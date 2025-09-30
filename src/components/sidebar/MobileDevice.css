@@ -1,0 +1,49 @@
+@media only screen and (max-width: 575.98px) {
+  .top-navbar {
+    margin-left: 0;
+    width: 100%;
+  }
+  .side-bar {
+    position: absolute;
+    left: -300px;
+    top: 55px;
+  }
+  .toggle-sidebar .side-bar {
+    left: 0px;
+    top: 55px;
+  }
+  .head-pad {
+    padding: 0 20px;
+  }
+  #main {
+    padding: 0;
+    margin-left: 0;
+    margin-top: 60px;
+  }
+  /* table start */
+  th {
+    font-size: 15px;
+  }
+  td {
+    font-size: 14px;
+  }
+  /* table end */
+  .collapse:not(.show) {
+    display: block !important;
+  }
+  .navbar-collapse {
+    flex-basis: auto !important;
+    flex-grow: 0 !important;
+  }
+
+  /* header css start */
+.mobile-profile{
+    position: relative;
+    background-color: #26507333 !important;
+    color: #265073 !important;
+    border-radius: 8px;
+    padding: 6px 14px;
+}
+.dropdown-menu {--bs-dropdown-min-width: 6rem; --bs-dropdown-font-size: 14px;}
+  /* header css end */
+}

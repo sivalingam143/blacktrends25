@@ -1,0 +1,23 @@
+.pad_120{
+  padding: 120px 0;
+}
+/* login pages  start */
+#login-box {
+  background-color: #f0f0f0;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.2);
+}
+/* login pages  end */
+/* dashboard start */
+  .count-card{
+    background-color: #E195AB;
+    padding: 10px ;
+    border-radius: 15px;
+    display: flex;
+     justify-content: space-between;
+      height: 120px;
+      align-items: center;
+  }
+  .count{font-size: 35px;}
+/* dashboard end */

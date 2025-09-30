@@ -1,0 +1,185 @@
+/* header css start */
+.pos-fixed {
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: 998;
+}
+/* header css end */
+
+li {
+  list-style: none !important;
+}
+
+ul {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.side-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  overflow-y: auto;
+  background: #f8f9fa;
+  transition: 0.5s all;
+  z-index: 998;
+  box-shadow: 0px 2px 20px rgba(59, 59, 59, 0.2);
+  width: 235px;
+  padding: 14px 0;
+}
+.side-bar-header {
+  padding: 30px;
+}
+.toggle-sidebar .side-bar {
+  left: 0px;
+}
+
+.toggle-sidebar .side-bar {
+  left: -300px;
+}
+
+#side-bar .list-group ul li {
+  padding: 1px 14px;
+  width: 100%;
+  position: relative;
+}
+
+#side-bar .list-group ul li a {
+  border-radius: 5px;
+  color: rgb(62, 62, 62) !important;
+  transition: 0.25s all;
+  width: 100% !important;
+  padding: 8px 12px;
+  width: 100%;
+  overflow: hidden;
+  display: inline-flex;
+  gap: 13px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.top-navbar {
+  margin-left: 240px;
+  width: calc(100% - 200px);
+  transition: 0.5s all;
+}
+/* Add hover effect for sidebar items */
+#side-bar .list-group ul li a:hover {
+  background-color: #26507333;
+  color: #265073 !important;
+}
+
+/* Active link styles */
+#side-bar .list-group li > .nav-link:hover,
+#side-bar .list-group li > .sub-menu:hover,
+#side-bar .list-group li .active {
+  background-color: #26507333;
+  color: #265073 !important;
+}
+.submenu-list li {
+  padding: 3px 0 !important;
+}
+#side-bar .list-group .li div.list-icon {
+  height: 24px;
+  width: 24px;
+}
+
+#side-bar.list-group .li .sub-menu.list-icon svg {
+  font-size: 22px;
+}
+
+.list-icon {
+  height: 24px;
+  width: 24px;
+}
+
+.color {
+  background-color: 265073;
+}
+
+.list-icon svg {
+  font-size: 20px;
+}
+
+.arrow-icon {
+  position: absolute;
+  right: 20px;
+  transition: 0.3s ease-in-out;
+}
+
+.arrow.rotate {
+  transform: rotate(90deg); /* Adjust the rotation angle as needed */
+}
+
+#main,
+#footer {
+  margin-left: 228px;
+  padding: 0 20px;
+}
+.toggle-sidebar .top-navbar {
+  width: 100% !important;
+}
+.toggle-sidebar #main,
+.toggle-sidebar #footer,
+.toggle-sidebar .top-navbar {
+  margin-left: 0px;
+}
+
+#main {
+  margin-top: 75px;
+  padding: 10px 28px;
+  transition: 0.5s all;
+}
+
+.main {
+  background-color: #ffffff;
+  border-radius: 5px;
+  padding: 20px;
+}
+
+/*************************header start***************************/
+.head-pad {
+  padding: 0 80px;
+}
+.profile {
+  position: relative;
+  background-color: #26507333 !important;
+  color: #265073 !important;
+  margin: 0 40px;
+  border-radius: 8px;
+  padding: 10px;
+}
+.profile .dropdown-toggle {
+  color: #265073 !important;
+}
+.dropdown-menu[data-bs-popper] {
+  top: 100%;
+  left: -55px;
+}
+/* Scrollbar styling for WebKit browsers (Chrome, Safari) */
+.side-bar::-webkit-scrollbar {
+  width: 2px; /* Adjust the width as needed */
+}
+
+.side-bar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.side-bar::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px; /* Make the scrollbar thumb rounded */
+}
+
+.side-bar::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Optional: Customize other parts of the scrollbar for better appearance */
+.side-bar::-webkit-scrollbar-button {
+  display: none; /* Hide the buttons on the scrollbar */
+}
+
+.side-bar::-webkit-scrollbar-corner {
+  background: transparent; /* Hide the corner where both scrollbars meet */
+}

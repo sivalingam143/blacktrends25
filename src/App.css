@@ -1,0 +1,73 @@
+@font-face {
+  font-family: "bold";
+  src: url("./assets/fonts/Poppins-Bold.ttf") format("truetype");
+  font-style: normal;
+  font-weight: normal;
+}
+@font-face {
+  font-family: "regular";
+  src: url("./assets/fonts/Poppins-Regular.ttf") format("truetype");
+  font-style: normal;
+  font-weight: normal;
+}
+* {
+  font-family: "regular" !important;
+}
+.filter-btn {
+  background-color: #ff3300; /* Blue color */
+  color: white;
+  border: none;
+  padding: 10px 16px ;
+  font-size: 14px;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+
+.filter-btn:hover {
+  background-color: #ff3300; /* Darker blue on hover */
+}
+
+.filter-btn:active {
+  background-color: #ff3300;
+}
+
+.filter-btn:focus {
+  outline: none;
+  box-shadow: 0 0 4px rgba(0, 123, 255, 0.5);
+}
+
+li {
+  list-style: none;
+}
+ul {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+/* main content start */
+#main,
+#footer {
+  margin-left: 228px;
+  padding: 0 20px;
+}
+.tab-btn {
+  background: none !important;
+  border: none !important;
+  padding: 4px 20px;
+}
+.bactive {
+  background-color: rgba(255, 24, 24, 0.871) !important;
+  color: white;
+}
+
+.cactive {
+  border-top: 1px solid #252525 !important;
+  border-left: 1px solid #252525 !important;
+  border-right: 1px solid #252525 !important;
+}
+/* main content end */
+.pdftable {
+  text-align: center;
+  font-size: 15;
+}
