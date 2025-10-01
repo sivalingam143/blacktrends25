@@ -39,7 +39,7 @@ const Company = () => {
   };
 
   // Table headers
-  const headers = ["No", "Company Name", "Contact Number", "GST No", "Actions"];
+  const headers = ["No", "Company Name", "Contact Number", "GST No"];
 
   // Table body
   const body = company.map((companyItem, index) => ({
