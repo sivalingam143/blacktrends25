@@ -17,12 +17,11 @@ export const fetchCompaniesApi = async (searchText = "") => {
 export const addCompanyApi = async (companyData) => {
   const payload = {
     action: "addcompany",
-    Company_Name: companyData.Company_Name,
-    Contact_Number: companyData.Contact_Number,
-    Email: companyData.Email,
-    Address: companyData.Address,
-    GSTIN: companyData.GSTIN,
-    Contact_Person: companyData.Contact_Person,
+    company_name: companyData.company_name,
+    contact_number: companyData.contact_number,
+    email: companyData.email,
+    address: companyData.address,
+    gst_no: companyData.gst_no,
   };
   const response = await axiosInstance.post(API_ENDPOINT, payload);
   console.log("add company:", response.data);
@@ -33,12 +32,11 @@ export const addCompanyApi = async (companyData) => {
 export const updateCompanyApi = async (companyData) => {
   const payload = {
     action: "updatecompany",
-    Company_Name: companyData.Company_Name,
-    Contact_Number: companyData.Contact_Number,
-    Email: companyData.Email,
-    Address: companyData.Address,
-    GSTIN: companyData.GSTIN,
-    Contact_Person: companyData.Contact_Person,
+    company_name: companyData.company_name,
+    contact_number: companyData.contact_number,
+    email: companyData.email,
+    address: companyData.address,
+    gst_no: companyData.gst_no,
     edit_company_id: companyData.company_id,
   };
   const response = await axiosInstance.post(API_ENDPOINT, payload);

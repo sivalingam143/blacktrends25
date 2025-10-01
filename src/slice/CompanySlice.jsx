@@ -1,3 +1,4 @@
+// Same as previous – no field-specific changes needed here
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import {
   fetchCompaniesApi,
@@ -64,7 +65,6 @@ const companySlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      // Fetch companies
       .addCase(fetchCompanies.pending, (state) => {
         state.status = "loading";
       })
@@ -76,7 +76,6 @@ const companySlice = createSlice({
         state.status = "failed";
         state.error = action.error.message;
       })
-      // Add company
       .addCase(addCompany.pending, (state) => {
         state.status = "loading";
       })
@@ -87,7 +86,6 @@ const companySlice = createSlice({
         state.status = "failed";
         state.error = action.error.message;
       })
-      // Update company
       .addCase(updateCompany.pending, (state) => {
         state.status = "loading";
       })
@@ -98,7 +96,6 @@ const companySlice = createSlice({
         state.status = "failed";
         state.error = action.error.message;
       })
-      // Delete company
       .addCase(deleteCompany.pending, (state) => {
         state.status = "loading";
       })

@@ -20,12 +20,11 @@ const CompanyCreation = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
-    Company_Name: "",
-    Contact_Number: "",
-    Email: "",
-    Address: "",
-    GSTIN: "",
-    Contact_Person: "",
+    company_name: "",
+    contact_number: "",
+    email: "",
+    address: "",
+    gst_no: "",
   });
 
   useEffect(() => {
@@ -37,12 +36,11 @@ const CompanyCreation = () => {
       const companyItem = company.find((c) => c.company_id === id);
       if (companyItem) {
         setFormData({
-          Company_Name: companyItem.Company_Name || "",
-          Contact_Number: companyItem.Contact_Number || "",
-          Email: companyItem.Email || "",
-          Address: companyItem.Address || "",
-          GSTIN: companyItem.GSTIN || "",
-          Contact_Person: companyItem.Contact_Person || "",
+          company_name: companyItem.company_name || "",
+          contact_number: companyItem.contact_number || "",
+          email: companyItem.email || "",
+          address: companyItem.address || "",
+          gst_no: companyItem.gst_no || "",
         });
       }
     }
@@ -56,7 +54,7 @@ const CompanyCreation = () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
 
-    if (!formData.Company_Name || !formData.Contact_Number) {
+    if (!formData.company_name || !formData.contact_number) {
       NotifyData(
         `${
           isEditMode ? "Company Update" : "Company Creation"
@@ -98,8 +96,8 @@ const CompanyCreation = () => {
             <TextInputform
               formLabel="Company Name"
               PlaceHolder="Company Name"
-              name="Company_Name"
-              value={formData.Company_Name}
+              name="company_name"
+              value={formData.company_name}
               formtype="text"
               onChange={handleChange}
             />
@@ -108,8 +106,8 @@ const CompanyCreation = () => {
             <TextInputform
               formLabel="Contact Number"
               PlaceHolder="Contact Number"
-              name="Contact_Number"
-              value={formData.Contact_Number}
+              name="contact_number"
+              value={formData.contact_number}
               formtype="text"
               onChange={handleChange}
             />
@@ -118,18 +116,18 @@ const CompanyCreation = () => {
             <TextInputform
               formLabel="Email"
               PlaceHolder="Email"
-              name="Email"
-              value={formData.Email}
+              name="email"
+              value={formData.email}
               formtype="email"
               onChange={handleChange}
             />
           </Col>
           <Col lg="6" md="6" xs="12" className="py-3">
             <TextInputform
-              formLabel="GSTIN"
-              PlaceHolder="GSTIN"
-              name="GSTIN"
-              value={formData.GSTIN}
+              formLabel="GST No"
+              PlaceHolder="GST No"
+              name="gst_no"
+              value={formData.gst_no}
               formtype="text"
               onChange={handleChange}
             />
@@ -137,18 +135,8 @@ const CompanyCreation = () => {
           <Col xs="12" className="py-3">
             <TextArea
               textlabel="Address"
-              name="Address"
-              value={formData.Address}
-              onChange={handleChange}
-            />
-          </Col>
-          <Col lg="6" md="6" xs="12" className="py-3">
-            <TextInputform
-              formLabel="Contact Person"
-              PlaceHolder="Contact Person"
-              name="Contact_Person"
-              value={formData.Contact_Person}
-              formtype="text"
+              name="address"
+              value={formData.address}
               onChange={handleChange}
             />
           </Col>

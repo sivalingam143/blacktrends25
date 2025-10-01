@@ -39,16 +39,16 @@ const Company = () => {
   };
 
   // Table headers
-  const headers = ["No", "Company Name", "Contact Number", "GSTIN", "Actions"];
+  const headers = ["No", "Company Name", "Contact Number", "GST No", "Actions"];
 
   // Table body
   const body = company.map((companyItem, index) => ({
     key: companyItem.company_id,
     values: [
       index + 1,
-      companyItem.Company_Name,
-      companyItem.Contact_Number,
-      companyItem.GSTIN || "-",
+      companyItem.company_name,
+      companyItem.contact_number,
+      companyItem.gst_no || "-",
       <ActionButton
         options={[
           {
