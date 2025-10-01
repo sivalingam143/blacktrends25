@@ -42,7 +42,7 @@ const Login = () => {
 
   return (
     <section
-      className={`login-section pad_120 d-flex align-items-center min-vh-100 overflow-hidden ${
+      className={`login-section pad_100 d-flex align-items-center min-vh-100 overflow-hidden ${
         isLoaded ? "loaded" : ""
       }`}
     >
