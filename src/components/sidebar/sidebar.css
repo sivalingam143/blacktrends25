@@ -32,6 +32,9 @@ ul {
 .side-bar-header {
   padding: 30px;
 }
+.side-bar-header img {
+  border-radius: 20px;
+}
 .toggle-sidebar .side-bar {
   left: 0px;
 }
