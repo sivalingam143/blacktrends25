@@ -1,12 +1,9 @@
-/* login.css - Updated for Saloon Billing Theme with Custom Fonts */
-
 @import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css");
 @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Roboto:wght@300;400;500&display=swap");
 
 * {
   font-family: "Roboto", sans-serif;
 }
-
 h1,
 h2,
 h3,
@@ -20,7 +17,6 @@ h6,
 .loaded {
   animation: fadeInSection 1.2s ease-out;
 }
-
 @keyframes fadeInSection {
   from {
     opacity: 0;
@@ -36,16 +32,14 @@ h6,
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(30px);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: all 0.5s;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
-
 .login-card-ultra.fade-in {
   opacity: 1;
   transform: translateY(0) scale(1);
-  animation: slideUpUltra 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  animation: slideUpUltra 1s;
 }
-
 @keyframes slideUpUltra {
   0% {
     transform: translateY(60px) scale(0.9);
@@ -65,11 +59,9 @@ h6,
   transform: translateY(30px);
   animation: fadeInUp 0.8s ease-out forwards;
 }
-
 .delay-1 {
   animation-delay: 0.2s;
 }
-
 @keyframes fadeInUp {
   to {
     opacity: 1;
@@ -78,18 +70,10 @@ h6,
 }
 
 .bg-gradient-salon {
-  background: linear-gradient(
-    135deg,
-    #d4af37 0%,
-    #8b5a2b 25%,
-    #f4e4bc 50%,
-    #c19a6b 75%,
-    #e8c4a8 100%
-  );
+  background: linear-gradient(135deg, #d4af37, #8b5a2b, #f4e4bc);
   position: relative;
   overflow: hidden;
 }
-
 .bg-gradient-salon::before {
   content: "";
   position: absolute;
@@ -106,7 +90,6 @@ h6,
   transform: rotate(45deg);
   animation: shineUltra 4s infinite linear;
 }
-
 @keyframes shineUltra {
   0% {
     transform: translateX(-100%) translateY(-100%) rotate(45deg);
@@ -119,10 +102,9 @@ h6,
 .neon-text {
   text-shadow: 0 0 5px rgba(212, 175, 55, 0.5), 0 0 10px rgba(212, 175, 55, 0.3),
     0 0 15px #d4af37, 0 0 20px #8b5a2b;
-  animation: neonFlicker 1.5s infinite alternate;
   color: #fff;
+  animation: neonFlicker 1.5s infinite alternate;
 }
-
 @keyframes neonFlicker {
   0%,
   18%,
@@ -144,7 +126,6 @@ h6,
 .logo-container {
   animation: floatUltra 4s ease-in-out infinite;
 }
-
 @keyframes floatUltra {
   0%,
   100% {
@@ -161,7 +142,6 @@ h6,
 .animate-glow {
   animation: glowUltra 3s ease-in-out infinite alternate;
 }
-
 @keyframes glowUltra {
   from {
     text-shadow: 0 0 20px rgba(255, 255, 255, 0.5),
@@ -176,21 +156,19 @@ h6,
 }
 
 .input-ultra {
-  background-color: rgba(255, 255, 255, 0.8) !important;
-  border: 1px solid rgba(193, 154, 107, 0.5) !important;
-  color: #333 !important;
-  backdrop-filter: blur(15px) !important;
-  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(193, 154, 107, 0.5);
+  color: #333;
+  backdrop-filter: blur(15px);
+  transition: all 0.4s;
 }
-
 .input-ultra:focus {
-  box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25),
-    inset 0 0 20px rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25) inset,
+    0 0 20px rgba(255, 255, 255, 0.1);
+  border-color: #d4af37;
+  background: rgba(255, 255, 255, 0.95);
   transform: scale(1.03);
-  border-color: #d4af37 !important;
-  background-color: rgba(255, 255, 255, 0.95) !important;
 }
-
 .input-underline-ultra {
   position: absolute;
   bottom: 0;
@@ -198,32 +176,24 @@ h6,
   width: 0;
   height: 3px;
   background: linear-gradient(135deg, #d4af37, #8b5a2b, #f4e4bc);
-  transition: width 0.4s ease;
+  transition: width 0.4s;
   box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
 }
-
 .input-ultra:focus + .input-underline-ultra,
 .input-ultra:not(:placeholder-shown) + .input-underline-ultra {
   width: 100%;
 }
 
 .login-btn-ultra {
-  background: linear-gradient(
-    135deg,
-    #d4af37 0%,
-    #8b5a2b 50%,
-    #f4e4bc 100%
-  ) !important;
-  border: none !important;
-  color: #fff !important;
-  transition: all 0.5s ease !important;
-  position: relative !important;
-  overflow: hidden !important;
-  font-weight: 600 !important;
-  font-size: 1rem !important;
-  padding: 0.75rem 1.5rem !important;
+  background: linear-gradient(135deg, #d4af37, #8b5a2b, #f4e4bc);
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.5s;
+  position: relative;
+  overflow: hidden;
 }
-
 .login-btn-ultra::before {
   content: "";
   position: absolute;
@@ -239,32 +209,24 @@ h6,
   );
   transition: left 0.5s;
 }
-
 .login-btn-ultra:hover::before {
   left: 100%;
 }
-
 .login-btn-ultra:hover {
   transform: translateY(-4px) scale(1.06);
-  box-shadow: 0 20px 40px rgba(212, 175, 55, 0.4) !important;
-  background: linear-gradient(
-    135deg,
-    #8b5a2b 0%,
-    #d4af37 50%,
-    #f4e4bc 100%
-  ) !important;
+  box-shadow: 0 20px 40px rgba(212, 175, 55, 0.4);
+  background: linear-gradient(135deg, #8b5a2b, #d4af37, #f4e4bc);
 }
 
 .login-card-ultra:hover {
   transform: translateY(-20px) scale(1.04);
-  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.2) !important;
-  border-color: rgba(212, 175, 55, 0.3) !important;
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.2);
+  border-color: rgba(212, 175, 55, 0.3);
 }
-
 .hover-icon-ultra:hover {
-  color: #d4af37 !important;
+  color: #d4af37;
   transform: scale(1.4) rotate(360deg);
-  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: all 0.4s;
   filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.5));
 }
 
@@ -277,7 +239,6 @@ h6,
   pointer-events: none;
   z-index: 1;
 }
-
 .particle {
   position: absolute;
   width: var(--size);
@@ -288,15 +249,12 @@ h6,
   animation-delay: var(--delay);
   animation-duration: var(--duration);
 }
-
 .particle:nth-child(odd) {
   background: rgba(139, 90, 43, 0.3);
 }
-
 .particle:nth-child(even) {
   background: rgba(244, 228, 188, 0.3);
 }
-
 @keyframes floatParticles {
   0% {
     transform: translateY(100vh) translateX(0) scale(0);
@@ -315,14 +273,12 @@ h6,
 }
 
 .login-section {
-  background-image: url("https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80");
+  background-image: url("https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=2070&q=80");
   background-size: cover;
   background-position: center;
-  background-repeat: no-repeat;
   background-attachment: fixed;
   position: relative;
 }
-
 .overlay {
   position: absolute;
   top: 0;
@@ -331,29 +287,25 @@ h6,
   bottom: 0;
   background: linear-gradient(
     135deg,
-    rgba(139, 90, 43, 0.4) 0%,
-    rgba(244, 228, 188, 0.2) 100%
+    rgba(139, 90, 43, 0.4),
+    rgba(244, 228, 188, 0.2)
   );
 }
-
 .logo-img {
   max-height: 180px;
   max-width: 100%;
   border: 3px solid rgba(255, 255, 255, 0.3);
   transform: rotate(-5deg);
 }
-
 .saloon-header {
   color: #8b5a2b;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 }
-
 .salon-icons i {
   font-size: 1.5rem;
   color: rgba(255, 255, 255, 0.8);
   animation: iconFloat 2s ease-in-out infinite;
 }
-
 @keyframes iconFloat {
   0%,
   100% {
@@ -363,7 +315,6 @@ h6,
     transform: translateY(-5px);
   }
 }
-
 @media (max-width: 992px) {
   .login-card-ultra {
     margin: 1rem;
@@ -371,9 +322,7 @@ h6,
   .card-body {
     padding: 3rem 2rem !important;
   }
-  .particles-container {
-    display: none;
-  }
+  .particles-container,
   .salon-icons {
     display: none;
   }
