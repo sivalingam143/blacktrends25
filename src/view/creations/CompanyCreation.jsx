@@ -92,7 +92,7 @@ const CompanyCreation = () => {
     <div id="main">
       <Container fluid className="p-3">
         <Row>
-          <Col lg="6" md="6" xs="12" className="py-3">
+          <Col lg="4" md="6" xs="12" className="py-3">
             <TextInputform
               formLabel="Company Name"
               PlaceHolder="Company Name"
@@ -102,7 +102,7 @@ const CompanyCreation = () => {
               onChange={handleChange}
             />
           </Col>
-          <Col lg="6" md="6" xs="12" className="py-3">
+          <Col lg="4" md="6" xs="12" className="py-3">
             <TextInputform
               formLabel="Contact Number"
               PlaceHolder="Contact Number"
@@ -112,7 +112,7 @@ const CompanyCreation = () => {
               onChange={handleChange}
             />
           </Col>
-          <Col lg="6" md="6" xs="12" className="py-3">
+          <Col lg="4" md="6" xs="12" className="py-3">
             <TextInputform
               formLabel="Email"
               PlaceHolder="Email"
@@ -122,7 +122,7 @@ const CompanyCreation = () => {
               onChange={handleChange}
             />
           </Col>
-          <Col lg="6" md="6" xs="12" className="py-3">
+          <Col lg="4" md="6" xs="12" className="py-3">
             <TextInputform
               formLabel="GST No"
               PlaceHolder="GST No"
@@ -132,7 +132,7 @@ const CompanyCreation = () => {
               onChange={handleChange}
             />
           </Col>
-          <Col xs="12" className="py-3">
+          <Col xs="4" className="py-3">
             <TextArea
               textlabel="Address"
               name="address"
@@ -162,7 +162,7 @@ const CompanyCreation = () => {
             <Buttons
               btnlabel={<>Cancel</>}
               onClick={handleCancel}
-              className="border-0 can-btn"
+              className="border-0 add-btn"
               disabled={isSubmitting}
             />
           </div>
