@@ -1,6 +1,6 @@
 import axios from "axios";
-const API_URL = "https://gurulakshmipayroll.zentexus.com/api";
-//const API_URL = "http://localhost/gurulakshmi_billing/api";
+//const API_URL = "https://blacktrends.zentexus.com/api";
+const API_URL = "http://localhost/blacktrends/api";
 
 const axiosInstance = axios.create({
   baseURL: API_URL,
