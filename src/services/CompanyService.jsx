@@ -1,5 +1,4 @@
 import axiosInstance from "../config/API";
-
 const API_ENDPOINT = "/company.php";
 
 // Fetch all companies
