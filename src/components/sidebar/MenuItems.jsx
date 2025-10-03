@@ -1,7 +1,7 @@
 import { MdOutlineHome } from "react-icons/md";
 import { BiUserPlus } from "react-icons/bi";
 import { BsFilePlus } from "react-icons/bs";
-import { FaBuilding, FaUsers, FaUserTie, FaBox } from "react-icons/fa";
+import { FaBuilding } from "react-icons/fa";
 
 const MenuItems = [
   {
@@ -28,17 +28,14 @@ const MenuItems = [
       {
         path: "/member",
         text: "Members",
-        icon: <FaUsers />,
       },
       {
         path: "/staff",
         text: "Staff",
-        icon: <FaUserTie />,
       },
       {
         path: "/productandservice",
         text: "Product & Service",
-        icon: <FaBox />,
       },
     ],
   },
