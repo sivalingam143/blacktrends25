@@ -2,6 +2,7 @@ import { MdOutlineHome } from "react-icons/md";
 import { BiUserPlus } from "react-icons/bi";
 import { BsFilePlus } from "react-icons/bs";
 import { FaBuilding } from "react-icons/fa";
+import { FaFileInvoice } from "react-icons/fa";
 
 const MenuItems = [
   {
@@ -38,6 +39,11 @@ const MenuItems = [
         text: "Product & Service",
       },
     ],
+  },
+  {
+    path: "/billing",
+    text: "Billing",
+    icon: <FaFileInvoice />,
   },
 ];
 
