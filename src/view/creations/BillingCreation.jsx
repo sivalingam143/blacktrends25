@@ -448,7 +448,7 @@ const BillingCreation = () => {
                     </td>
                     <td>
                       <TextInputform
-                        formtype="number"
+                        formtype="text"
                         PlaceHolder="Qty"
                         value={row.qty}
                         onChange={(e) =>
@@ -473,7 +473,7 @@ const BillingCreation = () => {
                           style={{ width: "40px" }}
                         />
                         <TextInputform
-                          formtype="number"
+                          formtype="text"
                           step="0.01"
                           PlaceHolder="Amount"
                           value={row.discount}
@@ -534,7 +534,7 @@ const BillingCreation = () => {
                   </div>
                   <div className="input-group" style={{ width: "150px" }}>
                     <TextInputform
-                      formtype="number"
+                      formtype="text"
                       step="0.01"
                       PlaceHolder="Amount"
                       value={overall_discount}
