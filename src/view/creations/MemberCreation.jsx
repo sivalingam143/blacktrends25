@@ -6,6 +6,7 @@ import { TextInputform } from "../../components/Forms";
 import { Buttons } from "../../components/Buttons";
 import NotifyData from "../../components/NotifyData";
 import { fetchMembers, addMember, updateMember } from "../../slice/MemberSlice";
+import GoldConfirmModal from "../../components/GoldConfirmModal";
 
 const MemberCreation = () => {
   const dispatch = useDispatch();
@@ -20,6 +21,10 @@ const MemberCreation = () => {
     gold_membership: "No",
   });
   const [submitting, setSubmitting] = useState(false);
+
+  // Modal state for gold confirmation
+  const [showGoldModal, setShowGoldModal] = useState(false);
+  const [pendingGold, setPendingGold] = useState(null);
 
   // load list (for edit lookup)
   useEffect(() => {
@@ -46,7 +51,25 @@ const MemberCreation = () => {
   };
 
   const handleGoldRadio = (e) => {
-    setForm((p) => ({ ...p, gold_membership: e.target.value }));
+    const newVal = e.target.value;
+    if (newVal === form.gold_membership) return;
+
+    // Show confirmation modal
+    setPendingGold(newVal);
+    setShowGoldModal(true);
+  };
+
+  const confirmGoldChange = () => {
+    if (pendingGold !== null) {
+      setForm((p) => ({ ...p, gold_membership: pendingGold }));
+    }
+    setShowGoldModal(false);
+    setPendingGold(null);
+  };
+
+  const cancelGoldChange = () => {
+    setShowGoldModal(false);
+    setPendingGold(null);
   };
 
   const submit = async () => {
@@ -75,6 +98,10 @@ const MemberCreation = () => {
       setSubmitting(false);
     }
   };
+
+  const memberDisplayName =
+    form.name || (isEdit ? "this member" : "New Member");
+  const wantYes = pendingGold === "Yes";
 
   return (
     <div id="main">
@@ -156,6 +183,15 @@ const MemberCreation = () => {
           />
         </div>
       </Container>
+
+      {/* Confirmation modal for gold change */}
+      <GoldConfirmModal
+        show={showGoldModal}
+        onHide={cancelGoldChange}
+        memberName={memberDisplayName}
+        wantYes={wantYes}
+        onConfirm={confirmGoldChange}
+      />
     </div>
   );
 };
