@@ -38,7 +38,7 @@ const ProductAndService = () => {
   };
 
   // ---------- table ----------
-  const headers = ["No", "Name", "Price", "Actions"];
+  const headers = ["No", "Name", "Price"];
   const body = productandservice.map((item, idx) => ({
     key: item.productandservice_id,
     values: [
