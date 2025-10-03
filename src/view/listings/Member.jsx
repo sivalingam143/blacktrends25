@@ -65,7 +65,7 @@ const Member = () => {
   };
 
   // ---------- table ----------
-  const headers = ["No", "Name", "Phone", "Gold", "Actions"];
+  const headers = ["No", "Name", "Phone", "Gold"];
   const body = member.map((m, idx) => ({
     key: m.member_id,
     values: [
