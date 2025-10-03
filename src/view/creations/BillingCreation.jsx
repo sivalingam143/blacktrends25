@@ -10,11 +10,12 @@ import {
   Card,
 } from "react-bootstrap";
 import Select from "react-select";
+import CreatableSelect from "react-select/creatable";
 import { useDispatch, useSelector } from "react-redux";
 import { TextInputform, DropDown } from "../../components/Forms";
 import { Buttons } from "../../components/Buttons";
 import NotifyData from "../../components/NotifyData";
-import { fetchMembers } from "../../slice/MemberSlice";
+import { fetchMembers, addMember } from "../../slice/MemberSlice";
 import { fetchProductAndServices } from "../../slice/ProductAndServiceSlice";
 import { fetchStaff } from "../../slice/StaffSlice";
 import {
@@ -48,12 +49,19 @@ const BillingCreation = () => {
     updated_by_id: 1,
     billing_id: "",
   });
+  console.log(form);
   const [rows, setRows] = useState([]); // Dynamic rows for products/services
   const [subtotal, setSubtotal] = useState(0);
   const [overall_discount, setOverallDiscount] = useState(0);
   const [discount_type, setDiscountType] = useState("INR"); // INR or PER
   const [grand_total, setGrandTotal] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+
+  // Phone options for searchable dropdown
+  const phoneOptions = member.map((m) => ({
+    value: m.phone,
+    label: m.phone,
+  }));
 
   useEffect(() => {
     dispatch(fetchMembers(""));
@@ -125,20 +133,59 @@ const BillingCreation = () => {
     setGrandTotal(newSubtotal - discountAmount);
   }, [rows, overall_discount, discount_type]);
 
+  const phoneValue = form.phone
+    ? phoneOptions.find((opt) => opt.value === form.phone) || {
+        value: form.phone,
+        label: form.phone,
+      }
+    : null;
+
   const handleMemberChange = (selectedOption) => {
     if (selectedOption) {
       const selectedMember = member.find(
         (m) => m.phone === selectedOption.value
       );
       if (selectedMember) {
+        // existing member
         setForm((prev) => ({
           ...prev,
           member_no: selectedMember.member_no,
           name: selectedMember.name,
           phone: selectedMember.phone,
           membership: selectedMember.gold_membership || "No",
+          last_visit_date: selectedMember.last_visit_date
+            ? selectedMember.last_visit_date.split(" ")[0]
+            : new Date().toISOString().split("T")[0],
+          total_visit_count: selectedMember.total_visit_count || 0,
+          total_spending: selectedMember.total_spending || 0,
         }));
+        NotifyData("Member found and details loaded!", "success");
+      } else {
+        // new phone
+        setForm((prev) => ({
+          ...prev,
+          member_no: "",
+          name: "",
+          phone: selectedOption.value,
+          membership: "No",
+          last_visit_date: new Date().toISOString().split("T")[0],
+          total_visit_count: 0,
+          total_spending: 0,
+        }));
+        NotifyData("New member - please enter name", "info");
       }
+    } else {
+      // cleared
+      setForm((prev) => ({
+        ...prev,
+        member_no: "",
+        name: "",
+        phone: "",
+        membership: "No",
+        last_visit_date: new Date().toISOString().split("T")[0],
+        total_visit_count: 0,
+        total_spending: 0,
+      }));
     }
   };
 
@@ -180,6 +227,8 @@ const BillingCreation = () => {
       } else if (field === "qty" || field === "discount") {
         row[field] = parseFloat(value) || 0;
         row.row_total = row.qty * row.product_price - row.discount;
+      } else if (field === "discount_type") {
+        row.discount_type = value;
       }
 
       newRows[index] = row;
@@ -199,6 +248,7 @@ const BillingCreation = () => {
         staff_ids: [],
         staff_names: "",
         row_total: 0,
+        discount_type: "INR",
       },
     ]);
   };
@@ -207,73 +257,86 @@ const BillingCreation = () => {
     setRows((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handlePhoneInputChange = (e) => {
-    const phoneValue = e.target.value;
-    setForm((prev) => ({ ...prev, phone: phoneValue }));
-
-    // Check if phone matches existing member
-    if (phoneValue.length === 10) {
-      const selectedMember = member.find((m) => m.phone === phoneValue);
-      if (selectedMember) {
-        setForm((prev) => ({
-          ...prev,
-          member_no: selectedMember.member_no,
-          name: selectedMember.name,
-          membership: selectedMember.gold_membership || "No",
-        }));
-        NotifyData("Member found and details loaded!", "success");
-      } else {
-        // New phone, keep as is
-        setForm((prev) => ({
-          ...prev,
-          member_no: "",
-          name: "",
-          membership: "No",
-        }));
-      }
-    }
-  };
-
   const submit = async () => {
     if (submitting) return;
     setSubmitting(true);
 
     if (
-      !form.member_no ||
-      !form.name ||
       !form.phone ||
+      !form.name.trim() ||
       rows.length === 0 ||
       rows.some((r) => !r.product_id)
     ) {
       NotifyData(
-        "Required fields missing (select at least one product/service)",
+        "Required fields missing (enter phone, name, and select at least one product/service)",
         "error"
       );
       setSubmitting(false);
       return;
     }
 
-    const payload = {
-      ...form,
-      productandservice_details: JSON.stringify(
-        rows.map((r) => ({
-          product_id: r.product_id,
-          qty: r.qty,
-          discount: r.discount,
-          staff_ids: r.staff_ids, // Array of staff IDs
-          total: r.row_total,
-        }))
-      ),
-      subtotal,
-      discount: overall_discount,
-      total: grand_total,
-      ...(isEdit && { billing_id: id }),
-    };
-
     try {
-      const action = isEdit ? updateBilling(payload) : addBilling(payload);
-      const msg = await dispatch(action).unwrap();
-      NotifyData(msg, "success");
+      let billingPayload = {
+        ...form,
+        productandservice_details: JSON.stringify(
+          rows.map((r) => ({
+            product_id: r.product_id,
+            qty: r.qty,
+            discount: r.discount,
+            staff_ids: r.staff_ids,
+            total: r.row_total,
+          }))
+        ),
+        subtotal,
+        discount: overall_discount,
+        total: grand_total,
+      };
+
+      // Update stats
+      const updatedVisitCount =
+        parseInt(billingPayload.total_visit_count || 0) + 1;
+      const updatedSpending =
+        parseFloat(billingPayload.total_spending || 0) + grand_total;
+      billingPayload.last_visit_date = billingPayload.billing_date;
+      billingPayload.total_visit_count = updatedVisitCount;
+      billingPayload.total_spending = updatedSpending;
+
+      if (isEdit) {
+        billingPayload.edit_billing_id = id;
+        billingPayload.updated_by_id = 1;
+        const msg = await dispatch(updateBilling(billingPayload)).unwrap();
+        NotifyData(msg, "success");
+      } else {
+        if (!billingPayload.member_no) {
+          // New member
+          const memberPayload = {
+            name: billingPayload.name,
+            phone: billingPayload.phone,
+            gold_membership: billingPayload.membership,
+          };
+          await dispatch(addMember(memberPayload)).unwrap();
+          // Refetch members to get the new one
+          const membersData = await dispatch(fetchMembers("")).unwrap();
+          const newMember = membersData.member.find(
+            (m) =>
+              m.phone === billingPayload.phone && m.name === billingPayload.name
+          );
+          if (!newMember) {
+            throw new Error("Failed to create new member");
+          }
+          // Update payload for billing
+          billingPayload.member_no = newMember.member_no;
+          billingPayload.created_by_id = 1;
+          // For new: set initial stats
+          billingPayload.total_visit_count = 1;
+          billingPayload.total_spending = grand_total;
+          billingPayload.last_visit_date = billingPayload.billing_date;
+        } else {
+          billingPayload.created_by_id = 1;
+        }
+        const msg = await dispatch(addBilling(billingPayload)).unwrap();
+        NotifyData(msg, "success");
+      }
       navigate("/billing");
     } catch (e) {
       NotifyData(e.message, "error");
@@ -316,12 +379,16 @@ const BillingCreation = () => {
             />
           </Col>
           <Col md={4}>
-            <TextInputform
-              formLabel="Phone *"
-              PlaceHolder="Type phone number"
-              name="phone"
-              value={form.phone}
-              onChange={handlePhoneInputChange}
+            <label>Phone *</label>
+            <CreatableSelect
+              options={phoneOptions}
+              isSearchable={true}
+              placeholder="Type to search or enter new phone"
+              value={phoneValue}
+              onChange={handleMemberChange}
+              formatCreateLabel={(inputValue) =>
+                `Use ${inputValue} as new phone`
+              }
             />
           </Col>
           <Col md={4}>
@@ -330,7 +397,8 @@ const BillingCreation = () => {
               PlaceHolder="Name"
               name="name"
               value={form.name}
-              disabled={true}
+              onChange={handleFormChange}
+              disabled={!!form.member_no}
             />
           </Col>
         </Row>
