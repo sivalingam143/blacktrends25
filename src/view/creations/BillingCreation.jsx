@@ -11,7 +11,7 @@ import {
 } from "react-bootstrap";
 import Select from "react-select";
 import { useDispatch, useSelector } from "react-redux";
-import { TextInputform } from "../../components/Forms";
+import { TextInputform, DropDown } from "../../components/Forms";
 import { Buttons } from "../../components/Buttons";
 import NotifyData from "../../components/NotifyData";
 import { fetchMembers } from "../../slice/MemberSlice";
@@ -207,6 +207,33 @@ const BillingCreation = () => {
     setRows((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const handlePhoneInputChange = (e) => {
+    const phoneValue = e.target.value;
+    setForm((prev) => ({ ...prev, phone: phoneValue }));
+
+    // Check if phone matches existing member
+    if (phoneValue.length === 10) {
+      const selectedMember = member.find((m) => m.phone === phoneValue);
+      if (selectedMember) {
+        setForm((prev) => ({
+          ...prev,
+          member_no: selectedMember.member_no,
+          name: selectedMember.name,
+          membership: selectedMember.gold_membership || "No",
+        }));
+        NotifyData("Member found and details loaded!", "success");
+      } else {
+        // New phone, keep as is
+        setForm((prev) => ({
+          ...prev,
+          member_no: "",
+          name: "",
+          membership: "No",
+        }));
+      }
+    }
+  };
+
   const submit = async () => {
     if (submitting) return;
     setSubmitting(true);
@@ -261,6 +288,18 @@ const BillingCreation = () => {
     label: st.name,
   }));
 
+  // Prepare product options for DropDown
+  const productOptions = products.map((p) => ({
+    value: p.productandservice_id,
+    label: p.productandservice_name,
+  }));
+
+  // Prepare discount type options for DropDown
+  const discountTypeOptions = [
+    { value: "INR", label: "INR" },
+    { value: "PER", label: "%" },
+  ];
+
   return (
     <div id="main">
       <Container fluid className="p-3">
@@ -277,19 +316,13 @@ const BillingCreation = () => {
             />
           </Col>
           <Col md={4}>
-            <Form.Group>
-              <Form.Label>Phone *</Form.Label>
-              <Select
-                options={member.map((m) => ({
-                  value: m.phone,
-                  label: m.phone,
-                }))}
-                placeholder="Type phone to search..."
-                onChange={handleMemberChange}
-                isSearchable={true}
-                isClearable={true}
-              />
-            </Form.Group>
+            <TextInputform
+              formLabel="Phone *"
+              PlaceHolder="Type phone number"
+              name="phone"
+              value={form.phone}
+              onChange={handlePhoneInputChange}
+            />
           </Col>
           <Col md={4}>
             <TextInputform
@@ -304,90 +337,98 @@ const BillingCreation = () => {
 
         {/* Main Row: Left 3 Containers, Right Stats */}
         <Row className="mb-4">
-          {/* Left: Container 2 - Product/Service Table */}
-          <Col md={8}>
-            <Card className="mb-3">
-              <Card.Header>Product and Service Details Table</Card.Header>
-              <Card.Body>
-                <Table bordered hover responsive>
-                  <thead>
-                    <tr>
-                      <th>Product/Service Dropdown</th>
-                      <th>Qty</th>
-                      <th>Discount</th>
-                      <th>Service Provider Dropdown (Multiple)</th>
-                      <th>Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rows.map((row, index) => (
-                      <tr key={index}>
-                        <td>
-                          <Form.Select
-                            value={row.product_id}
-                            onChange={(e) =>
-                              handleRowChange(
-                                index,
-                                "product_id",
-                                e.target.value
-                              )
-                            }
-                          >
-                            <option value="">Select Product/Service</option>
-                            {products.map((p) => (
-                              <option
-                                key={p.productandservice_id}
-                                value={p.productandservice_id}
-                              >
-                                {p.productandservice_name}
-                              </option>
-                            ))}
-                          </Form.Select>
-                        </td>
-                        <td>
-                          <Form.Control
-                            type="number"
-                            value={row.qty}
-                            onChange={(e) =>
-                              handleRowChange(index, "qty", e.target.value)
-                            }
-                          />
-                        </td>
-                        <td>
-                          <Form.Control
-                            type="number"
-                            step="0.01"
-                            value={row.discount}
-                            onChange={(e) =>
-                              handleRowChange(index, "discount", e.target.value)
-                            }
-                          />
-                        </td>
-                        <td>
-                          <Select
-                            isMulti
-                            options={staffOptions}
-                            value={staffOptions.filter((opt) =>
-                              row.staff_ids.includes(opt.value)
-                            )}
-                            onChange={(selected) =>
-                              handleRowChange(index, "staff_ids", selected)
-                            }
-                            placeholder="Select Staff (Multiple)"
-                          />
-                        </td>
-                        <td>₹{row.row_total.toFixed(2)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-                <Button variant="primary" onClick={addRow}>
-                  Add Row
-                </Button>
-              </Card.Body>
-            </Card>
+          {/* Left: Container 2 - Product/Service Table - Full Width */}
+          <Col md={12}>
+            <Table className="mb-3">
+              <thead>
+                <tr>
+                  <th>Product/Service Dropdown</th>
+                  <th>Qty</th>
+                  <th>Discount</th>
+                  <th>Service Provider Dropdown (Multiple)</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((row, index) => (
+                  <tr key={index}>
+                    <td>
+                      <DropDown
+                        placeholder="Select Product/Service"
+                        value={row.product_id}
+                        onChange={(e) =>
+                          handleRowChange(index, "product_id", e.target.value)
+                        }
+                        options={productOptions}
+                        style={{ width: "20px" }}
+                      />
+                    </td>
+                    <td>
+                      <TextInputform
+                        formtype="number"
+                        PlaceHolder="Qty"
+                        value={row.qty}
+                        onChange={(e) =>
+                          handleRowChange(index, "qty", e.target.value)
+                        }
+                        style={{ width: "40px" }}
+                      />
+                    </td>
+                    <td>
+                      <div className="d-flex">
+                        <DropDown
+                          placeholder="Type"
+                          value={row.discount_type || "INR"}
+                          onChange={(e) =>
+                            handleRowChange(
+                              index,
+                              "discount_type",
+                              e.target.value
+                            )
+                          }
+                          options={discountTypeOptions}
+                          style={{ width: "40px" }}
+                        />
+                        <TextInputform
+                          formtype="number"
+                          step="0.01"
+                          PlaceHolder="Amount"
+                          value={row.discount}
+                          onChange={(e) =>
+                            handleRowChange(index, "discount", e.target.value)
+                          }
+                          style={{ width: "60px" }}
+                        />
+                      </div>
+                    </td>
+                    <td>
+                      <Select
+                        isMulti
+                        options={staffOptions}
+                        value={staffOptions.filter((opt) =>
+                          row.staff_ids.includes(opt.value)
+                        )}
+                        onChange={(selected) =>
+                          handleRowChange(index, "staff_ids", selected)
+                        }
+                        placeholder="Select Staff (Multiple)"
+                      />
+                    </td>
+                    <td>₹{row.row_total.toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+            <Button variant="primary" onClick={addRow}>
+              Add Row
+            </Button>
+          </Col>
+        </Row>
 
-            {/* Container 3: Subtotal, Discount, Total - Vertical */}
+        {/* Row for Totals and Stats */}
+        <Row className="mb-4">
+          {/* Container 3: Subtotal, Discount, Total - Vertical */}
+          <Col md={8}>
             <Card>
               <Card.Header>Totals</Card.Header>
               <Card.Body className="p-3">
@@ -399,20 +440,20 @@ const BillingCreation = () => {
                   <div>
                     <label>Discount</label>
                     <div className="d-flex">
-                      <Form.Select
+                      <DropDown
+                        placeholder="Type"
                         value={discount_type}
                         onChange={handleDiscountTypeChange}
+                        options={discountTypeOptions}
                         style={{ width: "80px" }}
-                      >
-                        <option value="INR">INR</option>
-                        <option value="PER">%</option>
-                      </Form.Select>
+                      />
                     </div>
                   </div>
                   <div className="input-group" style={{ width: "150px" }}>
-                    <Form.Control
-                      type="number"
+                    <TextInputform
+                      formtype="number"
                       step="0.01"
+                      PlaceHolder="Amount"
                       value={overall_discount}
                       onChange={handleOverallDiscountChange}
                     />

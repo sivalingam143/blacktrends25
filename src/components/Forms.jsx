@@ -2,6 +2,40 @@ import Select from "react-select";
 import React from "react";
 import { Form } from "react-bootstrap";
 
+const DropDown = ({
+  textlabel,
+  placeholder,
+  value,
+  onChange,
+  name,
+  options = [],
+  width = "100%",
+}) => {
+  const handleChange = (selectedOption) => {
+    onChange({
+      target: {
+        name,
+        value: selectedOption.value,
+      },
+    });
+  };
+  return (
+    <>
+      {textlabel && (
+        <Form.Label className="px-2 regular">{textlabel}</Form.Label>
+      )}
+      <div style={{ width: width }}>
+        <Select
+          options={options}
+          placeholder={placeholder}
+          value={options.find((option) => option.value === value)}
+          onChange={handleChange}
+        />
+      </div>
+    </>
+  );
+};
+
 const TextInputform = ({
   formLabel,
   formtype,
@@ -15,13 +49,14 @@ const TextInputform = ({
   readOnly,
   suffix_icon,
   prefix_icon,
+  width = "100%",
 }) => {
   return (
     <>
       {formLabel && (
         <Form.Label className="px-2 regular">{formLabel}</Form.Label>
       )}
-      <div className="input-container">
+      <div className="input-container" style={{ width: width }}>
         {prefix_icon && <span className="prefix-icon">{prefix_icon}</span>}
         <Form.Control
           type={formtype}
@@ -66,36 +101,7 @@ const TextArea = ({
     </div>
   );
 };
-const DropDown = ({
-  textlabel,
-  placeholder,
-  value,
-  onChange,
-  name,
-  options = [],
-}) => {
-  const handleChange = (selectedOption) => {
-    onChange({
-      target: {
-        name,
-        value: selectedOption.value,
-      },
-    });
-  };
-  return (
-    <>
-      {textlabel && (
-        <Form.Label className="px-2 regular">{textlabel}</Form.Label>
-      )}
-      <Select
-        options={options}
-        placeholder={placeholder}
-        value={options.find((option) => option.value === value)}
-        onChange={handleChange}
-      />
-    </>
-  );
-};
+
 const CheckBox = ({ textlabel, OnChange, boxLabel, type }) => {
   return (
     <>
