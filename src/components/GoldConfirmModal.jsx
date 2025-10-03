@@ -21,17 +21,17 @@ const GoldConfirmModal = ({ show, onHide, memberName, wantYes, onConfirm }) => {
         )}
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={onHide}>
-          No
-        </Button>
         <Button
-          variant="primary"
+          variant="success"
           onClick={() => {
             onConfirm();
             onHide();
           }}
         >
           Yes
+        </Button>
+        <Button variant="secondary" onClick={onHide}>
+          No
         </Button>
       </Modal.Footer>
     </Modal>
