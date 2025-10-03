@@ -4,6 +4,7 @@ import LoginMiddleware from "../middleware/LoginMiddleware";
 import userReducer from "../slice/UserSlice";
 import companyReducer from "../slice/CompanySlice";
 import memberReducer from "../slice/MemberSlice";
+import staffReducer from "../slice/StaffSlice";
 
 const store = configureStore({
   reducer: {
@@ -11,6 +12,7 @@ const store = configureStore({
     users: userReducer,
     company: companyReducer,
     member: memberReducer,
+    staff: staffReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(LoginMiddleware),
