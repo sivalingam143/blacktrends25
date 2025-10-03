@@ -41,10 +41,10 @@ const BillingCreation = () => {
     member_no: "",
     name: "",
     phone: "",
-    last_visit_date: new Date().toISOString().split("T")[0],
+    last_visit_date: "",
     total_visit_count: 0,
     total_spending: 0,
-    membership: "No",
+    membership: "",
     created_by_id: 1,
     updated_by_id: 1,
     billing_id: "",
@@ -62,6 +62,12 @@ const BillingCreation = () => {
     value: m.phone,
     label: m.phone,
   }));
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "-";
+    const [year, month, day] = dateStr.split("-");
+    return `${day}-${month}-${year}`;
+  };
 
   useEffect(() => {
     dispatch(fetchMembers(""));
@@ -106,6 +112,7 @@ const BillingCreation = () => {
                 product_price: product?.productandservice_price || 0,
                 qty: detail.qty,
                 discount: detail.discount,
+                discount_type: detail.discount_type || "INR",
                 staff_ids: detail.staff_ids || [], // Array for multiple
                 staff_names: staffItems.map((st) => st.name).join(", "),
                 row_total: rowTotal,
@@ -152,10 +159,10 @@ const BillingCreation = () => {
           member_no: selectedMember.member_no,
           name: selectedMember.name,
           phone: selectedMember.phone,
-          membership: selectedMember.gold_membership || "No",
+          membership: selectedMember.gold_membership || "",
           last_visit_date: selectedMember.last_visit_date
             ? selectedMember.last_visit_date.split(" ")[0]
-            : new Date().toISOString().split("T")[0],
+            : "",
           total_visit_count: selectedMember.total_visit_count || 0,
           total_spending: selectedMember.total_spending || 0,
         }));
@@ -167,8 +174,8 @@ const BillingCreation = () => {
           member_no: "",
           name: "",
           phone: selectedOption.value,
-          membership: "No",
-          last_visit_date: new Date().toISOString().split("T")[0],
+          membership: "",
+          last_visit_date: "",
           total_visit_count: 0,
           total_spending: 0,
         }));
@@ -181,8 +188,8 @@ const BillingCreation = () => {
         member_no: "",
         name: "",
         phone: "",
-        membership: "No",
-        last_visit_date: new Date().toISOString().split("T")[0],
+        membership: "",
+        last_visit_date: "",
         total_visit_count: 0,
         total_spending: 0,
       }));
@@ -218,18 +225,25 @@ const BillingCreation = () => {
         row.product_id = value;
         row.product_name = selectedProduct?.productandservice_name || "";
         row.product_price = selectedProduct?.productandservice_price || 0;
-        row.row_total =
-          (row.qty || 1) * row.product_price - (row.discount || 0);
       } else if (field === "staff_ids") {
         // Multi-select for staff
         row.staff_ids = value ? value.map((v) => v.value) : [];
         row.staff_names = value ? value.map((v) => v.label).join(", ") : "";
-      } else if (field === "qty" || field === "discount") {
-        row[field] = parseFloat(value) || 0;
-        row.row_total = row.qty * row.product_price - row.discount;
+      } else if (field === "qty") {
+        row.qty = parseFloat(value) || 0;
+      } else if (field === "discount") {
+        row.discount = parseFloat(value) || 0;
       } else if (field === "discount_type") {
         row.discount_type = value;
       }
+
+      // Recalculate row total
+      let discAmount = row.discount || 0;
+      if (row.discount_type === "PER") {
+        discAmount =
+          (row.discount / 100) * (row.qty || 0) * (row.product_price || 0);
+      }
+      row.row_total = (row.qty || 0) * (row.product_price || 0) - discAmount;
 
       newRows[index] = row;
       return newRows;
@@ -245,10 +259,10 @@ const BillingCreation = () => {
         product_price: 0,
         qty: 1,
         discount: 0,
+        discount_type: "INR",
         staff_ids: [],
         staff_names: "",
         row_total: 0,
-        discount_type: "INR",
       },
     ]);
   };
@@ -283,6 +297,7 @@ const BillingCreation = () => {
             product_id: r.product_id,
             qty: r.qty,
             discount: r.discount,
+            discount_type: r.discount_type,
             staff_ids: r.staff_ids,
             total: r.row_total,
           }))
@@ -312,7 +327,7 @@ const BillingCreation = () => {
           const memberPayload = {
             name: billingPayload.name,
             phone: billingPayload.phone,
-            gold_membership: billingPayload.membership,
+            gold_membership: billingPayload.membership || "No",
           };
           await dispatch(addMember(memberPayload)).unwrap();
           // Refetch members to get the new one
@@ -540,36 +555,21 @@ const BillingCreation = () => {
             <Card className="h-100">
               <Card.Header>Member Status</Card.Header>
               <Card.Body className="p-2">
-                <div className="mb-2">
-                  <TextInputform
-                    formLabel="Last Visit Date"
-                    PlaceHolder="YYYY-MM-DD"
-                    name="last_visit_date"
-                    formtype="date"
-                    value={form.last_visit_date}
-                    onChange={handleFormChange}
-                  />
+                <div className="mb-2 d-flex justify-content-between align-items-center">
+                  <strong>Last Visit Date</strong>
+                  <span>{formatDate(form.last_visit_date)}</span>
                 </div>
-                <div className="mb-2">
-                  <TextInputform
-                    formLabel="Total Visit Count"
-                    PlaceHolder="0"
-                    name="total_visit_count"
-                    formtype="number"
-                    value={form.total_visit_count}
-                    onChange={handleFormChange}
-                  />
+                <div className="mb-2 d-flex justify-content-between align-items-center">
+                  <strong>Total Visit Count</strong>
+                  <span>{form.total_visit_count || 0}</span>
                 </div>
-                <div>
-                  <TextInputform
-                    formLabel="Total Spending"
-                    PlaceHolder="0.00"
-                    name="total_spending"
-                    formtype="number"
-                    step="0.01"
-                    value={form.total_spending}
-                    onChange={handleFormChange}
-                  />
+                <div className="mb-2 d-flex justify-content-between align-items-center">
+                  <strong>Total Spending</strong>
+                  <span>₹{(form.total_spending || 0).toFixed(2)}</span>
+                </div>
+                <div className="d-flex justify-content-between align-items-center">
+                  <strong>Membership</strong>
+                  <span>{form.membership || "-"}</span>
                 </div>
               </Card.Body>
             </Card>
