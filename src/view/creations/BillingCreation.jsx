@@ -501,7 +501,7 @@ const BillingCreation = () => {
                 ))}
               </tbody>
             </Table>
-            <Button variant="primary" onClick={addRow}>
+            <Button variant="success" onClick={addRow}>
               Add Row
             </Button>
           </Col>
