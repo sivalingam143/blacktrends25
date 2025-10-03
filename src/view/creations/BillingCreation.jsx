@@ -103,9 +103,8 @@ const BillingCreation = () => {
               const staffItems = detail.staff_ids
                 ? staff.filter((st) => detail.staff_ids.includes(st.staff_id))
                 : [];
-              const rowTotal =
-                detail.qty * (product?.productandservice_price || 0) -
-                detail.discount;
+              // Use the saved row total instead of recalculating to avoid discount type mismatch
+              const rowTotal = detail.total || 0;
               return {
                 product_id: detail.product_id,
                 product_name: product?.productandservice_name || "",
