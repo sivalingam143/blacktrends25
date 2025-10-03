@@ -9,6 +9,7 @@ import {
   Button,
   Card,
 } from "react-bootstrap";
+import Select from "react-select";
 import { useDispatch, useSelector } from "react-redux";
 import { TextInputform } from "../../components/Forms";
 import { Buttons } from "../../components/Buttons";
@@ -50,6 +51,7 @@ const BillingCreation = () => {
   const [rows, setRows] = useState([]); // Dynamic rows for products/services
   const [subtotal, setSubtotal] = useState(0);
   const [overall_discount, setOverallDiscount] = useState(0);
+  const [discount_type, setDiscountType] = useState("INR"); // INR or PER
   const [grand_total, setGrandTotal] = useState(0);
   const [submitting, setSubmitting] = useState(false);
 
@@ -73,6 +75,7 @@ const BillingCreation = () => {
           total_spending: parseFloat(rec.total_spending),
         });
         setOverallDiscount(parseFloat(rec.discount));
+        setDiscountType("INR"); // Default
 
         // Parse product details if exists
         let parsedRows = [];
@@ -83,9 +86,9 @@ const BillingCreation = () => {
               const product = products.find(
                 (p) => p.productandservice_id === detail.product_id
               );
-              const staffItem = staff.find(
-                (st) => st.staff_id === detail.staff_id
-              );
+              const staffItems = detail.staff_ids
+                ? staff.filter((st) => detail.staff_ids.includes(st.staff_id))
+                : [];
               const rowTotal =
                 detail.qty * (product?.productandservice_price || 0) -
                 detail.discount;
@@ -95,8 +98,8 @@ const BillingCreation = () => {
                 product_price: product?.productandservice_price || 0,
                 qty: detail.qty,
                 discount: detail.discount,
-                staff_id: detail.staff_id,
-                staff_name: staffItem?.name || "",
+                staff_ids: detail.staff_ids || [], // Array for multiple
+                staff_names: staffItems.map((st) => st.name).join(", "),
                 row_total: rowTotal,
               };
             });
@@ -113,21 +116,30 @@ const BillingCreation = () => {
   useEffect(() => {
     const newSubtotal = rows.reduce((sum, row) => sum + row.row_total, 0);
     setSubtotal(newSubtotal);
-    setGrandTotal(newSubtotal - overall_discount);
-  }, [rows, overall_discount]);
+    let discountAmount = 0;
+    if (discount_type === "PER") {
+      discountAmount = (overall_discount / 100) * newSubtotal;
+    } else {
+      discountAmount = overall_discount;
+    }
+    setGrandTotal(newSubtotal - discountAmount);
+  }, [rows, overall_discount, discount_type]);
 
-  const handleMemberChange = (e) => {
-    const selectedNo = e.target.value;
-    setForm((prev) => {
-      const selectedMember = member.find((m) => m.member_no === selectedNo);
-      return {
-        ...prev,
-        member_no: selectedNo,
-        name: selectedMember ? selectedMember.name : "",
-        phone: selectedMember ? selectedMember.phone : "",
-        membership: selectedMember ? selectedMember.gold_membership : "No",
-      };
-    });
+  const handleMemberChange = (selectedOption) => {
+    if (selectedOption) {
+      const selectedMember = member.find(
+        (m) => m.phone === selectedOption.value
+      );
+      if (selectedMember) {
+        setForm((prev) => ({
+          ...prev,
+          member_no: selectedMember.member_no,
+          name: selectedMember.name,
+          phone: selectedMember.phone,
+          membership: selectedMember.gold_membership || "No",
+        }));
+      }
+    }
   };
 
   const handleFormChange = (e) => {
@@ -136,6 +148,10 @@ const BillingCreation = () => {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const handleDiscountTypeChange = (e) => {
+    setDiscountType(e.target.value);
   };
 
   const handleOverallDiscountChange = (e) => {
@@ -155,13 +171,12 @@ const BillingCreation = () => {
         row.product_id = value;
         row.product_name = selectedProduct?.productandservice_name || "";
         row.product_price = selectedProduct?.productandservice_price || 0;
-        // Recalc total with default qty=1, discount=0 if new
         row.row_total =
           (row.qty || 1) * row.product_price - (row.discount || 0);
-      } else if (field === "staff_id") {
-        const selectedStaff = staff.find((st) => st.staff_id === value);
-        row.staff_id = value;
-        row.staff_name = selectedStaff?.name || "";
+      } else if (field === "staff_ids") {
+        // Multi-select for staff
+        row.staff_ids = value ? value.map((v) => v.value) : [];
+        row.staff_names = value ? value.map((v) => v.label).join(", ") : "";
       } else if (field === "qty" || field === "discount") {
         row[field] = parseFloat(value) || 0;
         row.row_total = row.qty * row.product_price - row.discount;
@@ -181,8 +196,8 @@ const BillingCreation = () => {
         product_price: 0,
         qty: 1,
         discount: 0,
-        staff_id: "",
-        staff_name: "",
+        staff_ids: [],
+        staff_names: "",
         row_total: 0,
       },
     ]);
@@ -218,7 +233,7 @@ const BillingCreation = () => {
           product_id: r.product_id,
           qty: r.qty,
           discount: r.discount,
-          staff_id: r.staff_id,
+          staff_ids: r.staff_ids, // Array of staff IDs
           total: r.row_total,
         }))
       ),
@@ -240,6 +255,12 @@ const BillingCreation = () => {
     }
   };
 
+  // Prepare staff options for multi-select
+  const staffOptions = staff.map((st) => ({
+    value: st.staff_id,
+    label: st.name,
+  }));
+
   return (
     <div id="main">
       <Container fluid className="p-3">
@@ -258,18 +279,16 @@ const BillingCreation = () => {
           <Col md={4}>
             <Form.Group>
               <Form.Label>Phone *</Form.Label>
-              <Form.Select
-                name="member_no"
-                value={form.member_no}
+              <Select
+                options={member.map((m) => ({
+                  value: m.phone,
+                  label: m.phone,
+                }))}
+                placeholder="Type phone to search..."
                 onChange={handleMemberChange}
-              >
-                <option value="">Select Phone</option>
-                {member.map((m) => (
-                  <option key={m.member_no} value={m.member_no}>
-                    {m.phone}
-                  </option>
-                ))}
-              </Form.Select>
+                isSearchable={true}
+                isClearable={true}
+              />
             </Form.Group>
           </Col>
           <Col md={4}>
@@ -296,7 +315,7 @@ const BillingCreation = () => {
                       <th>Product/Service Dropdown</th>
                       <th>Qty</th>
                       <th>Discount</th>
-                      <th>Service Provider Dropdown</th>
+                      <th>Service Provider Dropdown (Multiple)</th>
                       <th>Total</th>
                     </tr>
                   </thead>
@@ -324,7 +343,6 @@ const BillingCreation = () => {
                               </option>
                             ))}
                           </Form.Select>
-                          <small>{row.product_name}</small>
                         </td>
                         <td>
                           <Form.Control
@@ -346,20 +364,17 @@ const BillingCreation = () => {
                           />
                         </td>
                         <td>
-                          <Form.Select
-                            value={row.staff_id}
-                            onChange={(e) =>
-                              handleRowChange(index, "staff_id", e.target.value)
+                          <Select
+                            isMulti
+                            options={staffOptions}
+                            value={staffOptions.filter((opt) =>
+                              row.staff_ids.includes(opt.value)
+                            )}
+                            onChange={(selected) =>
+                              handleRowChange(index, "staff_ids", selected)
                             }
-                          >
-                            <option value="">Select Staff</option>
-                            {staff.map((st) => (
-                              <option key={st.staff_id} value={st.staff_id}>
-                                {st.name}
-                              </option>
-                            ))}
-                          </Form.Select>
-                          <small>{row.staff_name}</small>
+                            placeholder="Select Staff (Multiple)"
+                          />
                         </td>
                         <td>₹{row.row_total.toFixed(2)}</td>
                       </tr>
@@ -375,29 +390,43 @@ const BillingCreation = () => {
             {/* Container 3: Subtotal, Discount, Total - Vertical */}
             <Card>
               <Card.Header>Totals</Card.Header>
-              <Card.Body>
-                <div className="mb-3">
-                  <strong>Subtotal: ₹{subtotal.toFixed(2)}</strong>
+              <Card.Body className="p-3">
+                <div className="mb-3 d-flex justify-content-between align-items-center">
+                  <strong>Subtotal</strong>
+                  <span>₹{subtotal.toFixed(2)}</span>
                 </div>
-                <div className="mb-3">
-                  <TextInputform
-                    formLabel="Discount"
-                    PlaceHolder="0.00"
-                    name="overall_discount"
-                    formtype="number"
-                    step="0.01"
-                    value={overall_discount}
-                    onChange={handleOverallDiscountChange}
-                  />
+                <div className="mb-3 d-flex justify-content-between align-items-center">
+                  <div>
+                    <label>Discount</label>
+                    <div className="d-flex">
+                      <Form.Select
+                        value={discount_type}
+                        onChange={handleDiscountTypeChange}
+                        style={{ width: "80px" }}
+                      >
+                        <option value="INR">INR</option>
+                        <option value="PER">%</option>
+                      </Form.Select>
+                    </div>
+                  </div>
+                  <div className="input-group" style={{ width: "150px" }}>
+                    <Form.Control
+                      type="number"
+                      step="0.01"
+                      value={overall_discount}
+                      onChange={handleOverallDiscountChange}
+                    />
+                  </div>
                 </div>
-                <div>
-                  <strong>Total: ₹{grand_total.toFixed(2)}</strong>
+                <div className="d-flex justify-content-between align-items-center border-top pt-2">
+                  <strong>Total</strong>
+                  <span>₹{grand_total.toFixed(2)}</span>
                 </div>
               </Card.Body>
             </Card>
           </Col>
 
-          {/* Right: Stats Container - Only for 3 Fields */}
+          {/* Right: Stats Container - Compact for 3 Fields */}
           <Col md={4}>
             <Card className="h-100">
               <Card.Header>Member Status</Card.Header>
@@ -410,7 +439,6 @@ const BillingCreation = () => {
                     formtype="date"
                     value={form.last_visit_date}
                     onChange={handleFormChange}
-                    size="sm"
                   />
                 </div>
                 <div className="mb-2">
@@ -421,7 +449,6 @@ const BillingCreation = () => {
                     formtype="number"
                     value={form.total_visit_count}
                     onChange={handleFormChange}
-                    size="sm"
                   />
                 </div>
                 <div>
@@ -433,7 +460,6 @@ const BillingCreation = () => {
                     step="0.01"
                     value={form.total_spending}
                     onChange={handleFormChange}
-                    size="sm"
                   />
                 </div>
               </Card.Body>
