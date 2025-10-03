@@ -381,9 +381,8 @@ const BillingCreation = () => {
   return (
     <div id="main">
       <Container fluid className="p-3">
-        {/* Container 1: Date, Phone, Name */}
-        <Row className="mb-4 border p-3 rounded">
-          <Col md={4}>
+        <Row className="mb-4 ">
+          <Col md={4} lg={3}>
             <TextInputform
               formLabel="Date *"
               PlaceHolder="YYYY-MM-DD"
@@ -393,7 +392,7 @@ const BillingCreation = () => {
               onChange={handleFormChange}
             />
           </Col>
-          <Col md={4}>
+          <Col md={4} lg={3} className="py-2">
             <label>Phone *</label>
             <CreatableSelect
               options={phoneOptions}
@@ -406,7 +405,7 @@ const BillingCreation = () => {
               }
             />
           </Col>
-          <Col md={4}>
+          <Col md={4} lg={3}>
             <TextInputform
               formLabel="Name *"
               PlaceHolder="Name"
