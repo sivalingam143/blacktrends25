@@ -34,22 +34,14 @@ const Billing = () => {
   };
 
   // Table headers
-  const headers = [
-    "No",
-    "Billing ID",
-    "Date",
-    "Member No",
-    "Name",
-    "Total",
-    "Actions",
-  ];
+  const headers = ["No", "Date", "Member No", "Name", "Total"];
 
   // Table body
   const body = billing.map((item, idx) => ({
     key: item.billing_id,
     values: [
       idx + 1,
-      item.billing_id,
+
       item.billing_date.split(" ")[0],
       item.member_no,
       item.name,
