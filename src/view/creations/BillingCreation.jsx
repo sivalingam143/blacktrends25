@@ -89,7 +89,7 @@ const BillingCreation = () => {
           total_spending: parseFloat(rec.total_spending),
         });
         setOverallDiscount(parseFloat(rec.discount));
-        setDiscountType("INR"); // Default
+        setDiscountType(rec.discount_type || "INR");
 
         // Parse product details if exists
         let parsedRows = [];
@@ -304,6 +304,7 @@ const BillingCreation = () => {
         ),
         subtotal,
         discount: overall_discount,
+        discount_type,
         total: grand_total,
       };
 
