@@ -415,9 +415,7 @@ const BillingCreation = () => {
             (m) =>
               m.phone === billingPayload.phone && m.name === billingPayload.name
           );
-          if (!newMember) {
-            throw new Error("Failed to create new member");
-          }
+
           // Update payload for billing
           billingPayload.member_no = newMember.member_no;
           billingPayload.created_by_id = 1;
