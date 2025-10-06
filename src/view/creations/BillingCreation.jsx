@@ -8,6 +8,7 @@ import {
   Table,
   Button,
   Card,
+  Modal,
 } from "react-bootstrap";
 import Select from "react-select";
 import { useDispatch, useSelector } from "react-redux";
@@ -55,6 +56,15 @@ const BillingCreation = () => {
   const [discount_type, setDiscountType] = useState("INR"); // INR or PER
   const [grand_total, setGrandTotal] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+
+  // New Member Modal States
+  const [showNewMemberModal, setShowNewMemberModal] = useState(false);
+  const [newMemberForm, setNewMemberForm] = useState({
+    name: "",
+    phone: "",
+    membership: "No",
+  });
+  const [newMemberSubmitting, setNewMemberSubmitting] = useState(false);
 
   // Phone options for searchable dropdown
   const phoneOptions = member.map((m) => ({
@@ -260,6 +270,64 @@ const BillingCreation = () => {
     setOverallDiscount(parseFloat(e.target.value) || 0);
   };
 
+  // New Member Form Handlers
+  const handleNewMemberChange = (e) => {
+    const { name, value } = e.target;
+    setNewMemberForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleNewMemberSubmit = async () => {
+    if (newMemberSubmitting) return;
+    setNewMemberSubmitting(true);
+
+    if (!newMemberForm.name.trim() || !newMemberForm.phone.trim()) {
+      NotifyData("Name and Phone required!", "error");
+      setNewMemberSubmitting(false);
+      return;
+    }
+    if (!/^\d{10}$/.test(newMemberForm.phone)) {
+      NotifyData("Phone must be 10 digits!", "error");
+      setNewMemberSubmitting(false);
+      return;
+    }
+
+    try {
+      const payload = {
+        action: "addmember",
+        name: newMemberForm.name,
+        phone: newMemberForm.phone,
+        membership: newMemberForm.membership,
+      };
+      const msg = await dispatch(addMember(payload)).unwrap();
+      NotifyData(msg, "success");
+
+      // Refresh members list
+      dispatch(fetchMembers(""));
+
+      // Auto-populate billing form with new member
+      setForm((prev) => ({
+        ...prev,
+        member_no: "",
+        name: newMemberForm.name,
+        phone: newMemberForm.phone,
+        membership: newMemberForm.membership,
+        last_visit_date: "",
+        total_visit_count: 0,
+        total_spending: 0,
+      }));
+
+      // Close modal
+      setShowNewMemberModal(false);
+      setNewMemberForm({ name: "", phone: "", membership: "No" });
+
+      NotifyData("New member added and loaded!", "success");
+    } catch (e) {
+      NotifyData(e.message, "error");
+    } finally {
+      setNewMemberSubmitting(false);
+    }
+  };
+
   // Handle row changes
   const handleRowChange = (index, field, value) => {
     setRows((prev) => {
@@ -417,6 +485,12 @@ const BillingCreation = () => {
     { value: "PER", label: "%" },
   ];
 
+  // New Member Membership Options
+  const newMemberMembershipOptions = [
+    { value: "No", label: "No" },
+    { value: "Yes", label: "Yes" },
+  ];
+
   return (
     <div id="main">
       <Container fluid className="p-3">
@@ -433,13 +507,25 @@ const BillingCreation = () => {
           </Col>
           <Col md={4} lg={3} className="py-2">
             <label>Phone *</label>
-            <Select
-              options={phoneOptions}
-              isSearchable={true}
-              placeholder="Type to search existing phone"
-              value={phoneValue}
-              onChange={handleMemberChange}
-            />
+            <div className="d-flex gap-2">
+              <Select
+                options={phoneOptions}
+                isSearchable={true}
+                placeholder="Type to search existing phone"
+                value={phoneValue}
+                onChange={handleMemberChange}
+                className="flex-grow-1"
+              />
+              {!isEdit && (
+                <Button
+                  variant="outline-primary"
+                  size="sm"
+                  onClick={() => setShowNewMemberModal(true)}
+                >
+                  +
+                </Button>
+              )}
+            </div>
           </Col>
           <Col md={4} lg={3}>
             <TextInputform
@@ -650,6 +736,65 @@ const BillingCreation = () => {
           </Col>
         </Row>
       </Container>
+
+      {/* New Member Modal */}
+      <Modal
+        show={showNewMemberModal}
+        onHide={() => setShowNewMemberModal(false)}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Add New Member</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group className="mb-2">
+              <Form.Label>Name *</Form.Label>
+              <TextInputform
+                formtype="text"
+                PlaceHolder="Enter name"
+                name="name"
+                value={newMemberForm.name}
+                onChange={handleNewMemberChange}
+              />
+            </Form.Group>
+            <Form.Group className="mb-2">
+              <Form.Label>Phone *</Form.Label>
+              <TextInputform
+                formtype="text"
+                PlaceHolder="10 digits"
+                name="phone"
+                value={newMemberForm.phone}
+                onChange={handleNewMemberChange}
+              />
+            </Form.Group>
+            <Form.Group className="mb-2">
+              <Form.Label>Membership</Form.Label>
+              <DropDown
+                placeholder="Select"
+                name="membership"
+                value={newMemberForm.membership}
+                onChange={handleNewMemberChange}
+                options={newMemberMembershipOptions}
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="success"
+            onClick={handleNewMemberSubmit}
+            disabled={newMemberSubmitting}
+          >
+            {newMemberSubmitting ? "Adding..." : "Add Member"}
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() => setShowNewMemberModal(false)}
+          >
+            Cancel
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
