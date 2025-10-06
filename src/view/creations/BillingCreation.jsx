@@ -10,7 +10,6 @@ import {
   Card,
 } from "react-bootstrap";
 import Select from "react-select";
-import CreatableSelect from "react-select/creatable";
 import { useDispatch, useSelector } from "react-redux";
 import { TextInputform, DropDown } from "../../components/Forms";
 import { Buttons } from "../../components/Buttons";
@@ -229,19 +228,6 @@ const BillingCreation = () => {
         } else {
           NotifyData("Member found and details loaded!", "success");
         }
-      } else {
-        // new phone
-        setForm((prev) => ({
-          ...prev,
-          member_no: "",
-          name: "",
-          phone: selectedOption.value,
-          membership: "",
-          last_visit_date: "",
-          total_visit_count: 0,
-          total_spending: 0,
-        }));
-        NotifyData("New member - please enter name", "info");
       }
     } else {
       // cleared
@@ -401,31 +387,7 @@ const BillingCreation = () => {
         const msg = await dispatch(updateBilling(billingPayload)).unwrap();
         NotifyData(msg, "success");
       } else {
-        if (!billingPayload.member_no) {
-          // New member
-          const memberPayload = {
-            name: billingPayload.name,
-            phone: billingPayload.phone,
-            membership: billingPayload.membership || "No",
-          };
-          await dispatch(addMember(memberPayload)).unwrap();
-          // Refetch members to get the new one
-          const membersData = await dispatch(fetchMembers("")).unwrap();
-          const newMember = membersData.member.find(
-            (m) =>
-              m.phone === billingPayload.phone && m.name === billingPayload.name
-          );
-
-          // Update payload for billing
-          billingPayload.member_no = newMember.member_no;
-          billingPayload.created_by_id = 1;
-          // For new: set initial stats
-          billingPayload.total_visit_count = 1;
-          billingPayload.total_spending = grand_total;
-          billingPayload.last_visit_date = billingPayload.billing_date;
-        } else {
-          billingPayload.created_by_id = 1;
-        }
+        billingPayload.created_by_id = 1;
         const msg = await dispatch(addBilling(billingPayload)).unwrap();
         NotifyData(msg, "success");
       }
@@ -471,15 +433,12 @@ const BillingCreation = () => {
           </Col>
           <Col md={4} lg={3} className="py-2">
             <label>Phone *</label>
-            <CreatableSelect
+            <Select
               options={phoneOptions}
               isSearchable={true}
-              placeholder="Type to search or enter new phone"
+              placeholder="Type to search existing phone"
               value={phoneValue}
               onChange={handleMemberChange}
-              formatCreateLabel={(inputValue) =>
-                `Use ${inputValue} as new phone`
-              }
             />
           </Col>
           <Col md={4} lg={3}>
