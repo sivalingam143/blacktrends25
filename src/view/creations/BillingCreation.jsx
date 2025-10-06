@@ -97,16 +97,24 @@ const BillingCreation = () => {
           try {
             const details = JSON.parse(rec.productandservice_details);
             parsedRows = details.map((detail) => {
+              // CHANGED: Handle both productandservice_id and old product_id for backward compatibility
+              const productId =
+                detail.productandservice_id || detail.product_id;
               const product = products.find(
-                (p) => p.productandservice_id === detail.product_id
+                (p) => p.productandservice_id === productId
               );
-              const staffItems = detail.staff_ids
-                ? staff.filter((st) => detail.staff_ids.includes(st.staff_id))
-                : [];
+              // CHANGED: Single staff handling with staff_name from saved data if available
+              const staffId = detail.staff_id;
+              const savedStaffName = detail.staff_name || "";
+              const staffItem = staffId
+                ? staff.find((st) => st.staff_id === staffId)
+                : null;
+              const staffName =
+                savedStaffName || (staffItem ? staffItem.name : "");
               // Use the saved row total instead of recalculating to avoid discount type mismatch
               const rowTotal = detail.total || 0;
 
-              // NEW: Calculate discount_amount for edit mode
+              // Calculate discount_amount for edit mode
               const rowSubtotal =
                 (detail.qty || 0) * (product?.productandservice_price || 0);
               let discAmount = detail.discount || 0;
@@ -115,16 +123,22 @@ const BillingCreation = () => {
               }
 
               return {
-                product_id: detail.product_id,
-                product_name: product?.productandservice_name || "",
-                product_price: product?.productandservice_price || 0,
+                product_id: productId, // Keep internal as product_id for consistency
+                product_name:
+                  detail.productandservice_name ||
+                  product?.productandservice_name ||
+                  "",
+                product_price:
+                  detail.productandservice_price ||
+                  product?.productandservice_price ||
+                  0,
                 qty: detail.qty,
                 discount: detail.discount,
                 discount_type: detail.discount_type || "INR",
-                // NEW: Add discount_amount
                 discount_amount: discAmount,
-                staff_ids: detail.staff_ids || [], // Array for multiple
-                staff_names: staffItems.map((st) => st.name).join(", "),
+                // CHANGED: Single staff_id and staff_name (prefer saved, else from current)
+                staff_id: staffId || null,
+                staff_name: staffName,
                 row_total: rowTotal,
               };
             });
@@ -144,7 +158,6 @@ const BillingCreation = () => {
                 ...row,
                 discount: 18,
                 discount_type: "PER",
-                // NEW: Update discount_amount
                 discount_amount: discAmount,
               };
             })
@@ -205,7 +218,6 @@ const BillingCreation = () => {
                 ...row,
                 discount: 18,
                 discount_type: "PER",
-                // NEW: Update discount_amount
                 discount_amount: discAmount,
               };
             })
@@ -275,10 +287,10 @@ const BillingCreation = () => {
         row.product_id = value;
         row.product_name = selectedProduct?.productandservice_name || "";
         row.product_price = selectedProduct?.productandservice_price || 0;
-      } else if (field === "staff_ids") {
-        // Multi-select for staff
-        row.staff_ids = value ? value.map((v) => v.value) : [];
-        row.staff_names = value ? value.map((v) => v.label).join(", ") : "";
+      } else if (field === "staff_id") {
+        // Single staff handling
+        row.staff_id = value ? value.value : null;
+        row.staff_name = value ? value.label : "";
       } else if (field === "qty") {
         row.qty = parseFloat(value) || 0;
       } else if (field === "discount") {
@@ -294,7 +306,6 @@ const BillingCreation = () => {
         discAmount = (row.discount / 100) * rowSubtotal;
       }
       row.row_total = rowSubtotal - discAmount;
-      // NEW: Set discount_amount
       row.discount_amount = discAmount;
 
       newRows[index] = row;
@@ -311,10 +322,10 @@ const BillingCreation = () => {
       qty: 1,
       discount: 0,
       discount_type: "INR",
-      // NEW: Add discount_amount
       discount_amount: 0,
-      staff_ids: [],
-      staff_names: "",
+      // Single staff
+      staff_id: null,
+      staff_name: "",
       row_total: 0,
     };
 
@@ -322,7 +333,6 @@ const BillingCreation = () => {
     if (form.membership === "Yes") {
       newRow.discount = 18;
       newRow.discount_type = "PER";
-      // Calculate initial discount_amount (but price=0, so 0)
       newRow.discount_amount = (18 / 100) * (1 * 0); // 0 initially
     }
 
@@ -356,13 +366,17 @@ const BillingCreation = () => {
         ...form,
         productandservice_details: JSON.stringify(
           rows.map((r) => ({
-            product_id: r.product_id,
+            // CHANGED: Rename to productandservice_id and add name/price
+            productandservice_id: r.product_id,
+            productandservice_name: r.product_name,
+            productandservice_price: r.product_price,
             qty: r.qty,
             discount: r.discount,
             discount_type: r.discount_type,
-            // NEW: Add discount_amount
             discount_amount: r.discount_amount,
-            staff_ids: r.staff_ids,
+            // CHANGED: Add staff_name
+            staff_id: r.staff_id,
+            staff_name: r.staff_name,
             total: r.row_total,
           }))
         ),
@@ -425,7 +439,7 @@ const BillingCreation = () => {
     }
   };
 
-  // Prepare staff options for multi-select
+  // Prepare staff options for single-select
   const staffOptions = staff.map((st) => ({
     value: st.staff_id,
     label: st.name,
@@ -492,7 +506,7 @@ const BillingCreation = () => {
                   <th>Product/Service Dropdown</th>
                   <th>Qty</th>
                   <th>Discount</th>
-                  <th>Service Provider Dropdown (Multiple)</th>
+                  <th>Service Provider Dropdown</th>
                   <th>Total</th>
                 </tr>
               </thead>
@@ -549,16 +563,18 @@ const BillingCreation = () => {
                       </div>
                     </td>
                     <td>
+                      {/* Single Select */}
                       <Select
-                        isMulti
                         options={staffOptions}
-                        value={staffOptions.filter((opt) =>
-                          row.staff_ids.includes(opt.value)
-                        )}
-                        onChange={(selected) =>
-                          handleRowChange(index, "staff_ids", selected)
+                        value={
+                          staffOptions.find(
+                            (opt) => opt.value === row.staff_id
+                          ) || null
                         }
-                        placeholder="Select Staff (Multiple)"
+                        onChange={(selected) =>
+                          handleRowChange(index, "staff_id", selected)
+                        }
+                        placeholder="Select Staff"
                       />
                     </td>
                     <td>₹{row.row_total.toFixed(2)}</td>
