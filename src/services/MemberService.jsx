@@ -14,7 +14,7 @@ export const addMemberApi = async (memberData) => {
     action: "addmember",
     name: memberData.name,
     phone: memberData.phone,
-    gold_membership: memberData.gold_membership,
+    membership: memberData.membership,
   };
   const { data } = await axiosInstance.post(API_ENDPOINT, payload);
   return data;
@@ -27,7 +27,7 @@ export const updateMemberApi = async (memberData) => {
     edit_member_id: memberData.member_id,
     name: memberData.name,
     phone: memberData.phone,
-    gold_membership: memberData.gold_membership,
+    membership: memberData.membership,
   };
   const { data } = await axiosInstance.post(API_ENDPOINT, payload);
   return data;

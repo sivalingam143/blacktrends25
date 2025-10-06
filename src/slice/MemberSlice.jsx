@@ -114,7 +114,7 @@ const memberSlice = createSlice({
       const { member_id, makeGold } = action.payload;
       const goldVal = makeGold ? "Yes" : "No";
       const idx = state.member.findIndex((m) => m.member_id === member_id);
-      if (idx !== -1) state.member[idx].gold_membership = goldVal;
+      if (idx !== -1) state.member[idx].membership = goldVal;
     });
   },
 });

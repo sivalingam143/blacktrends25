@@ -18,7 +18,7 @@ const MemberCreation = () => {
   const [form, setForm] = useState({
     name: "",
     phone: "",
-    gold_membership: "No",
+    membership: "No",
   });
   const [submitting, setSubmitting] = useState(false);
 
@@ -39,7 +39,7 @@ const MemberCreation = () => {
         setForm({
           name: rec.name,
           phone: rec.phone,
-          gold_membership: rec.gold_membership,
+          membership: rec.membership,
         });
       }
     }
@@ -52,7 +52,7 @@ const MemberCreation = () => {
 
   const handleGoldRadio = (e) => {
     const newVal = e.target.value;
-    if (newVal === form.gold_membership) return;
+    if (newVal === form.membership) return;
 
     // Show confirmation modal
     setPendingGold(newVal);
@@ -61,7 +61,7 @@ const MemberCreation = () => {
 
   const confirmGoldChange = () => {
     if (pendingGold !== null) {
-      setForm((p) => ({ ...p, gold_membership: pendingGold }));
+      setForm((p) => ({ ...p, membership: pendingGold }));
     }
     setShowGoldModal(false);
     setPendingGold(null);
@@ -133,10 +133,10 @@ const MemberCreation = () => {
               <input
                 className="form-check-input"
                 type="radio"
-                name="gold_membership"
+                name="membership"
                 id="goldYes"
                 value="Yes"
-                checked={form.gold_membership === "Yes"}
+                checked={form.membership === "Yes"}
                 onChange={handleGoldRadio}
               />
               <label className="form-check-label" htmlFor="goldYes">
@@ -147,10 +147,10 @@ const MemberCreation = () => {
               <input
                 className="form-check-input"
                 type="radio"
-                name="gold_membership"
+                name="membership"
                 id="goldNo"
                 value="No"
-                checked={form.gold_membership === "No"}
+                checked={form.membership === "No"}
                 onChange={handleGoldRadio}
               />
               <label className="form-check-label" htmlFor="goldNo">

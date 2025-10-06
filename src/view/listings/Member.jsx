@@ -43,7 +43,7 @@ const Member = () => {
   };
 
   const openGoldModal = (member) => {
-    const wantYes = member.gold_membership !== "Yes";
+    const wantYes = member.membership !== "Yes";
     setPendingMember({ ...member, wantYes });
     setShowGoldModal(true);
   };
@@ -81,11 +81,11 @@ const Member = () => {
         <input
           className="form-check-input"
           type="checkbox"
-          checked={m.gold_membership === "Yes"}
+          checked={m.membership === "Yes"}
           readOnly
         />
         <label className="form-check-label">
-          {m.gold_membership === "Yes" ? "Yes" : "No"}
+          {m.membership === "Yes" ? "Yes" : "No"}
         </label>
       </div>,
       <ActionButton

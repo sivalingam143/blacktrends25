@@ -158,7 +158,7 @@ const BillingCreation = () => {
           member_no: selectedMember.member_no,
           name: selectedMember.name,
           phone: selectedMember.phone,
-          membership: selectedMember.gold_membership || "",
+          membership: selectedMember.membership || "",
           last_visit_date: selectedMember.last_visit_date
             ? selectedMember.last_visit_date.split(" ")[0]
             : "",
@@ -327,7 +327,7 @@ const BillingCreation = () => {
           const memberPayload = {
             name: billingPayload.name,
             phone: billingPayload.phone,
-            gold_membership: billingPayload.membership || "No",
+            membership: billingPayload.membership || "No",
           };
           await dispatch(addMember(memberPayload)).unwrap();
           // Refetch members to get the new one
