@@ -88,6 +88,14 @@ const DashboardReports = () => {
       align: "left",
       render: (t) => t || "-",
     },
+    {
+      title: "Total",
+      dataIndex: "total",
+      key: "total",
+      ellipsis: true,
+      align: "left",
+      render: (t) => t || "-",
+    },
   ];
 
   const memberColumns = [
@@ -124,6 +132,30 @@ const DashboardReports = () => {
       sorter: (a, b) =>
         a.membership.toString().localeCompare(b.membership.toString()),
       render: (m) => (m === "Yes" ? "Yes ✅" : "No ❌"),
+    },
+    {
+      title: "Last Visit Date",
+      dataIndex: "last_visit_date",
+      key: "last_visit_date",
+      ellipsis: true,
+      align: "left",
+      render: (t) => t || "-",
+    },
+    {
+      title: "Last Visit Count",
+      dataIndex: "total_visit_count",
+      key: "total_visit_count",
+      ellipsis: true,
+      align: "left",
+      render: (t) => t || "-",
+    },
+    {
+      title: "Total Spending",
+      dataIndex: "total_spending",
+      key: "total_spending",
+      ellipsis: true,
+      align: "left",
+      render: (t) => t || "-",
     },
   ];
 

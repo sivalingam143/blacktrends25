@@ -5,6 +5,7 @@ const API_ENDPOINT = "/staff.php";
 export const fetchStaffApi = async (searchText = "") => {
   const payload = { action: "listStaff", search_text: searchText };
   const { data } = await axiosInstance.post(API_ENDPOINT, payload);
+  console.log(data);
   return data.body || { staff: [] };
 };
 
