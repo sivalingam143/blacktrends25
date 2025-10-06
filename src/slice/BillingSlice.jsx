@@ -4,6 +4,8 @@ import {
   addBillingApi,
   updateBillingApi,
   deleteBillingApi,
+  fetchStaffReportApi,
+  fetchMemberReportApi,
 } from "../services/BillingService";
 
 /* ---- thunks ---- */
@@ -39,17 +41,31 @@ export const deleteBilling = createAsyncThunk(
   }
 );
 
+export const fetchStaffReport = createAsyncThunk(
+  "billing/fetchStaffReport",
+  async ({ fromDate, toDate, searchText = "" }) =>
+    await fetchStaffReportApi(fromDate, toDate, searchText)
+);
+
+export const fetchMemberReport = createAsyncThunk(
+  "billing/fetchMemberReport",
+  async ({ fromDate, toDate, searchText = "" }) =>
+    await fetchMemberReportApi(fromDate, toDate, searchText)
+);
+
 /* ---- slice ---- */
 const billingSlice = createSlice({
   name: "billing",
   initialState: {
     billing: [],
+    staffReport: [],
+    memberReport: [],
     status: "idle",
     error: null,
   },
   reducers: {},
   extraReducers: (builder) => {
-    // fetch
+    // fetch billings
     builder
       .addCase(fetchBillings.pending, (s) => {
         s.status = "loading";
@@ -59,6 +75,34 @@ const billingSlice = createSlice({
         s.billing = a.payload.billing || [];
       })
       .addCase(fetchBillings.rejected, (s, a) => {
+        s.status = "failed";
+        s.error = a.error.message;
+      });
+
+    // fetch staff report
+    builder
+      .addCase(fetchStaffReport.pending, (s) => {
+        s.status = "loading";
+      })
+      .addCase(fetchStaffReport.fulfilled, (s, a) => {
+        s.status = "succeeded";
+        s.staffReport = a.payload.staff || [];
+      })
+      .addCase(fetchStaffReport.rejected, (s, a) => {
+        s.status = "failed";
+        s.error = a.error.message;
+      });
+
+    // fetch member report
+    builder
+      .addCase(fetchMemberReport.pending, (s) => {
+        s.status = "loading";
+      })
+      .addCase(fetchMemberReport.fulfilled, (s, a) => {
+        s.status = "succeeded";
+        s.memberReport = a.payload.member || [];
+      })
+      .addCase(fetchMemberReport.rejected, (s, a) => {
         s.status = "failed";
         s.error = a.error.message;
       });

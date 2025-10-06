@@ -5,6 +5,7 @@ const API_ENDPOINT = "/billing.php";
 export const fetchBillingsApi = async (searchText = "") => {
   const payload = { action: "listBilling", search_text: searchText };
   const { data } = await axiosInstance.post(API_ENDPOINT, payload);
+  console.log(data);
   return data.body || { billing: [] };
 };
 
@@ -65,4 +66,38 @@ export const deleteBillingApi = async (billingId) => {
   };
   const { data } = await axiosInstance.post(API_ENDPOINT, payload);
   return data;
+};
+
+/* ---------- STAFF REPORT ---------- */
+export const fetchStaffReportApi = async (
+  fromDate,
+  toDate,
+  searchText = ""
+) => {
+  const payload = {
+    action: "staffReport",
+    from_date: fromDate,
+    to_date: toDate,
+    search_text: searchText,
+  };
+  const { data } = await axiosInstance.post(API_ENDPOINT, payload);
+  console.log(data);
+  return data.body || { staff: [] };
+};
+
+/* ---------- MEMBER REPORT ---------- */
+export const fetchMemberReportApi = async (
+  fromDate,
+  toDate,
+  searchText = ""
+) => {
+  const payload = {
+    action: "memberReport",
+    from_date: fromDate,
+    to_date: toDate,
+    search_text: searchText,
+  };
+  const { data } = await axiosInstance.post(API_ENDPOINT, payload);
+  console.log(data);
+  return data.body || { member: [] };
 };
