@@ -105,6 +105,15 @@ const BillingCreation = () => {
                 : [];
               // Use the saved row total instead of recalculating to avoid discount type mismatch
               const rowTotal = detail.total || 0;
+
+              // NEW: Calculate discount_amount for edit mode
+              const rowSubtotal =
+                (detail.qty || 0) * (product?.productandservice_price || 0);
+              let discAmount = detail.discount || 0;
+              if (detail.discount_type === "PER") {
+                discAmount = (detail.discount / 100) * rowSubtotal;
+              }
+
               return {
                 product_id: detail.product_id,
                 product_name: product?.productandservice_name || "",
@@ -112,6 +121,8 @@ const BillingCreation = () => {
                 qty: detail.qty,
                 discount: detail.discount,
                 discount_type: detail.discount_type || "INR",
+                // NEW: Add discount_amount
+                discount_amount: discAmount,
                 staff_ids: detail.staff_ids || [], // Array for multiple
                 staff_names: staffItems.map((st) => st.name).join(", "),
                 row_total: rowTotal,
@@ -122,6 +133,23 @@ const BillingCreation = () => {
           }
         }
         setRows(parsedRows);
+
+        // If editing and membership is 'Yes', apply 18% default discount to all rows
+        if (rec.membership === "Yes") {
+          setRows((prevRows) =>
+            prevRows.map((row) => {
+              const rowSubtotal = (row.qty || 0) * (row.product_price || 0);
+              const discAmount = (18 / 100) * rowSubtotal;
+              return {
+                ...row,
+                discount: 18,
+                discount_type: "PER",
+                // NEW: Update discount_amount
+                discount_amount: discAmount,
+              };
+            })
+          );
+        }
       }
     }
   }, [id, billing, isEdit, products, staff]);
@@ -146,6 +174,7 @@ const BillingCreation = () => {
       }
     : null;
 
+  // Handle member change with membership check for default discount
   const handleMemberChange = (selectedOption) => {
     if (selectedOption) {
       const selectedMember = member.find(
@@ -165,7 +194,29 @@ const BillingCreation = () => {
           total_visit_count: selectedMember.total_visit_count || 0,
           total_spending: selectedMember.total_spending || 0,
         }));
-        NotifyData("Member found and details loaded!", "success");
+
+        // If membership is 'Yes', apply 18% default discount to all existing rows
+        if (selectedMember.membership === "Yes") {
+          setRows((prevRows) =>
+            prevRows.map((row) => {
+              const rowSubtotal = (row.qty || 0) * (row.product_price || 0);
+              const discAmount = (18 / 100) * rowSubtotal;
+              return {
+                ...row,
+                discount: 18,
+                discount_type: "PER",
+                // NEW: Update discount_amount
+                discount_amount: discAmount,
+              };
+            })
+          );
+          NotifyData(
+            "Membership 'Yes' detected - 18% discount applied to all rows!",
+            "info"
+          );
+        } else {
+          NotifyData("Member found and details loaded!", "success");
+        }
       } else {
         // new phone
         setForm((prev) => ({
@@ -236,34 +287,46 @@ const BillingCreation = () => {
         row.discount_type = value;
       }
 
-      // Recalculate row total
+      // Recalculate row total and discount_amount
+      const rowSubtotal = (row.qty || 0) * (row.product_price || 0);
       let discAmount = row.discount || 0;
       if (row.discount_type === "PER") {
-        discAmount =
-          (row.discount / 100) * (row.qty || 0) * (row.product_price || 0);
+        discAmount = (row.discount / 100) * rowSubtotal;
       }
-      row.row_total = (row.qty || 0) * (row.product_price || 0) - discAmount;
+      row.row_total = rowSubtotal - discAmount;
+      // NEW: Set discount_amount
+      row.discount_amount = discAmount;
 
       newRows[index] = row;
       return newRows;
     });
   };
 
+  // Add row with membership check for default discount
   const addRow = () => {
-    setRows((prev) => [
-      ...prev,
-      {
-        product_id: "",
-        product_name: "",
-        product_price: 0,
-        qty: 1,
-        discount: 0,
-        discount_type: "INR",
-        staff_ids: [],
-        staff_names: "",
-        row_total: 0,
-      },
-    ]);
+    const newRow = {
+      product_id: "",
+      product_name: "",
+      product_price: 0,
+      qty: 1,
+      discount: 0,
+      discount_type: "INR",
+      // NEW: Add discount_amount
+      discount_amount: 0,
+      staff_ids: [],
+      staff_names: "",
+      row_total: 0,
+    };
+
+    // If membership is 'Yes', set default 18% discount
+    if (form.membership === "Yes") {
+      newRow.discount = 18;
+      newRow.discount_type = "PER";
+      // Calculate initial discount_amount (but price=0, so 0)
+      newRow.discount_amount = (18 / 100) * (1 * 0); // 0 initially
+    }
+
+    setRows((prev) => [...prev, newRow]);
   };
 
   const removeRow = (index) => {
@@ -297,6 +360,8 @@ const BillingCreation = () => {
             qty: r.qty,
             discount: r.discount,
             discount_type: r.discount_type,
+            // NEW: Add discount_amount
+            discount_amount: r.discount_amount,
             staff_ids: r.staff_ids,
             total: r.row_total,
           }))
