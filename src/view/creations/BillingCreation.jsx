@@ -508,7 +508,6 @@ const BillingCreation = () => {
                   <th>Discount</th>
                   <th>Service Provider Dropdown</th>
                   <th>Total</th>
-                  {/* NEW: Action column for Delete */}
                   <th>Action</th>
                 </tr>
               </thead>
@@ -538,7 +537,8 @@ const BillingCreation = () => {
                       />
                     </td>
                     <td>
-                      <div className="d-flex">
+                      {/* MODIFIED: Added gap-2 for spacing between dropdown and input */}
+                      <div className="d-flex gap-2">
                         <DropDown
                           placeholder="Type"
                           value={row.discount_type || "INR"}
@@ -580,7 +580,6 @@ const BillingCreation = () => {
                       />
                     </td>
                     <td>₹{row.row_total.toFixed(2)}</td>
-                    {/* NEW: Delete button for each row */}
                     <td>
                       <Button
                         variant="danger"
