@@ -10,11 +10,8 @@ import {
   DatePicker,
   Row,
   Col,
-  Select,
 } from "antd";
 import { fetchStaffReport, fetchMemberReport } from "../../slice/BillingSlice";
-import { fetchStaff } from "../../slice/StaffSlice";
-import { fetchMembers } from "../../slice/MemberSlice";
 import {
   SearchOutlined,
   UserOutlined,
@@ -25,7 +22,6 @@ import "./Dashboard.css";
 const { TabPane } = Tabs;
 const { Text } = Typography;
 const { RangePicker } = DatePicker;
-const { Option } = Select;
 
 const DashboardReports = () => {
   const dispatch = useDispatch();
@@ -43,16 +39,8 @@ const DashboardReports = () => {
     error,
   } = useSelector((state) => state.billing);
 
-  const staffList = useSelector((state) => state.staff.staff || []);
-  const memberList = useSelector((state) => state.member.member || []);
-
   const fromDate = dateRange[0] ? dateRange[0].format("YYYY-MM-DD") : "";
   const toDate = dateRange[1] ? dateRange[1].format("YYYY-MM-DD") : "";
-
-  useEffect(() => {
-    dispatch(fetchStaff());
-    dispatch(fetchMembers());
-  }, [dispatch]);
 
   useEffect(() => {
     if (fromDate && toDate) {
@@ -260,31 +248,14 @@ const DashboardReports = () => {
                   Total Records: {staff?.length || 0}
                 </Text>
               </div>
-              <div style={{ display: "flex", gap: 8 }}>
-                <Input
-                  placeholder="Search staff by name..."
-                  prefix={<SearchOutlined />}
-                  allowClear
-                  style={{ width: 200 }}
-                  value={staffSearchText}
-                  onChange={(e) => handleStaffSearchChange(e.target.value)}
-                />
-                <Select
-                  placeholder="Select Staff"
-                  style={{ width: 200 }}
-                  onChange={handleStaffSearchChange}
-                  allowClear
-                  showSearch
-                  optionFilterProp="children"
-                  value={staffSearchText}
-                >
-                  {staffList.map((s) => (
-                    <Option key={s.staff_id || s.id} value={s.name}>
-                      {s.name}
-                    </Option>
-                  ))}
-                </Select>
-              </div>
+              <Input
+                placeholder="Search staff by name..."
+                prefix={<SearchOutlined />}
+                allowClear
+                style={{ width: 300 }}
+                value={staffSearchText}
+                onChange={(e) => handleStaffSearchChange(e.target.value)}
+              />
             </div>
             {status === "loading" ? (
               <p className="text-center py-3">Loading...</p>
@@ -330,31 +301,14 @@ const DashboardReports = () => {
                   Total Records: {member?.length || 0}
                 </Text>
               </div>
-              <div style={{ display: "flex", gap: 8 }}>
-                <Input
-                  placeholder="Search members by name, phone..."
-                  prefix={<SearchOutlined />}
-                  allowClear
-                  style={{ width: 200 }}
-                  value={memberSearchText}
-                  onChange={(e) => handleMemberSearchChange(e.target.value)}
-                />
-                <Select
-                  placeholder="Select Member"
-                  style={{ width: 200 }}
-                  onChange={handleMemberSearchChange}
-                  allowClear
-                  showSearch
-                  optionFilterProp="children"
-                  value={memberSearchText}
-                >
-                  {memberList.map((m) => (
-                    <Option key={m.id || m.member_id} value={m.name}>
-                      {m.name}
-                    </Option>
-                  ))}
-                </Select>
-              </div>
+              <Input
+                placeholder="Search members by name, phone..."
+                prefix={<SearchOutlined />}
+                allowClear
+                style={{ width: 300 }}
+                value={memberSearchText}
+                onChange={(e) => handleMemberSearchChange(e.target.value)}
+              />
             </div>
             {status === "loading" ? (
               <p className="text-center py-3">Loading...</p>
