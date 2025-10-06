@@ -97,13 +97,13 @@ const BillingCreation = () => {
           try {
             const details = JSON.parse(rec.productandservice_details);
             parsedRows = details.map((detail) => {
-              // CHANGED: Handle both productandservice_id and old product_id for backward compatibility
+              // Handle both productandservice_id and old product_id for backward compatibility
               const productId =
                 detail.productandservice_id || detail.product_id;
               const product = products.find(
                 (p) => p.productandservice_id === productId
               );
-              // CHANGED: Single staff handling with staff_name from saved data if available
+              // Single staff handling with staff_name from saved data if available
               const staffId = detail.staff_id;
               const savedStaffName = detail.staff_name || "";
               const staffItem = staffId
@@ -136,7 +136,7 @@ const BillingCreation = () => {
                 discount: detail.discount,
                 discount_type: detail.discount_type || "INR",
                 discount_amount: discAmount,
-                // CHANGED: Single staff_id and staff_name (prefer saved, else from current)
+                // Single staff_id and staff_name (prefer saved, else from current)
                 staff_id: staffId || null,
                 staff_name: staffName,
                 row_total: rowTotal,
@@ -366,7 +366,7 @@ const BillingCreation = () => {
         ...form,
         productandservice_details: JSON.stringify(
           rows.map((r) => ({
-            // CHANGED: Rename to productandservice_id and add name/price
+            // Rename to productandservice_id and add name/price
             productandservice_id: r.product_id,
             productandservice_name: r.product_name,
             productandservice_price: r.product_price,
@@ -374,7 +374,7 @@ const BillingCreation = () => {
             discount: r.discount,
             discount_type: r.discount_type,
             discount_amount: r.discount_amount,
-            // CHANGED: Add staff_name
+            // Add staff_name
             staff_id: r.staff_id,
             staff_name: r.staff_name,
             total: r.row_total,
@@ -508,6 +508,8 @@ const BillingCreation = () => {
                   <th>Discount</th>
                   <th>Service Provider Dropdown</th>
                   <th>Total</th>
+                  {/* NEW: Action column for Delete */}
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -578,6 +580,16 @@ const BillingCreation = () => {
                       />
                     </td>
                     <td>₹{row.row_total.toFixed(2)}</td>
+                    {/* NEW: Delete button for each row */}
+                    <td>
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => removeRow(index)}
+                      >
+                        Delete
+                      </Button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
