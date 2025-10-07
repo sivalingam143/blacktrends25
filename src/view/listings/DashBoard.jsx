@@ -64,7 +64,7 @@ const DashboardReports = () => {
         })
       );
     }
-  }, [dispatch, staffFromDate, staffToDate]);
+  }, [dispatch, staffFromDate, staffToDate, staffSearchText]);
 
   useEffect(() => {
     if (memberFromDate && memberToDate) {
@@ -76,7 +76,7 @@ const DashboardReports = () => {
         })
       );
     }
-  }, [dispatch, memberFromDate, memberToDate]);
+  }, [dispatch, memberFromDate, memberToDate, memberSearchText]);
 
   const handleStaffDateChange = (dates) =>
     setStaffDateRange(dates || [moment().startOf("year"), moment()]);
@@ -131,18 +131,21 @@ const DashboardReports = () => {
       dataIndex: "name",
       key: "name",
       align: "left",
+      sorter: (a, b) => a.name.localeCompare(b.name),
     },
     {
       title: "Phone",
       dataIndex: "phone",
       key: "phone",
       align: "center",
+      sorter: (a, b) => a.phone - b.phone,
     },
     {
       title: "Address",
       dataIndex: "address",
       key: "address",
       align: "left",
+      sorter: (a, b) => (a.address || "").localeCompare(b.address || ""),
       render: (t) => t || "-",
     },
     {
@@ -150,6 +153,7 @@ const DashboardReports = () => {
       dataIndex: "total",
       key: "total",
       align: "right",
+      sorter: (a, b) => a.total - b.total,
       render: (t) => `₹${t || 0}`,
     },
   ];
@@ -168,6 +172,7 @@ const DashboardReports = () => {
       dataIndex: "report_date",
       key: "report_date",
       align: "center",
+      sorter: (a, b) => new Date(b.report_date) - new Date(a.report_date),
       render: (date) => formatDate(date),
     },
     {
@@ -175,24 +180,28 @@ const DashboardReports = () => {
       dataIndex: "member_no",
       key: "member_no",
       align: "center",
+      sorter: (a, b) => a.member_no.localeCompare(b.member_no),
     },
     {
       title: "Name",
       dataIndex: "name",
       key: "name",
       align: "left",
+      sorter: (a, b) => a.name.localeCompare(b.name),
     },
     {
       title: "Phone",
       dataIndex: "phone",
       key: "phone",
       align: "center",
+      sorter: (a, b) => a.phone - b.phone,
     },
     {
       title: "Gold Membership",
       dataIndex: "membership",
       key: "membership",
       align: "center",
+      sorter: (a, b) => a.membership.localeCompare(b.membership),
       render: (m) => (m === "Yes" ? "Yes ✅" : "No ❌"),
     },
     {
@@ -200,6 +209,7 @@ const DashboardReports = () => {
       dataIndex: "total_spending",
       key: "total_spending",
       align: "right",
+      sorter: (a, b) => a.total_spending - b.total_spending,
       render: (t) => `₹${t || 0}`,
     },
   ];
