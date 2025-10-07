@@ -214,20 +214,6 @@ const DashboardReports = () => {
     <div className="dashboard-container" id="main">
       <Tabs defaultActiveKey="staff" className="report-tabs">
         {/* -------- DATE RANGE PICKER SHARED -------- */}
-        <Row gutter={16} style={{ marginBottom: 16 }}>
-          <Col>
-            <Text strong>
-              <CalendarOutlined /> Select Date Range:{" "}
-            </Text>
-          </Col>
-          <Col>
-            <RangePicker
-              value={dateRange}
-              onChange={handleDateChange}
-              format="YYYY-MM-DD"
-            />
-          </Col>
-        </Row>
 
         {/* -------- STAFF REPORT TAB -------- */}
         <TabPane
@@ -247,6 +233,20 @@ const DashboardReports = () => {
                 <Text type="secondary" className="record-count">
                   Total Records: {staff?.length || 0}
                 </Text>
+              </div>
+              <Row>
+                <Col></Col>
+                <Col></Col>
+              </Row>
+              <div>
+                <Text strong>
+                  <CalendarOutlined /> Select Date Range:
+                </Text>
+                <RangePicker
+                  value={dateRange}
+                  onChange={handleDateChange}
+                  format="DD-MM-YYYY"
+                />
               </div>
               <Input
                 placeholder="Search staff by name..."
