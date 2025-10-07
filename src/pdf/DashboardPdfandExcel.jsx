@@ -34,7 +34,8 @@ export const downloadStaffPDF = (staff, staffFromDate, staffToDate) => {
     14,
     30
   );
-  const tableData = staff.map((row) => [
+  const tableData = staff.map((row, index) => [
+    index + 1,
     formatDate(row.report_date),
     row.name,
     row.phone,
@@ -42,7 +43,7 @@ export const downloadStaffPDF = (staff, staffFromDate, staffToDate) => {
     row.total || 0,
   ]);
   autoTable(doc, {
-    head: [["Date", "Name", "Phone", "Address", "Total"]],
+    head: [["S.No", "Date", "Name", "Phone", "Address", "Total"]],
     body: tableData,
     startY: 40,
   });
@@ -83,7 +84,8 @@ export const downloadMemberPDF = (member, memberFromDate, memberToDate) => {
     14,
     30
   );
-  const tableData = member.map((row) => [
+  const tableData = member.map((row, index) => [
+    index + 1,
     formatDate(row.report_date),
     row.member_no,
     row.name,
@@ -94,6 +96,7 @@ export const downloadMemberPDF = (member, memberFromDate, memberToDate) => {
   autoTable(doc, {
     head: [
       [
+        "S.No",
         "Date",
         "Member No",
         "Name",
