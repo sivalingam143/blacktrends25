@@ -520,7 +520,7 @@ const BillingCreation = () => {
               <Select
                 options={phoneOptions}
                 isSearchable={true}
-                placeholder="Type to search existing phone"
+                placeholder="phone"
                 value={phoneValue}
                 onChange={handleMemberChange}
                 className="flex-grow-1"

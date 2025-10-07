@@ -288,7 +288,7 @@ const DashboardReports = () => {
                 </Text>
               </div>
               <Row gutter={[12, 12]} justify="end">
-                <Col xs={24} sm={12} md={10} lg={4}>
+                <Col xs={24} sm={12} md={10} lg={6}>
                   <Text strong>
                     <CalendarOutlined /> Date Range:
                   </Text>
@@ -362,7 +362,7 @@ const DashboardReports = () => {
                 </Text>
               </div>
               <Row gutter={[12, 12]} justify="end">
-                <Col xs={24} sm={12} md={10} lg={4}>
+                <Col xs={24} sm={12} md={10} lg={6}>
                   <Text strong>
                     <CalendarOutlined /> Date Range:
                   </Text>
