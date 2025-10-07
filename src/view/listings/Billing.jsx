@@ -12,6 +12,7 @@ import PageTitle from "../../components/PageTitle";
 import NotifyData from "../../components/NotifyData";
 import TableUI from "../../components/TableUI";
 import { fetchBillings, deleteBilling } from "../../slice/BillingSlice";
+import moment from "moment";
 
 const Billing = () => {
   const dispatch = useDispatch();
@@ -24,6 +25,11 @@ const Billing = () => {
 
   const handleCreate = () => navigate("/billing/create");
   const handleEdit = (item) => navigate(`/billing/edit/${item.billing_id}`);
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    return moment(dateString, "YYYY-MM-DD").format("DD-MM-YYYY");
+  };
 
   const handleDelete = async (id) => {
     try {
@@ -194,7 +200,7 @@ const Billing = () => {
     key: item.billing_id,
     values: [
       idx + 1,
-      item.billing_date.split(" ")[0],
+      formatDate(item.billing_date.split(" ")[0]),
       item.member_no,
       item.name,
       `₹ ${parseFloat(item.total).toFixed(2)}`,
