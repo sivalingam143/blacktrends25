@@ -19,6 +19,7 @@ import {
   CalendarOutlined,
 } from "@ant-design/icons";
 import "./Dashboard.css";
+
 const { TabPane } = Tabs;
 const { Text } = Typography;
 const { RangePicker } = DatePicker;
@@ -27,10 +28,14 @@ const DashboardReports = () => {
   const dispatch = useDispatch();
   const [staffSearchText, setStaffSearchText] = useState("");
   const [memberSearchText, setMemberSearchText] = useState("");
-  const [dateRange, setDateRange] = useState([
+  const [staffDateRange, setStaffDateRange] = useState([
     moment().startOf("year"),
     moment(),
-  ]); // Default to start of year to today
+  ]);
+  const [memberDateRange, setMemberDateRange] = useState([
+    moment().startOf("year"),
+    moment(),
+  ]);
 
   const {
     staffReport: staff,
@@ -39,45 +44,76 @@ const DashboardReports = () => {
     error,
   } = useSelector((state) => state.billing);
 
-  const fromDate = dateRange[0] ? dateRange[0].format("YYYY-MM-DD") : "";
-  const toDate = dateRange[1] ? dateRange[1].format("YYYY-MM-DD") : "";
+  // STAFF
+  const staffFromDate = staffDateRange[0]?.format("YYYY-MM-DD") || "";
+  const staffToDate = staffDateRange[1]?.format("YYYY-MM-DD") || "";
 
+  // MEMBER
+  const memberFromDate = memberDateRange[0]?.format("YYYY-MM-DD") || "";
+  const memberToDate = memberDateRange[1]?.format("YYYY-MM-DD") || "";
+
+  // Fetch reports
   useEffect(() => {
-    if (fromDate && toDate) {
+    if (staffFromDate && staffToDate) {
       dispatch(
-        fetchStaffReport({ fromDate, toDate, searchText: staffSearchText })
-      );
-      dispatch(
-        fetchMemberReport({ fromDate, toDate, searchText: memberSearchText })
+        fetchStaffReport({
+          fromDate: staffFromDate,
+          toDate: staffToDate,
+          searchText: staffSearchText,
+        })
       );
     }
-  }, [dispatch, fromDate, toDate]);
+  }, [dispatch, staffFromDate, staffToDate]);
 
-  const handleDateChange = (dates) => {
-    setDateRange(dates || [moment().startOf("year"), moment()]);
-  };
+  useEffect(() => {
+    if (memberFromDate && memberToDate) {
+      dispatch(
+        fetchMemberReport({
+          fromDate: memberFromDate,
+          toDate: memberToDate,
+          searchText: memberSearchText,
+        })
+      );
+    }
+  }, [dispatch, memberFromDate, memberToDate]);
+
+  const handleStaffDateChange = (dates) =>
+    setStaffDateRange(dates || [moment().startOf("year"), moment()]);
+  const handleMemberDateChange = (dates) =>
+    setMemberDateRange(dates || [moment().startOf("year"), moment()]);
 
   const handleStaffSearchChange = (value) => {
     setStaffSearchText(value);
-    if (fromDate && toDate) {
-      dispatch(fetchStaffReport({ fromDate, toDate, searchText: value }));
+    if (staffFromDate && staffToDate) {
+      dispatch(
+        fetchStaffReport({
+          fromDate: staffFromDate,
+          toDate: staffToDate,
+          searchText: value,
+        })
+      );
     }
   };
 
   const handleMemberSearchChange = (value) => {
     setMemberSearchText(value);
-    if (fromDate && toDate) {
-      dispatch(fetchMemberReport({ fromDate, toDate, searchText: value }));
+    if (memberFromDate && memberToDate) {
+      dispatch(
+        fetchMemberReport({
+          fromDate: memberFromDate,
+          toDate: memberToDate,
+          searchText: value,
+        })
+      );
     }
   };
 
-  // Table columns with alignment and sorting
   const staffColumns = [
     {
       title: "S.No",
       dataIndex: "index",
       key: "index",
-      width: 80,
+      width: 70,
       align: "center",
       render: (_, __, i) => i + 1,
     },
@@ -85,7 +121,6 @@ const DashboardReports = () => {
       title: "Date",
       dataIndex: "report_date",
       key: "report_date",
-      width: 120,
       align: "center",
       sorter: (a, b) => new Date(b.report_date) - new Date(a.report_date),
     },
@@ -93,23 +128,18 @@ const DashboardReports = () => {
       title: "Name",
       dataIndex: "name",
       key: "name",
-      ellipsis: true,
       align: "left",
-      sorter: (a, b) => a.name.toString().localeCompare(b.name.toString()),
     },
     {
       title: "Phone",
       dataIndex: "phone",
       key: "phone",
-      width: 120,
       align: "center",
-      sorter: (a, b) => a.phone.toString().localeCompare(b.phone.toString()),
     },
     {
       title: "Address",
       dataIndex: "address",
       key: "address",
-      ellipsis: true,
       align: "left",
       render: (t) => t || "-",
     },
@@ -117,9 +147,7 @@ const DashboardReports = () => {
       title: "Total",
       dataIndex: "total",
       key: "total",
-      ellipsis: true,
       align: "right",
-      sorter: (a, b) => a.total - b.total,
       render: (t) => `₹${t || 0}`,
     },
   ];
@@ -129,7 +157,7 @@ const DashboardReports = () => {
       title: "S.No",
       dataIndex: "index",
       key: "index",
-      width: 80,
+      width: 70,
       align: "center",
       render: (_, __, i) => i + 1,
     },
@@ -137,75 +165,38 @@ const DashboardReports = () => {
       title: "Date",
       dataIndex: "report_date",
       key: "report_date",
-      width: 120,
       align: "center",
-      sorter: (a, b) => new Date(b.report_date) - new Date(a.report_date),
     },
     {
       title: "Member No",
       dataIndex: "member_no",
       key: "member_no",
-      width: 120,
       align: "center",
     },
     {
       title: "Name",
       dataIndex: "name",
       key: "name",
-      ellipsis: true,
       align: "left",
-      sorter: (a, b) => a.name.toString().localeCompare(b.name.toString()),
     },
     {
       title: "Phone",
       dataIndex: "phone",
       key: "phone",
-      width: 120,
       align: "center",
-      sorter: (a, b) => a.phone.toString().localeCompare(b.phone.toString()),
     },
     {
       title: "Gold Membership",
       dataIndex: "membership",
       key: "membership",
-      width: 150,
       align: "center",
-      sorter: (a, b) =>
-        a.membership.toString().localeCompare(b.membership.toString()),
       render: (m) => (m === "Yes" ? "Yes ✅" : "No ❌"),
-    },
-    {
-      title: "Last Visit Date",
-      dataIndex: "last_visit_date",
-      key: "last_visit_date",
-      ellipsis: true,
-      align: "left",
-      render: (t) => t || "-",
-    },
-    {
-      title: "Visit Count",
-      dataIndex: "total_visit_count",
-      key: "total_visit_count",
-      ellipsis: true,
-      align: "center",
-      render: (t) => t || "-",
     },
     {
       title: "Total Spending",
       dataIndex: "total_spending",
       key: "total_spending",
-      ellipsis: true,
       align: "right",
-      sorter: (a, b) => a.total_spending - b.total_spending,
-      render: (t) => `₹${t || 0}`,
-    },
-    {
-      title: "Daily Total",
-      dataIndex: "daily_total",
-      key: "daily_total",
-      ellipsis: true,
-      align: "right",
-      sorter: (a, b) => a.daily_total - b.daily_total,
       render: (t) => `₹${t || 0}`,
     },
   ];
@@ -213,9 +204,7 @@ const DashboardReports = () => {
   return (
     <div className="dashboard-container" id="main">
       <Tabs defaultActiveKey="staff" className="report-tabs">
-        {/* -------- DATE RANGE PICKER SHARED -------- */}
-
-        {/* -------- STAFF REPORT TAB -------- */}
+        {/* STAFF TAB */}
         <TabPane
           tab={
             <span>
@@ -227,62 +216,51 @@ const DashboardReports = () => {
           <Card className="report-card">
             <div className="report-header">
               <div className="header-left">
-                <h3 className="m-0">
-                  <UserOutlined /> Staff Report ({fromDate} to {toDate})
+                <h3>
+                  <UserOutlined /> Staff Report ({staffFromDate} to{" "}
+                  {staffToDate})
                 </h3>
-                <Text type="secondary" className="record-count">
+                <Text type="secondary">
                   Total Records: {staff?.length || 0}
                 </Text>
               </div>
-              <Row>
-                <Col></Col>
-                <Col></Col>
+              <Row gutter={[12, 12]}>
+                <Col xs={24} sm={12} md={10} lg={4}>
+                  <Text strong>
+                    <CalendarOutlined /> Date Range:
+                  </Text>
+                  <RangePicker
+                    value={staffDateRange}
+                    onChange={handleStaffDateChange}
+                    format="DD-MM-YYYY"
+                    style={{ width: "100%", marginTop: 4 }}
+                  />
+                </Col>
+                <Col xs={24} sm={12} md={8} lg={6} className="py-4">
+                  <Input
+                    placeholder="Search staff..."
+                    prefix={<SearchOutlined />}
+                    allowClear
+                    value={staffSearchText}
+                    onChange={(e) => handleStaffSearchChange(e.target.value)}
+                  />
+                </Col>
               </Row>
-              <div>
-                <Text strong>
-                  <CalendarOutlined /> Select Date Range:
-                </Text>
-                <RangePicker
-                  value={dateRange}
-                  onChange={handleDateChange}
-                  format="DD-MM-YYYY"
-                />
-              </div>
-              <Input
-                placeholder="Search staff by name..."
-                prefix={<SearchOutlined />}
-                allowClear
-                style={{ width: 300 }}
-                value={staffSearchText}
-                onChange={(e) => handleStaffSearchChange(e.target.value)}
-              />
             </div>
-            {status === "loading" ? (
-              <p className="text-center py-3">Loading...</p>
-            ) : status === "failed" ? (
-              <p className="text-center text-danger py-3">
-                {error || "Error loading staff report"}
-              </p>
-            ) : !fromDate || !toDate ? (
-              <p className="text-center py-3">
-                Please select a date range to view reports.
-              </p>
-            ) : (
-              <Table
-                columns={staffColumns}
-                dataSource={staff}
-                rowKey={(record) => `${record.report_date}_${record.name}`}
-                pagination={false}
-                bordered
-                className="professional-table"
-                scroll={{ x: 800 }}
-                size="middle"
-              />
-            )}
+            <Table
+              columns={staffColumns}
+              dataSource={staff}
+              rowKey={(r) => `${r.report_date}_${r.name}`}
+              pagination={false}
+              bordered
+              scroll={{ x: 800 }}
+              size="middle"
+              className="professional-table"
+            />
           </Card>
         </TabPane>
 
-        {/* -------- MEMBER REPORT TAB -------- */}
+        {/* MEMBER TAB */}
         <TabPane
           tab={
             <span>
@@ -294,44 +272,47 @@ const DashboardReports = () => {
           <Card className="report-card">
             <div className="report-header">
               <div className="header-left">
-                <h3 className="m-0">
-                  <TeamOutlined /> Member Report ({fromDate} to {toDate})
+                <h3>
+                  <TeamOutlined /> Member Report ({memberFromDate} to{" "}
+                  {memberToDate})
                 </h3>
-                <Text type="secondary" className="record-count">
+                <Text type="secondary">
                   Total Records: {member?.length || 0}
                 </Text>
               </div>
-              <Input
-                placeholder="Search members by name, phone..."
-                prefix={<SearchOutlined />}
-                allowClear
-                style={{ width: 300 }}
-                value={memberSearchText}
-                onChange={(e) => handleMemberSearchChange(e.target.value)}
-              />
+              <Row gutter={[12, 12]}>
+                <Col xs={24} sm={12} md={10} lg={4}>
+                  <Text strong>
+                    <CalendarOutlined /> Date Range:
+                  </Text>
+                  <RangePicker
+                    value={memberDateRange}
+                    onChange={handleMemberDateChange}
+                    format="DD-MM-YYYY"
+                    style={{ width: "100%", marginTop: 4 }}
+                  />
+                </Col>
+                <Col xs={24} sm={12} md={8} lg={6} className="py-4">
+                  <Input
+                    placeholder="Search members..."
+                    prefix={<SearchOutlined />}
+                    allowClear
+                    value={memberSearchText}
+                    onChange={(e) => handleMemberSearchChange(e.target.value)}
+                  />
+                </Col>
+              </Row>
             </div>
-            {status === "loading" ? (
-              <p className="text-center py-3">Loading...</p>
-            ) : status === "failed" ? (
-              <p className="text-center text-danger py-3">
-                {error || "Error loading member report"}
-              </p>
-            ) : !fromDate || !toDate ? (
-              <p className="text-center py-3">
-                Please select a date range to view reports.
-              </p>
-            ) : (
-              <Table
-                columns={memberColumns}
-                dataSource={member}
-                rowKey={(record) => `${record.report_date}_${record.member_id}`}
-                pagination={false}
-                bordered
-                className="professional-table"
-                scroll={{ x: 1200 }}
-                size="middle"
-              />
-            )}
+            <Table
+              columns={memberColumns}
+              dataSource={member}
+              rowKey={(r) => `${r.report_date}_${r.member_no}`}
+              pagination={false}
+              bordered
+              scroll={{ x: 1000 }}
+              size="middle"
+              className="professional-table"
+            />
           </Card>
         </TabPane>
       </Tabs>
