@@ -139,7 +139,7 @@ const Billing = () => {
 
       totalQty += qty;
 
-      doc.text(`${i + 1}. ${name}`, 3, y);
+      doc.text(name, 3, y);
       doc.text(staff, 22, y);
       doc.text(rate, 30, y);
       doc.text(dis, 38, y);
