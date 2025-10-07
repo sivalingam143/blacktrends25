@@ -98,7 +98,7 @@ const Billing = () => {
       y += 3;
     };
 
-    addDetail("Invoice No", item.id || "-");
+    addDetail("Invoice No", item.member_no || "-");
     addDetail("Date", item.billing_date.split(" ")[0]);
     addDetail("Customer", item.name || "-");
     addDetail("Mobile", item.phone || "-");
