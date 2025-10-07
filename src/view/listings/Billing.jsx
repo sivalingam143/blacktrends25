@@ -55,10 +55,10 @@ const Billing = () => {
     // 🔹 HEADER
     doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
-    doc.text("Naagarigam", 29, y, { align: "center" });
+    doc.text("Black Trends", 29, y, { align: "center" });
     y += 4;
     doc.setFontSize(8);
-    doc.text("Family & Skin Clinic", 29, y, { align: "center" });
+    doc.text("Hair & Skin", 29, y, { align: "center" });
     y += 3;
     doc.setFont("helvetica", "normal");
     doc.setFontSize(6);
