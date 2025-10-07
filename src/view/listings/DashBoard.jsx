@@ -54,6 +54,16 @@ const DashboardReports = () => {
     error,
   } = useSelector((state) => state.billing);
 
+  // Calculate totals
+  const staffTotal = staff.reduce(
+    (sum, item) => sum + (parseFloat(item.total) || 0),
+    0
+  );
+  const memberTotal = member.reduce(
+    (sum, item) => sum + (parseFloat(item.total_spending) || 0),
+    0
+  );
+
   // STAFF
   const staffFromDate = staffDateRange[0]?.format("YYYY-MM-DD") || "";
   const staffToDate = staffDateRange[1]?.format("YYYY-MM-DD") || "";
@@ -240,6 +250,20 @@ const DashboardReports = () => {
     },
   ];
 
+  const tableFooter = (total, label = "Overall Total") => (
+    <div
+      style={{
+        textAlign: "right",
+        padding: "8px",
+        fontWeight: "bold",
+        borderTop: "1px solid #d9d9d9",
+        backgroundColor: "#f9f9f9",
+      }}
+    >
+      {label}: ₹{total.toLocaleString("en-IN")}
+    </div>
+  );
+
   return (
     <div className="dashboard-container" id="main">
       <Tabs defaultActiveKey="staff" className="report-tabs">
@@ -312,6 +336,7 @@ const DashboardReports = () => {
               scroll={{ x: 800 }}
               size="middle"
               className="professional-table"
+              footer={() => tableFooter(staffTotal)}
             />
           </Card>
         </TabPane>
@@ -385,6 +410,7 @@ const DashboardReports = () => {
               scroll={{ x: 1000 }}
               size="middle"
               className="professional-table"
+              footer={() => tableFooter(memberTotal, "Overall Total Spending")}
             />
           </Card>
         </TabPane>

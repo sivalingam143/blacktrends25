@@ -10,6 +10,10 @@ export const downloadStaffExcel = (
   staffToDate,
   staffColumns
 ) => {
+  const staffTotal = staff.reduce(
+    (acc, row) => acc + (parseFloat(row.total) || 0),
+    0
+  );
   const headers = staffColumns.map((col) => col.title);
   const data = staff.map((row, index) => [
     index + 1, // S.No
@@ -20,13 +24,26 @@ export const downloadStaffExcel = (
       return row[col.dataIndex] || "-";
     }),
   ]);
+  data.push([
+    "",
+    "",
+    "",
+    "",
+    "Overall Total",
+    `₹${staffTotal.toLocaleString("en-IN")}`,
+  ]);
   const ws = XLSX.utils.aoa_to_sheet([headers, ...data]);
   const wb = XLSX.utils.book_new();
+
   XLSX.utils.book_append_sheet(wb, ws, "Staff Report");
   XLSX.writeFile(wb, `Staff_Report_${staffFromDate}_to_${staffToDate}.xlsx`);
 };
 
 export const downloadStaffPDF = (staff, staffFromDate, staffToDate) => {
+  const staffTotal = staff.reduce(
+    (acc, row) => acc + (parseFloat(row.total) || 0),
+    0
+  );
   const doc = new jsPDF();
   doc.text("Staff Report", 14, 20);
   doc.text(
@@ -40,7 +57,15 @@ export const downloadStaffPDF = (staff, staffFromDate, staffToDate) => {
     row.name,
     row.phone,
     row.address || "-",
-    row.total || 0,
+    `Rs. ${row.total || 0}`,
+  ]);
+  tableData.push([
+    "",
+    "",
+    "",
+    "",
+    "Overall Total",
+    `Rs. ${staffTotal.toLocaleString("en-IN")}`,
   ]);
   autoTable(doc, {
     head: [["S.No", "Date", "Name", "Phone", "Address", "Total"]],
@@ -57,6 +82,10 @@ export const downloadMemberExcel = (
   memberToDate,
   memberColumns
 ) => {
+  const memberTotal = member.reduce(
+    (acc, row) => acc + (parseFloat(row.total_spending) || 0),
+    0
+  );
   const headers = memberColumns.map((col) => col.title);
   const data = member.map((row, index) => [
     index + 1, // S.No
@@ -70,6 +99,15 @@ export const downloadMemberExcel = (
       return row[col.dataIndex] || "-";
     }),
   ]);
+  data.push([
+    "",
+    "",
+    "",
+    "",
+    "",
+    "Overall Total",
+    `₹${memberTotal.toLocaleString("en-IN")}`,
+  ]);
   const ws = XLSX.utils.aoa_to_sheet([headers, ...data]);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Member Report");
@@ -77,6 +115,10 @@ export const downloadMemberExcel = (
 };
 
 export const downloadMemberPDF = (member, memberFromDate, memberToDate) => {
+  const memberTotal = member.reduce(
+    (acc, row) => acc + (parseFloat(row.total_spending) || 0),
+    0
+  );
   const doc = new jsPDF();
   doc.text("Member Report", 14, 20);
   doc.text(
@@ -91,7 +133,16 @@ export const downloadMemberPDF = (member, memberFromDate, memberToDate) => {
     row.name,
     row.phone,
     row.membership === "Yes" ? "Yes" : "No",
-    row.total_spending || 0,
+    `Rs. ${row.total_spending || 0}`,
+  ]);
+  tableData.push([
+    "",
+    "",
+    "",
+    "",
+    "",
+    "Overall Total",
+    `Rs. ${memberTotal.toLocaleString("en-IN")}`,
   ]);
   autoTable(doc, {
     head: [
