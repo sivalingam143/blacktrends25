@@ -125,7 +125,7 @@ const Billing = () => {
     // 🔹 ITEM DETAILS (NO line per item)
     doc.setFont("helvetica", "normal");
     doc.setFontSize(5.5);
-    let totalQty = 0;
+    let totalQty = details.length; // Count of products instead of sum of quantities
 
     details.forEach((d, i) => {
       if (y > 160) return; // stop if height exceeded
@@ -133,11 +133,9 @@ const Billing = () => {
       const name = String(d.productandservice_name || "-").substring(0, 15);
       const staff = String(d.staff_name || "-").substring(0, 6);
       const rate = parseFloat(d.productandservice_price || 0).toFixed(0);
-      const dis = `${d.discount || 0}${d.discount_type === "PER" ? "%" : ""}`;
+      const dis = parseFloat(d.discount_amount || 0).toFixed(0);
       const qty = parseFloat(d.qty || 1);
       const total = parseFloat(d.total || 0).toFixed(0);
-
-      totalQty += qty;
 
       doc.text(name, 3, y);
       doc.text(staff, 22, y);
