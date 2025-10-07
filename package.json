@@ -2,7 +2,7 @@
   "name": "blacktrends",
   "version": "0.1.0",
   "private": true,
-  "proxy": "https://blacktrends.zentexus.com",
+  "proxy": "https://blacktrends.zentexus.in",
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
