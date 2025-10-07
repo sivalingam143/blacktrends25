@@ -11,14 +11,15 @@ export const downloadStaffExcel = (
   staffColumns
 ) => {
   const headers = staffColumns.map((col) => col.title);
-  const data = staff.map((row) =>
-    staffColumns.slice(1).map((col) => {
+  const data = staff.map((row, index) => [
+    index + 1, // S.No
+    ...staffColumns.slice(1).map((col) => {
       if (col.dataIndex === "report_date")
         return formatDate(row[col.dataIndex]);
       if (col.dataIndex === "total") return `₹${row[col.dataIndex] || 0}`;
       return row[col.dataIndex] || "-";
-    })
-  );
+    }),
+  ]);
   const ws = XLSX.utils.aoa_to_sheet([headers, ...data]);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Staff Report");
@@ -56,8 +57,9 @@ export const downloadMemberExcel = (
   memberColumns
 ) => {
   const headers = memberColumns.map((col) => col.title);
-  const data = member.map((row) =>
-    memberColumns.slice(1).map((col) => {
+  const data = member.map((row, index) => [
+    index + 1, // S.No
+    ...memberColumns.slice(1).map((col) => {
       if (col.dataIndex === "report_date")
         return formatDate(row[col.dataIndex]);
       if (col.dataIndex === "total_spending")
@@ -65,8 +67,8 @@ export const downloadMemberExcel = (
       if (col.dataIndex === "membership")
         return row[col.dataIndex] === "Yes" ? "Yes" : "No";
       return row[col.dataIndex] || "-";
-    })
-  );
+    }),
+  ]);
   const ws = XLSX.utils.aoa_to_sheet([headers, ...data]);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Member Report");
