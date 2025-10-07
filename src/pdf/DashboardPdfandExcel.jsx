@@ -1,8 +1,7 @@
-// DashboardPdfandExcel.js
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { formatDate } from "../components/Forms"; // Adjust path as needed
+import { formatDate } from "../components/Forms";
 
 // Export functions for Staff
 export const downloadStaffExcel = (
@@ -39,7 +38,7 @@ export const downloadStaffPDF = (staff, staffFromDate, staffToDate) => {
     row.name,
     row.phone,
     row.address || "-",
-    `₹${row.total || 0}`,
+    row.total || 0,
   ]);
   autoTable(doc, {
     head: [["Date", "Name", "Phone", "Address", "Total"]],
@@ -64,7 +63,7 @@ export const downloadMemberExcel = (
       if (col.dataIndex === "total_spending")
         return `₹${row[col.dataIndex] || 0}`;
       if (col.dataIndex === "membership")
-        return row[col.dataIndex] === "Yes" ? "Yes ✅" : "No ❌";
+        return row[col.dataIndex] === "Yes" ? "Yes" : "No";
       return row[col.dataIndex] || "-";
     })
   );
@@ -87,8 +86,8 @@ export const downloadMemberPDF = (member, memberFromDate, memberToDate) => {
     row.member_no,
     row.name,
     row.phone,
-    row.membership === "Yes" ? "Yes ✅" : "No ❌",
-    `₹${row.total_spending || 0}`,
+    row.membership === "Yes" ? "Yes" : "No",
+    row.total_spending || 0,
   ]);
   autoTable(doc, {
     head: [
