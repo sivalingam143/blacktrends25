@@ -188,8 +188,7 @@ const Billing = () => {
     doc.text("PLEASE VISIT AGAIN", 29, y, { align: "center" });
 
     // 🔹 SAVE PDF
-    doc.save(`billing_${item.billing_id}.pdf`);
-    NotifyData("Optimized 58mm PDF Generated!", "success");
+    doc.save(`billing_${item.member_no}.pdf`);
   };
 
   // 🔹 TABLE HEADERS
