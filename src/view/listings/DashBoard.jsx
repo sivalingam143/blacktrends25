@@ -124,6 +124,7 @@ const DashboardReports = () => {
       key: "report_date",
       align: "center",
       sorter: (a, b) => new Date(b.report_date) - new Date(a.report_date),
+      render: (report_date) => formatDate(report_date),
     },
     {
       title: "Name",
