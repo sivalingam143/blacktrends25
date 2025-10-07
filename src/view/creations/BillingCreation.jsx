@@ -38,6 +38,7 @@ const BillingCreation = () => {
 
   const [form, setForm] = useState({
     billing_date: new Date().toISOString().split("T")[0],
+    member_id: "",
     member_no: "",
     name: "",
     phone: "",
@@ -50,10 +51,10 @@ const BillingCreation = () => {
     billing_id: "",
   });
   console.log(form);
-  const [rows, setRows] = useState([]); // Dynamic rows for products/services
+  const [rows, setRows] = useState([]);
   const [subtotal, setSubtotal] = useState(0);
   const [overall_discount, setOverallDiscount] = useState(0);
-  const [discount_type, setDiscountType] = useState("INR"); // INR or PER
+  const [discount_type, setDiscountType] = useState("INR");
   const [grand_total, setGrandTotal] = useState(0);
   const [submitting, setSubmitting] = useState(false);
 
@@ -92,6 +93,7 @@ const BillingCreation = () => {
         // Set basic form
         setForm({
           ...rec,
+          member_id: rec.member_id,
           billing_date: rec.billing_date.split(" ")[0],
           last_visit_date: rec.last_visit_date.split(" ")[0],
           total_visit_count: parseInt(rec.total_visit_count),
@@ -132,7 +134,7 @@ const BillingCreation = () => {
               }
 
               return {
-                product_id: productId, // Keep internal as product_id for consistency
+                product_id: productId,
                 product_name:
                   detail.productandservice_name ||
                   product?.productandservice_name ||
@@ -145,7 +147,6 @@ const BillingCreation = () => {
                 discount: detail.discount,
                 discount_type: detail.discount_type || "INR",
                 discount_amount: discAmount,
-                // Single staff_id and staff_name (prefer saved, else from current)
                 staff_id: staffId || null,
                 staff_name: staffName,
                 row_total: rowTotal,
@@ -206,6 +207,7 @@ const BillingCreation = () => {
         // existing member
         setForm((prev) => ({
           ...prev,
+          member_id: selectedMember.member_id,
           member_no: selectedMember.member_no,
           name: selectedMember.name,
           phone: selectedMember.phone,
@@ -243,6 +245,7 @@ const BillingCreation = () => {
       // cleared
       setForm((prev) => ({
         ...prev,
+        member_id: "",
         member_no: "",
         name: "",
         phone: "",
@@ -302,19 +305,25 @@ const BillingCreation = () => {
       NotifyData(msg, "success");
 
       // Refresh members list
-      dispatch(fetchMembers(""));
+      await dispatch(fetchMembers(""));
 
-      // Auto-populate billing form with new member
-      setForm((prev) => ({
-        ...prev,
-        member_no: "",
-        name: newMemberForm.name,
-        phone: newMemberForm.phone,
-        membership: newMemberForm.membership,
-        last_visit_date: "",
-        total_visit_count: 0,
-        total_spending: 0,
-      }));
+      // Find the newly added member by phone and auto-populate
+      const newMember = member.find((m) => m.phone === newMemberForm.phone);
+      if (newMember) {
+        setForm((prev) => ({
+          ...prev,
+          member_id: newMember.member_id,
+          member_no: newMember.member_no,
+          name: newMemberForm.name,
+          phone: newMemberForm.phone,
+          membership: newMemberForm.membership,
+          last_visit_date: newMember.last_visit_date
+            ? newMember.last_visit_date.split(" ")[0]
+            : "",
+          total_visit_count: newMember.total_visit_count || 0,
+          total_spending: newMember.total_spending || 0,
+        }));
+      }
 
       // Close modal
       setShowNewMemberModal(false);
@@ -418,9 +427,9 @@ const BillingCreation = () => {
     try {
       let billingPayload = {
         ...form,
+        member_id: form.member_id,
         productandservice_details: JSON.stringify(
           rows.map((r) => ({
-            // Rename to productandservice_id and add name/price
             productandservice_id: r.product_id,
             productandservice_name: r.product_name,
             productandservice_price: r.product_price,

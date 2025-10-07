@@ -14,6 +14,7 @@ export const addBillingApi = async (billingData) => {
   const payload = {
     action: "addBilling",
     billing_date: billingData.billing_date,
+    member_id: billingData.member_id,
     member_no: billingData.member_no,
     name: billingData.name,
     phone: billingData.phone,
@@ -38,6 +39,7 @@ export const updateBillingApi = async (billingData) => {
   const payload = {
     action: "updateBilling",
     edit_billing_id: billingData.billing_id,
+    member_id: billingData.member_id,
     billing_date: billingData.billing_date,
     member_no: billingData.member_no,
     name: billingData.name,
@@ -54,6 +56,7 @@ export const updateBillingApi = async (billingData) => {
     updated_by_id: billingData.updated_by_id,
   };
   const { data } = await axiosInstance.post(API_ENDPOINT, payload);
+  console.log(data);
   return data;
 };
 
