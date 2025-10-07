@@ -10,6 +10,7 @@ import {
   DatePicker,
   Row,
   Col,
+  Button,
 } from "antd";
 import { fetchStaffReport, fetchMemberReport } from "../../slice/BillingSlice";
 import {
@@ -17,9 +18,17 @@ import {
   UserOutlined,
   TeamOutlined,
   CalendarOutlined,
+  FileExcelOutlined,
+  FilePdfOutlined,
 } from "@ant-design/icons";
 import "./Dashboard.css";
 import { formatDate } from "../../components/Forms";
+import {
+  downloadStaffExcel,
+  downloadStaffPDF,
+  downloadMemberExcel,
+  downloadMemberPDF,
+} from "../../pdf/DashboardPdfandExcel";
 
 const { TabPane } = Tabs;
 const { Text } = Typography;
@@ -107,6 +116,23 @@ const DashboardReports = () => {
         })
       );
     }
+  };
+
+  // Download handlers
+  const handleStaffExcelDownload = () => {
+    downloadStaffExcel(staff, staffFromDate, staffToDate, staffColumns);
+  };
+
+  const handleStaffPDFDownload = () => {
+    downloadStaffPDF(staff, staffFromDate, staffToDate);
+  };
+
+  const handleMemberExcelDownload = () => {
+    downloadMemberExcel(member, memberFromDate, memberToDate, memberColumns);
+  };
+
+  const handleMemberPDFDownload = () => {
+    downloadMemberPDF(member, memberFromDate, memberToDate);
   };
 
   const staffColumns = [
@@ -258,6 +284,23 @@ const DashboardReports = () => {
                     onChange={(e) => handleStaffSearchChange(e.target.value)}
                   />
                 </Col>
+                <Col xs={24} sm={12} md={6} lg={4} className="py-4">
+                  <Button
+                    type="primary"
+                    icon={<FileExcelOutlined />}
+                    onClick={handleStaffExcelDownload}
+                    style={{ marginRight: 8 }}
+                  >
+                    Excel
+                  </Button>
+                  <Button
+                    type="primary"
+                    icon={<FilePdfOutlined />}
+                    onClick={handleStaffPDFDownload}
+                  >
+                    PDF
+                  </Button>
+                </Col>
               </Row>
             </div>
             <Table
@@ -313,6 +356,23 @@ const DashboardReports = () => {
                     value={memberSearchText}
                     onChange={(e) => handleMemberSearchChange(e.target.value)}
                   />
+                </Col>
+                <Col xs={24} sm={12} md={6} lg={4} className="py-4">
+                  <Button
+                    type="primary"
+                    icon={<FileExcelOutlined />}
+                    onClick={handleMemberExcelDownload}
+                    style={{ marginRight: 8 }}
+                  >
+                    Excel
+                  </Button>
+                  <Button
+                    type="primary"
+                    icon={<FilePdfOutlined />}
+                    onClick={handleMemberPDFDownload}
+                  >
+                    PDF
+                  </Button>
                 </Col>
               </Row>
             </div>
