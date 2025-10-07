@@ -1,6 +1,7 @@
 import Select from "react-select";
 import React from "react";
 import { Form } from "react-bootstrap";
+import moment from "moment";
 
 const DropDown = ({
   textlabel,
@@ -135,4 +136,9 @@ const Calender = ({ setLabel, calenderlabel, initialDate }) => {
   );
 };
 
-export { TextInputform, TextArea, DropDown, CheckBox, Calender };
+const formatDate = (dateString) => {
+  if (!dateString) return "";
+  return moment(dateString, "YYYY-MM-DD").format("DD-MM-YYYY");
+};
+
+export { TextInputform, TextArea, DropDown, CheckBox, formatDate, Calender };

@@ -19,6 +19,7 @@ import {
   CalendarOutlined,
 } from "@ant-design/icons";
 import "./Dashboard.css";
+import { formatDate } from "../../components/Forms";
 
 const { TabPane } = Tabs;
 const { Text } = Typography;
@@ -166,6 +167,7 @@ const DashboardReports = () => {
       dataIndex: "report_date",
       key: "report_date",
       align: "center",
+      render: (date) => formatDate(date),
     },
     {
       title: "Member No",
@@ -224,7 +226,7 @@ const DashboardReports = () => {
                   Total Records: {staff?.length || 0}
                 </Text>
               </div>
-              <Row gutter={[12, 12]}>
+              <Row gutter={[12, 12]} justify="end">
                 <Col xs={24} sm={12} md={10} lg={4}>
                   <Text strong>
                     <CalendarOutlined /> Date Range:
@@ -280,7 +282,7 @@ const DashboardReports = () => {
                   Total Records: {member?.length || 0}
                 </Text>
               </div>
-              <Row gutter={[12, 12]}>
+              <Row gutter={[12, 12]} justify="end">
                 <Col xs={24} sm={12} md={10} lg={4}>
                   <Text strong>
                     <CalendarOutlined /> Date Range:
