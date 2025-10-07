@@ -83,10 +83,10 @@ const Billing = () => {
     doc.line(3, y, 55, y);
     y += 2;
 
-    // 🔹 INVOICE DETAILS (with alignment)
+    // 🔹 INVOICE DETAILS (aligned)
     const leftX = 3;
     const colonX = 20;
-    const valueX = 26;
+    const valueX = 27;
 
     doc.setFont("helvetica", "normal");
     doc.setFontSize(6);
@@ -116,18 +116,20 @@ const Billing = () => {
     doc.text("Rate", 30, y);
     doc.text("Dis", 38, y);
     doc.text("Qty", 44, y);
-    doc.text("Amt", 52, y, { align: "right" });
-    y += 2;
-    doc.line(3, y, 55, y);
+    doc.text("Amt", 55, y, { align: "right" });
     y += 2;
 
-    // 🔹 ITEM DETAILS
+    doc.line(3, y, 55, y); // line below header
+    y += 2;
+
+    // 🔹 ITEM DETAILS (NO line per item)
     doc.setFont("helvetica", "normal");
     doc.setFontSize(5.5);
     let totalQty = 0;
 
     details.forEach((d, i) => {
-      if (y > 160) return; // page limit
+      if (y > 160) return; // stop if height exceeded
+
       const name = String(d.productandservice_name || "-").substring(0, 15);
       const staff = String(d.staff_name || "-").substring(0, 6);
       const rate = parseFloat(d.productandservice_price || 0).toFixed(0);
@@ -144,11 +146,11 @@ const Billing = () => {
       doc.text(String(qty), 44, y);
       doc.text(total, 55, y, { align: "right" });
       y += 3;
-      doc.line(3, y, 55, y);
-      y += 1;
     });
 
-    y += 2;
+    // line below last item
+    doc.line(3, y, 55, y);
+    y += 3;
 
     // 🔹 TOTALS SECTION (aligned)
     const subtotal = parseFloat(item.subtotal || item.total || 0);
@@ -174,6 +176,7 @@ const Billing = () => {
     doc.line(3, y, 55, y);
     y += 3;
 
+    // 🔹 FOOTER
     doc.setFont("helvetica", "bold");
     doc.setFontSize(8);
     doc.text("*** THANK YOU ***", 29, y, { align: "center" });
