@@ -24,9 +24,6 @@ export const addBillingApi = async (billingData) => {
     discount: billingData.discount,
     discount_type: billingData.discount_type,
     total: billingData.total,
-    last_visit_date: billingData.last_visit_date,
-    total_visit_count: billingData.total_visit_count,
-    total_spending: billingData.total_spending,
     membership: billingData.membership,
     created_by_id: userId,
   };
@@ -50,9 +47,6 @@ export const updateBillingApi = async (billingData) => {
     discount: billingData.discount,
     discount_type: billingData.discount_type,
     total: billingData.total,
-    last_visit_date: billingData.last_visit_date,
-    total_visit_count: billingData.total_visit_count,
-    total_spending: billingData.total_spending,
     membership: billingData.membership,
     updated_by_id: userId,
   };

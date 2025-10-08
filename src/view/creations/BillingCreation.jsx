@@ -42,9 +42,6 @@ const BillingCreation = () => {
     member_no: "",
     name: "",
     phone: "",
-    last_visit_date: "",
-    total_visit_count: 0,
-    total_spending: 0,
     membership: "",
     billing_id: "",
   });
@@ -93,9 +90,6 @@ const BillingCreation = () => {
           ...rec,
           member_id: rec.member_id,
           billing_date: rec.billing_date.split(" ")[0],
-          last_visit_date: rec.last_visit_date.split(" ")[0],
-          total_visit_count: parseInt(rec.total_visit_count),
-          total_spending: parseFloat(rec.total_spending),
         });
         setOverallDiscount(parseFloat(rec.discount));
         setDiscountType(rec.discount_type || "INR");
@@ -155,7 +149,6 @@ const BillingCreation = () => {
           }
         }
         setRows(parsedRows);
-
         // If editing and membership is 'Yes', apply 18% default discount to all rows
         if (rec.membership === "Yes") {
           setRows((prevRows) =>
@@ -195,7 +188,7 @@ const BillingCreation = () => {
       }
     : null;
 
-  // Handle member change with membership check for default discount
+  // Handle member change
   const handleMemberChange = (selectedOption) => {
     if (selectedOption) {
       const selectedMember = member.find(
@@ -210,11 +203,6 @@ const BillingCreation = () => {
           name: selectedMember.name,
           phone: selectedMember.phone,
           membership: selectedMember.membership || "",
-          last_visit_date: selectedMember.last_visit_date
-            ? selectedMember.last_visit_date.split(" ")[0]
-            : "",
-          total_visit_count: selectedMember.total_visit_count || 0,
-          total_spending: selectedMember.total_spending || 0,
         }));
 
         // If membership is 'Yes', apply 18% default discount to all existing rows
@@ -248,9 +236,6 @@ const BillingCreation = () => {
         name: "",
         phone: "",
         membership: "",
-        last_visit_date: "",
-        total_visit_count: 0,
-        total_spending: 0,
       }));
     }
   };
@@ -315,11 +300,6 @@ const BillingCreation = () => {
           name: newMemberForm.name,
           phone: newMemberForm.phone,
           membership: newMemberForm.membership,
-          last_visit_date: newMember.last_visit_date
-            ? newMember.last_visit_date.split(" ")[0]
-            : "",
-          total_visit_count: newMember.total_visit_count || 0,
-          total_spending: newMember.total_spending || 0,
         }));
       }
 
@@ -374,7 +354,7 @@ const BillingCreation = () => {
     });
   };
 
-  // Add row with membership check for default discount
+  // Add row
   const addRow = () => {
     const newRow = {
       product_id: "",
@@ -389,7 +369,6 @@ const BillingCreation = () => {
       staff_name: "",
       row_total: 0,
     };
-
     // If membership is 'Yes', set default 18% discount
     if (form.membership === "Yes") {
       newRow.discount = 18;
@@ -447,15 +426,6 @@ const BillingCreation = () => {
         total: grand_total,
       };
 
-      // Update stats
-      const updatedVisitCount =
-        parseInt(billingPayload.total_visit_count || 0) + 1;
-      const updatedSpending =
-        parseFloat(billingPayload.total_spending || 0) + grand_total;
-      billingPayload.last_visit_date = billingPayload.billing_date;
-      billingPayload.total_visit_count = updatedVisitCount;
-      billingPayload.total_spending = updatedSpending;
-
       if (isEdit) {
         billingPayload.billing_id = id;
         const msg = await dispatch(updateBilling(billingPayload)).unwrap();
@@ -489,7 +459,6 @@ const BillingCreation = () => {
     { value: "INR", label: "INR" },
     { value: "PER", label: "%" },
   ];
-
   // New Member Membership Options
   const newMemberMembershipOptions = [
     { value: "No", label: "No" },
@@ -696,19 +665,19 @@ const BillingCreation = () => {
               <Card.Body className="p-2">
                 <div className="mb-2 d-flex justify-content-between align-items-center">
                   <strong>Last Visit Date</strong>
-                  <span>{formatDate(form.last_visit_date)}</span>
+                  <span>Null</span>
                 </div>
                 <div className="mb-2 d-flex justify-content-between align-items-center">
                   <strong>Total Visit Count</strong>
-                  <span>{form.total_visit_count || 0}</span>
+                  <span>0</span>
                 </div>
                 <div className="mb-2 d-flex justify-content-between align-items-center">
                   <strong>Total Spending</strong>
-                  <span>₹{(form.total_spending || 0).toFixed(2)}</span>
+                  <span>0</span>
                 </div>
                 <div className="d-flex justify-content-between align-items-center">
                   <strong>Membership</strong>
-                  <span>{form.membership || "-"}</span>
+                  <span>Null</span>
                 </div>
               </Card.Body>
             </Card>
