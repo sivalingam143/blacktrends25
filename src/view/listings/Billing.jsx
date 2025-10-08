@@ -12,15 +12,18 @@ import PageTitle from "../../components/PageTitle";
 import NotifyData from "../../components/NotifyData";
 import TableUI from "../../components/TableUI";
 import { fetchBillings, deleteBilling } from "../../slice/BillingSlice";
+import { fetchCompanies } from "../../slice/CompanySlice";
 import moment from "moment";
 
 const Billing = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { billing } = useSelector((s) => s.billing);
+  const companies = useSelector((s) => s.company.company);
 
   useEffect(() => {
     dispatch(fetchBillings(""));
+    dispatch(fetchCompanies(""));
   }, [dispatch]);
 
   const handleCreate = () => navigate("/billing/create");
@@ -51,6 +54,7 @@ const Billing = () => {
       console.error("Error parsing details:", e);
     }
 
+    const companyDetails = companies[0] || {};
     const doc = new jsPDF({
       unit: "mm",
       format: [58, 200], // 58mm width, dynamic height
@@ -61,20 +65,24 @@ const Billing = () => {
     // 🔹 HEADER
     doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
-    doc.text("Black Trends", 29, y, { align: "center" });
+    doc.text(companyDetails.company_name || "Company Name", 29, y, {
+      align: "center",
+    });
     y += 4;
     doc.setFontSize(8);
-    doc.text("Hair & Skin", 29, y, { align: "center" });
+    doc.text("Hair & Skin", 29, y, { align: "center" }); // Retained as business subtitle; adjust if dynamic field available
     y += 3;
     doc.setFont("helvetica", "normal");
     doc.setFontSize(6);
-    doc.text("105/6, Kacheeri Road,", 29, y, { align: "center" });
+    doc.text(companyDetails.address || "Address", 29, y, { align: "center" });
     y += 2.5;
-    doc.text("Virudhunagar - 626001", 29, y, { align: "center" });
+    doc.text(`Ph: ${companyDetails.contact_number || "Phone Number"}`, 29, y, {
+      align: "center",
+    });
     y += 2.5;
-    doc.text("Ph: 8300816120 / 962515524", 29, y, { align: "center" });
-    y += 2.5;
-    doc.text("GST: 33CXPS384C2Z0", 29, y, { align: "center" });
+    doc.text(`GST: ${companyDetails.gst_no || "GST No"}`, 29, y, {
+      align: "center",
+    });
     y += 3;
 
     // Separator
@@ -218,7 +226,7 @@ const Billing = () => {
           {
             label: "Delete",
             icon: <MdOutlineDelete />,
-            onClick: () => handleDelete(item.id),
+            onClick: () => handleDelete(item.billing_id), // Fixed: Use billing_id instead of id
           },
         ]}
         label={<HiOutlineDotsVertical />}

@@ -30,7 +30,7 @@ export const addBillingApi = async (billingData) => {
     created_by_id: billingData.created_by_id,
   };
   const { data } = await axiosInstance.post(API_ENDPOINT, payload);
-
+  console.log(data);
   return data;
 };
 

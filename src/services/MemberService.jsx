@@ -17,6 +17,7 @@ export const addMemberApi = async (memberData) => {
     membership: memberData.membership,
   };
   const { data } = await axiosInstance.post(API_ENDPOINT, payload);
+  console.log(data);
   return data;
 };
 
