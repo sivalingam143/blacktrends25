@@ -242,10 +242,10 @@ const DashboardReports = () => {
     },
     {
       title: "Total Spending",
-      dataIndex: "total_spending",
-      key: "total_spending",
+      dataIndex: "total",
+      key: "total",
       align: "right",
-      sorter: (a, b) => a.total_spending - b.total_spending,
+      sorter: (a, b) => a.total - b.total,
       render: (t) => `₹${t || 0}`,
     },
   ];
