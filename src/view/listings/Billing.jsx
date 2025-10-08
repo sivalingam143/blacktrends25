@@ -57,7 +57,7 @@ const Billing = () => {
     const companyDetails = companies[0] || {};
     const doc = new jsPDF({
       unit: "mm",
-      format: [58, 200], // 58mm width, dynamic height
+      format: [58, 200],
     });
 
     let y = 5;
@@ -70,7 +70,7 @@ const Billing = () => {
     });
     y += 4;
     doc.setFontSize(8);
-    doc.text("Hair & Skin", 29, y, { align: "center" }); // Retained as business subtitle; adjust if dynamic field available
+    doc.text("Hair & Skin", 29, y, { align: "center" });
     y += 3;
     doc.setFont("helvetica", "normal");
     doc.setFontSize(6);
