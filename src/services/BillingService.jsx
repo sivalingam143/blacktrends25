@@ -1,5 +1,6 @@
 import axiosInstance from "../config/API";
 const API_ENDPOINT = "/billing.php";
+const userId = sessionStorage.getItem("userid");
 
 /* ---------- LIST ---------- */
 export const fetchBillingsApi = async (searchText = "") => {
@@ -27,7 +28,7 @@ export const addBillingApi = async (billingData) => {
     total_visit_count: billingData.total_visit_count,
     total_spending: billingData.total_spending,
     membership: billingData.membership,
-    created_by_id: billingData.created_by_id,
+    created_by_id: userId,
   };
   const { data } = await axiosInstance.post(API_ENDPOINT, payload);
   console.log(data);
@@ -53,7 +54,7 @@ export const updateBillingApi = async (billingData) => {
     total_visit_count: billingData.total_visit_count,
     total_spending: billingData.total_spending,
     membership: billingData.membership,
-    updated_by_id: billingData.updated_by_id,
+    updated_by_id: userId,
   };
   const { data } = await axiosInstance.post(API_ENDPOINT, payload);
   console.log(data);
@@ -65,7 +66,7 @@ export const deleteBillingApi = async (billingId) => {
   const payload = {
     action: "deleteBilling",
     delete_billing_id: billingId,
-    delete_by_id: 1,
+    delete_by_id: userId,
   };
   const { data } = await axiosInstance.post(API_ENDPOINT, payload);
   return data;

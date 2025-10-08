@@ -46,8 +46,6 @@ const BillingCreation = () => {
     total_visit_count: 0,
     total_spending: 0,
     membership: "",
-    created_by_id: 1,
-    updated_by_id: 1,
     billing_id: "",
   });
   console.log(form);
@@ -459,12 +457,10 @@ const BillingCreation = () => {
       billingPayload.total_spending = updatedSpending;
 
       if (isEdit) {
-        billingPayload.edit_billing_id = id;
-        billingPayload.updated_by_id = 1;
+        billingPayload.billing_id = id;
         const msg = await dispatch(updateBilling(billingPayload)).unwrap();
         NotifyData(msg, "success");
       } else {
-        billingPayload.created_by_id = 1;
         const msg = await dispatch(addBilling(billingPayload)).unwrap();
         NotifyData(msg, "success");
       }
