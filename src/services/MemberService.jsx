@@ -5,6 +5,7 @@ const API_ENDPOINT = "/member.php";
 export const fetchMembersApi = async (searchText = "") => {
   const payload = { action: "listMember", search_text: searchText };
   const { data } = await axiosInstance.post(API_ENDPOINT, payload);
+  console.log(data);
   return data.body || { member: [] };
 };
 
