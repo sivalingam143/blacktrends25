@@ -226,7 +226,7 @@ const Billing = () => {
           {
             label: "Delete",
             icon: <MdOutlineDelete />,
-            onClick: () => handleDelete(item.billing_id), // Fixed: Use billing_id instead of id
+            onClick: () => handleDelete(item.id),
           },
         ]}
         label={<HiOutlineDotsVertical />}
