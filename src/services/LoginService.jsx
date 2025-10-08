@@ -18,6 +18,7 @@ const loginUser = createAsyncThunk(
         console.log(response.data.body.name);
         // Successful login
         sessionStorage.setItem("username", response.data.body.name);
+        sessionStorage.setItem("userid", response.data.body.user_id);
         return response?.data?.body?.user || {};
       } else {
         return thunkAPI.rejectWithValue(
@@ -33,6 +34,7 @@ const loginUser = createAsyncThunk(
 
 const logoutUser = createAsyncThunk("auth/logoutUser", async (_, thunkAPI) => {
   sessionStorage.removeItem("username");
+  sessionStorage.removeItem("userid");
   return {};
 });
 
