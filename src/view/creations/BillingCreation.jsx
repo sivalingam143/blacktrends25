@@ -659,29 +659,48 @@ const BillingCreation = () => {
           </Col>
 
           {/* Right: Stats Container - Compact for 3 Fields */}
-          <Col md={4}>
-            <Card className="h-100">
-              <Card.Header>Member Status</Card.Header>
-              <Card.Body className="p-2">
-                <div className="mb-2 d-flex justify-content-between align-items-center">
-                  <strong>Last Visit Date</strong>
-                  <span>Null</span>
-                </div>
-                <div className="mb-2 d-flex justify-content-between align-items-center">
-                  <strong>Total Visit Count</strong>
-                  <span>0</span>
-                </div>
-                <div className="mb-2 d-flex justify-content-between align-items-center">
-                  <strong>Total Spending</strong>
-                  <span>0</span>
-                </div>
-                <div className="d-flex justify-content-between align-items-center">
-                  <strong>Membership</strong>
-                  <span>Null</span>
-                </div>
-              </Card.Body>
-            </Card>
-          </Col>
+          {form.member_id && (
+            <Col md={4}>
+              <Card className="h-100">
+                <Card.Header>Member Status</Card.Header>
+                <Card.Body className="p-2">
+                  {(() => {
+                    const selectedMember = member.find(
+                      (m) => m.member_id === form.member_id
+                    );
+                    return selectedMember ? (
+                      <>
+                        <div className="mb-2 d-flex justify-content-between align-items-center">
+                          <strong>Last Visit Date</strong>
+                          <span>
+                            {selectedMember.last_visit_date
+                              ? formatDate(selectedMember.last_visit_date)
+                              : "-"}
+                          </span>
+                        </div>
+                        <div className="mb-2 d-flex justify-content-between align-items-center">
+                          <strong>Total Visit Count</strong>
+                          <span>{selectedMember.total_visit_count || 0}</span>
+                        </div>
+                        <div className="mb-2 d-flex justify-content-between align-items-center">
+                          <strong>Total Spending</strong>
+                          <span>₹{selectedMember.total_spending || 0}</span>
+                        </div>
+                        <div className="d-flex justify-content-between align-items-center">
+                          <strong>Membership</strong>
+                          <span>{selectedMember.membership || "-"}</span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-center text-muted">
+                        No Member Data
+                      </div>
+                    );
+                  })()}
+                </Card.Body>
+              </Card>
+            </Col>
+          )}
         </Row>
 
         {/* Submit Buttons */}
