@@ -68,7 +68,8 @@ const Billing = () => {
     logo: {
       width: "30mm",
       height: "20mm",
-      marginTop: "5mm",
+      marginTop: "2mm",
+      marginBottom: "2mm",
       alignSelf: "center",
     },
     contentWrapper: {
@@ -182,7 +183,7 @@ const Billing = () => {
       textAlign: "center",
       fontSize: "8pt",
       fontWeight: "bold",
-      marginTop: "1.5mm",
+      marginTop: "5.5mm",
       marginBottom: "0mm",
     },
     footer2: {
@@ -190,8 +191,8 @@ const Billing = () => {
       textAlign: "center",
       fontSize: "8pt",
       fontWeight: "bold",
-      marginTop: "2mm",
-      marginBottom: "1mm",
+      marginTop: "5.5mm",
+      marginBottom: "0mm",
     },
   });
 
