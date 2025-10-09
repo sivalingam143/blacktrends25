@@ -58,14 +58,14 @@ const Billing = () => {
     const companyDetails = companies[0] || {};
     const doc = new jsPDF({
       unit: "mm",
-      format: [58, 200],
+      format: [58, 150],
     });
 
     let y = 5;
 
     // Add Logo Image above the header
-    doc.addImage(logo, "PNG", 20, y, 18, 10); // Centered logo: x=20 (center of 58mm), width=18mm, height=10mm
-    y += 15; // Adjust y position after logo (height + some space)
+    doc.addImage(logo, "PNG", 15, y, 30, 20); // Centered logo: x=20 (center of 58mm), width=18mm, height=10mm
+    y += 25; // Adjust y position after logo (height + some space)
 
     // 🔹 HEADER
     doc.setFont("helvetica", "bold");
