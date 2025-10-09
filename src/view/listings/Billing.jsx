@@ -70,7 +70,7 @@ const Billing = () => {
     });
     y += 4;
     doc.setFontSize(8);
-    doc.text("Hair & Skin", 29, y, { align: "center" });
+    doc.text("Hair | Skin | Makeup | Spa", 29, y, { align: "center" });
     y += 3;
     doc.setFont("helvetica", "normal");
     doc.setFontSize(6);
@@ -125,7 +125,7 @@ const Billing = () => {
     // 🔹 ITEM TABLE HEADER
     doc.setFont("helvetica", "bold");
     doc.setFontSize(6);
-    doc.text("Service & Product", 3, y);
+    doc.text("Service & Products", 3, y);
     doc.text("Service Provider", 22, y);
     doc.text("Rate", 30, y);
     doc.text("Dis", 38, y);
