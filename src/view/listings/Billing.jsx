@@ -122,21 +122,29 @@ const Billing = () => {
     doc.line(3, y, 55, y);
     y += 3;
 
-    // 🔹 ITEM TABLE HEADER
+    // 🔹 ITEM TABLE HEADER (multi-line for better alignment)
     doc.setFont("helvetica", "bold");
     doc.setFontSize(6);
-    doc.text("Service & Products", 3, y);
-    doc.text("Service Provider", 22, y);
-    doc.text("Rate", 30, y);
-    doc.text("Dis", 38, y);
-    doc.text("Qty", 44, y);
-    doc.text("Amt", 55, y, { align: "right" });
-    y += 2;
+    let headerStartY = y;
 
+    // First line of header
+    doc.text("Service &", 3, headerStartY);
+    doc.text("Service", 18, headerStartY);
+    doc.text("Rate", 28, headerStartY);
+    doc.text("Dis", 36, headerStartY);
+    doc.text("Qty", 43, headerStartY);
+    doc.text("Amt", 52, headerStartY, { align: "right" });
+
+    // Second line of header
+    let headerSecondY = headerStartY + 2.5;
+    doc.text("Products", 3, headerSecondY);
+    doc.text("Provider", 18, headerSecondY);
+
+    y = headerSecondY + 2;
     doc.line(3, y, 55, y); // line below header
     y += 2;
 
-    // 🔹 ITEM DETAILS (NO line per item)
+    // 🔹 ITEM DETAILS (adjusted x positions to match headers)
     doc.setFont("helvetica", "normal");
     doc.setFontSize(5.5);
     let totalQty = details.length; // Count of products instead of sum of quantities
@@ -144,19 +152,19 @@ const Billing = () => {
     details.forEach((d, i) => {
       if (y > 160) return; // stop if height exceeded
 
-      const name = String(d.productandservice_name || "-").substring(0, 15);
-      const staff = String(d.staff_name || "-").substring(0, 6);
+      const name = String(d.productandservice_name || "-").substring(0, 14); // Slightly shorter for better fit
+      const staff = String(d.staff_name || "-").substring(0, 7); // Adjusted length
       const rate = parseFloat(d.productandservice_price || 0).toFixed(0);
       const dis = parseFloat(d.discount_amount || 0).toFixed(0);
       const qty = parseFloat(d.qty || 1);
       const total = parseFloat(d.total || 0).toFixed(0);
 
-      doc.text(name, 3, y);
-      doc.text(staff, 22, y);
-      doc.text(rate, 30, y);
-      doc.text(dis, 38, y);
-      doc.text(String(qty), 44, y);
-      doc.text(total, 55, y, { align: "right" });
+      doc.text(name, 3, y); // Align under header
+      doc.text(staff, 18, y); // Align under Provider
+      doc.text(rate, 28, y); // Align under Rate
+      doc.text(dis, 36, y); // Align under Dis
+      doc.text(String(qty), 43, y); // Align under Qty
+      doc.text(total, 52, y, { align: "right" }); // Right-aligned under Amt
       y += 3;
     });
 
@@ -226,7 +234,7 @@ const Billing = () => {
           {
             label: "Delete",
             icon: <MdOutlineDelete />,
-            onClick: () => handleDelete(item.id),
+            onClick: () => handleDelete(item.billing_id),
           },
         ]}
         label={<HiOutlineDotsVertical />}
