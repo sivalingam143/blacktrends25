@@ -176,6 +176,8 @@ const Billing = () => {
     const subtotal = parseFloat(item.subtotal || item.total || 0);
     const discount = parseFloat(item.discount || 0);
     const grand = parseFloat(item.total || 0);
+    const paid = parseFloat(item.paid || 0);
+    const balance = parseFloat(item.balance || 0);
 
     doc.setFont("helvetica", "bold");
     doc.setFontSize(6.5);
@@ -191,6 +193,8 @@ const Billing = () => {
     addTotalLine("Subtotal", subtotal.toFixed(2));
     addTotalLine("Discount", discount.toFixed(2));
     addTotalLine("Grand Total", grand.toFixed(2));
+    addTotalLine("Paid", paid.toFixed(2));
+    addTotalLine("Balance", balance.toFixed(2));
 
     y += 2;
     doc.line(3, y, 55, y);
