@@ -125,8 +125,8 @@ const Billing = () => {
     // 🔹 ITEM TABLE HEADER
     doc.setFont("helvetica", "bold");
     doc.setFontSize(6);
-    doc.text("Item", 3, y);
-    doc.text("Stf", 22, y);
+    doc.text("Service & Product", 3, y);
+    doc.text("Service Provider", 22, y);
     doc.text("Rate", 30, y);
     doc.text("Dis", 38, y);
     doc.text("Qty", 44, y);
