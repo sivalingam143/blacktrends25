@@ -144,7 +144,7 @@ const Billing = () => {
 
     y = headerSecondY + 2;
     doc.line(3, y, 55, y); // line below header
-    y += 2;
+    y += 3;
 
     // 🔹 ITEM DETAILS (adjusted x positions to match headers)
     doc.setFont("helvetica", "normal");
