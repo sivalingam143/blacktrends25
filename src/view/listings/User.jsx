@@ -178,7 +178,7 @@ const User = () => {
           <Col xs="6" className="py-3 text-end">
             <Buttons
               btnlabel="Add New"
-              className="submit-btn"
+              className="add-btn"
               onClick={handleCreate}
             />
           </Col>
