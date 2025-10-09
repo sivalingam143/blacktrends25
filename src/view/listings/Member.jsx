@@ -128,7 +128,7 @@ const Member = () => {
   });
 
   // ---------- table ----------
-  const headers = ["No", "Name", "Phone", "Gold"];
+  const headers = ["No", "Name", "Phone", "Membership"];
   const body = filteredMember.map((m, idx) => ({
     key: m.member_id,
     values: [
