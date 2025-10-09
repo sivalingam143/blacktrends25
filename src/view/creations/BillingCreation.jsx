@@ -51,6 +51,7 @@ const BillingCreation = () => {
   const [overall_discount, setOverallDiscount] = useState(0);
   const [discount_type, setDiscountType] = useState("INR");
   const [grand_total, setGrandTotal] = useState(0);
+  const [paid, setPaid] = useState(0);
   const [submitting, setSubmitting] = useState(false);
 
   // New Member Modal States
@@ -93,6 +94,7 @@ const BillingCreation = () => {
         });
         setOverallDiscount(parseFloat(rec.discount));
         setDiscountType(rec.discount_type || "INR");
+        setPaid(parseFloat(rec.paid) || 0);
 
         // Parse product details if exists
         let parsedRows = [];
@@ -256,6 +258,10 @@ const BillingCreation = () => {
     setOverallDiscount(parseFloat(e.target.value) || 0);
   };
 
+  const handlePaidChange = (e) => {
+    setPaid(parseFloat(e.target.value) || 0);
+  };
+
   // New Member Form Handlers
   const handleNewMemberChange = (e) => {
     const { name, value } = e.target;
@@ -402,6 +408,7 @@ const BillingCreation = () => {
     }
 
     try {
+      const balance = grand_total - paid;
       let billingPayload = {
         ...form,
         member_id: form.member_id,
@@ -424,6 +431,8 @@ const BillingCreation = () => {
         discount: overall_discount,
         discount_type,
         total: grand_total,
+        paid,
+        balance,
       };
 
       if (isEdit) {
@@ -464,6 +473,8 @@ const BillingCreation = () => {
     { value: "No", label: "No" },
     { value: "Yes", label: "Yes" },
   ];
+
+  const balance = grand_total - paid;
 
   return (
     <div id="main">
@@ -650,9 +661,27 @@ const BillingCreation = () => {
                     />
                   </div>
                 </div>
-                <div className="d-flex justify-content-between align-items-center border-top pt-2">
+                <div className="mb-3 d-flex justify-content-between align-items-center  pt-2">
                   <strong>Total</strong>
                   <span>₹{grand_total.toFixed(2)}</span>
+                </div>
+                <div className="mb-3 d-flex justify-content-between align-items-center">
+                  <div>
+                    <label>Paid</label>
+                  </div>
+                  <div className="input-group" style={{ width: "150px" }}>
+                    <TextInputform
+                      formtype="text"
+                      step="0.01"
+                      PlaceHolder="Amount"
+                      value={paid}
+                      onChange={handlePaidChange}
+                    />
+                  </div>
+                </div>
+                <div className="d-flex justify-content-between align-items-center  pt-2">
+                  <strong>{balance >= 0 ? "Balance" : "Change"}</strong>
+                  <span>₹{Math.abs(balance).toFixed(2)}</span>
                 </div>
               </Card.Body>
             </Card>
@@ -661,7 +690,7 @@ const BillingCreation = () => {
           {/* Right: Stats Container - Compact for 3 Fields */}
           {form.member_id && (
             <Col md={4}>
-              <Card className="h-100">
+              <Card>
                 <Card.Header>Member Status</Card.Header>
                 <Card.Body className="p-2">
                   {(() => {
