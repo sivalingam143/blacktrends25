@@ -128,7 +128,9 @@ const Category = () => {
 
   const filteredCategories =
     categories?.filter((category) =>
-      category?.category_name?.toLowerCase()?.includes(searchTerm.toLowerCase())
+      (category?.category_name || "")
+        .toLowerCase()
+        ?.includes(searchTerm.toLowerCase())
     ) || [];
 
   const RoleHead = ["No", "Category Name"];
@@ -169,6 +171,15 @@ const Category = () => {
               btnlabel="Add New"
               className="add-btn"
               onClick={handleCreate}
+            />
+          </Col>
+          <Col xs="12" lg="3" className="py-2">
+            <input
+              type="text"
+              placeholder="Search by category name..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="form-control"
             />
           </Col>
           <Col xs="12" className="py-3">

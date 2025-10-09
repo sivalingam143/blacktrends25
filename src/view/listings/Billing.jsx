@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -21,6 +21,7 @@ const Billing = () => {
   const navigate = useNavigate();
   const { billing } = useSelector((s) => s.billing);
   const companies = useSelector((s) => s.company.company);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     dispatch(fetchBillings(""));
@@ -211,11 +212,19 @@ const Billing = () => {
     doc.save(`billing_${item.member_no}.pdf`);
   };
 
+  const filteredBilling = billing.filter(
+    (item) =>
+      (item.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      String(item.member_no || "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
+  );
+
   // 🔹 TABLE HEADERS
   const headers = ["No", "Date", "Member No", "Name", "Total"];
 
   // 🔹 TABLE BODY
-  const body = billing.map((item, idx) => ({
+  const body = filteredBilling.map((item, idx) => ({
     key: item.billing_id,
     values: [
       idx + 1,
@@ -258,6 +267,15 @@ const Billing = () => {
               btnlabel="Add New"
               className="add-btn"
               onClick={handleCreate}
+            />
+          </Col>
+          <Col xs="12" lg="3" className="py-2">
+            <input
+              type="text"
+              placeholder="Search by name or member no..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="form-control"
             />
           </Col>
           <Col xs="12" className="py-3">

@@ -15,6 +15,7 @@ const Staff = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { staff } = useSelector((state) => state.staff);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     dispatch(fetchStaff(""));
@@ -38,11 +39,20 @@ const Staff = () => {
     }
   };
 
+  const filteredStaff = staff.filter(
+    (staffItem) =>
+      (staffItem.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      String(staffItem.phone || "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      (staffItem.address || "").toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   // Table headers
   const headers = ["No", "Name", "Phone", "Address"];
 
   // Table body
-  const body = staff.map((staffItem, index) => ({
+  const body = filteredStaff.map((staffItem, index) => ({
     key: staffItem.staff_id,
     values: [
       index + 1,
@@ -79,6 +89,15 @@ const Staff = () => {
               btnlabel="Add New"
               className="add-btn"
               onClick={handleCreate}
+            />
+          </Col>
+          <Col xs="12" lg="3" className="py-2">
+            <input
+              type="text"
+              placeholder="Search by name, phone, or address..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="form-control"
             />
           </Col>
           <Col xs="12" className="py-3">

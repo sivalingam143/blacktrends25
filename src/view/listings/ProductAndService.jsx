@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -18,6 +18,7 @@ const ProductAndService = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { productandservice } = useSelector((s) => s.productandservice);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     dispatch(fetchProductAndServices(""));
@@ -37,9 +38,19 @@ const ProductAndService = () => {
     }
   };
 
+  const filteredProductAndService = productandservice.filter(
+    (item) =>
+      (item.productandservice_name || "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      (item.category_name || "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
+  );
+
   // ---------- table ----------
   const headers = ["No", "Name", "Category", "Price"];
-  const body = productandservice.map((item, idx) => ({
+  const body = filteredProductAndService.map((item, idx) => ({
     key: item.productandservice_id,
     values: [
       idx + 1,
@@ -78,7 +89,15 @@ const ProductAndService = () => {
               onClick={handleCreate}
             />
           </Col>
-
+          <Col xs="12" lg="3" className="py-2">
+            <input
+              type="text"
+              placeholder="Search by name or category..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="form-control"
+            />
+          </Col>
           <Col xs="12" className="py-3">
             <TableUI
               headers={headers}
