@@ -126,7 +126,7 @@ const Billing = () => {
       fontSize: "8pt",
     },
     label: {
-      width: "16mm",
+      width: "20mm",
       textAlign: "left",
     },
     colon: {
