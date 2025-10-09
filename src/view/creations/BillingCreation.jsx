@@ -589,6 +589,7 @@ const BillingCreation = () => {
                       </td>
                       <td>
                         <DropDown
+                          key={row.category_id}
                           placeholder="Select Product/Service"
                           value={row.product_id}
                           onChange={(e) =>
