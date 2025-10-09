@@ -575,7 +575,7 @@ const BillingCreation = () => {
                     <tr key={index}>
                       <td>
                         <DropDown
-                          placeholder="Select Category"
+                          placeholder="Select"
                           value={row.category_id}
                           onChange={(e) =>
                             handleRowChange(
@@ -590,7 +590,7 @@ const BillingCreation = () => {
                       <td>
                         <DropDown
                           key={row.category_id}
-                          placeholder="Select Product/Service"
+                          placeholder="Select"
                           value={row.product_id}
                           onChange={(e) =>
                             handleRowChange(index, "product_id", e.target.value)
@@ -649,7 +649,7 @@ const BillingCreation = () => {
                           onChange={(selected) =>
                             handleRowChange(index, "staff_id", selected)
                           }
-                          placeholder="Select Staff"
+                          placeholder="Select"
                         />
                       </td>
                       <td>₹{row.row_total.toFixed(2)}</td>

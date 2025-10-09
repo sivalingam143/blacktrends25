@@ -95,6 +95,16 @@ const ProductAndServiceCreation = () => {
       <Container fluid className="p-3">
         <Row>
           <Col lg="4" md="6" xs="12" className="py-3">
+            <DropDown
+              textlabel="Category"
+              placeholder="Select Category"
+              name="category_id"
+              value={form.category_id}
+              onChange={handleChange}
+              options={categoryOptions}
+            />
+          </Col>
+          <Col lg="4" md="6" xs="12" className="py-3">
             <TextInputform
               formLabel="Product & Service Name"
               PlaceHolder="Enter name"
@@ -113,16 +123,6 @@ const ProductAndServiceCreation = () => {
               step="0.01"
               min="0"
               onChange={handleChange}
-            />
-          </Col>
-          <Col lg="4" md="6" xs="12" className="py-3">
-            <DropDown
-              textlabel="Category"
-              placeholder="Select Category"
-              name="category_id"
-              value={form.category_id}
-              onChange={handleChange}
-              options={categoryOptions}
             />
           </Col>
         </Row>
