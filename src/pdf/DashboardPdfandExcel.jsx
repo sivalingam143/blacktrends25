@@ -83,7 +83,7 @@ export const downloadMemberExcel = (
   memberColumns
 ) => {
   const memberTotal = member.reduce(
-    (acc, row) => acc + (parseFloat(row.total_spending) || 0),
+    (acc, row) => acc + (parseFloat(row.total) || 0),
     0
   );
   const headers = memberColumns.map((col) => col.title);
@@ -92,8 +92,7 @@ export const downloadMemberExcel = (
     ...memberColumns.slice(1).map((col) => {
       if (col.dataIndex === "report_date")
         return formatDate(row[col.dataIndex]);
-      if (col.dataIndex === "total_spending")
-        return `₹${row[col.dataIndex] || 0}`;
+      if (col.dataIndex === "total") return `₹${row[col.dataIndex] || 0}`;
       if (col.dataIndex === "membership")
         return row[col.dataIndex] === "Yes" ? "Yes" : "No";
       return row[col.dataIndex] || "-";
@@ -116,7 +115,7 @@ export const downloadMemberExcel = (
 
 export const downloadMemberPDF = (member, memberFromDate, memberToDate) => {
   const memberTotal = member.reduce(
-    (acc, row) => acc + (parseFloat(row.total_spending) || 0),
+    (acc, row) => acc + (parseFloat(row.total) || 0),
     0
   );
   const doc = new jsPDF();
@@ -133,7 +132,7 @@ export const downloadMemberPDF = (member, memberFromDate, memberToDate) => {
     row.name,
     row.phone,
     row.membership === "Yes" ? "Yes" : "No",
-    `Rs. ${row.total_spending || 0}`,
+    `Rs. ${row.total || 0}`,
   ]);
   tableData.push([
     "",
