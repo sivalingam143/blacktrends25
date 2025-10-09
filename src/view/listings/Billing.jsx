@@ -94,7 +94,10 @@ const Billing = () => {
     // 🔹 INVOICE TITLE
     doc.setFontSize(7);
     doc.setFont("helvetica", "bold");
-    doc.text("SALES INVOICE", 29, y, { align: "center" });
+    doc.text("SALES INVOICE", 30, y, { align: "center" });
+    y += 3;
+    doc.setFontSize(5);
+    doc.text("(Soozhakkarai Medu)", 30, y, { align: "center" });
     y += 2;
     doc.line(3, y, 55, y);
     y += 3;
