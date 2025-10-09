@@ -8,6 +8,7 @@ import { LiaEditSolid } from "react-icons/lia";
 import { HiOutlineDotsVertical } from "react-icons/hi";
 import { FaPrint } from "react-icons/fa";
 import jsPDF from "jspdf";
+import logo from "../../assets/images/storelogo.png";
 import PageTitle from "../../components/PageTitle";
 import NotifyData from "../../components/NotifyData";
 import TableUI from "../../components/TableUI";
@@ -62,6 +63,10 @@ const Billing = () => {
 
     let y = 5;
 
+    // Add Logo Image above the header
+    doc.addImage(logo, "PNG", 20, y, 18, 10); // Centered logo: x=20 (center of 58mm), width=18mm, height=10mm
+    y += 15; // Adjust y position after logo (height + some space)
+
     // 🔹 HEADER
     doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
@@ -79,10 +84,7 @@ const Billing = () => {
     doc.text(`Ph: ${companyDetails.contact_number || "Phone Number"}`, 29, y, {
       align: "center",
     });
-    y += 2.5;
-    doc.text(`GST: ${companyDetails.gst_no || "GST No"}`, 29, y, {
-      align: "center",
-    });
+
     y += 3;
 
     // Separator
@@ -93,9 +95,9 @@ const Billing = () => {
     doc.setFontSize(7);
     doc.setFont("helvetica", "bold");
     doc.text("SALES INVOICE", 29, y, { align: "center" });
-    y += 3;
-    doc.line(3, y, 55, y);
     y += 2;
+    doc.line(3, y, 55, y);
+    y += 3;
 
     // 🔹 INVOICE DETAILS (aligned)
     const leftX = 3;
