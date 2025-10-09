@@ -71,8 +71,12 @@ const Billing = () => {
       marginTop: "5mm",
       alignSelf: "center",
     },
+    contentWrapper: {
+      width: "54mm",
+      alignSelf: "center",
+    },
     header: {
-      width: "58mm",
+      width: "54mm",
       textAlign: "center",
       marginBottom: "2mm",
     },
@@ -94,7 +98,7 @@ const Billing = () => {
       marginBottom: "0.5mm",
     },
     line: {
-      width: "58mm",
+      width: "54mm",
       borderBottomWidth: 1,
       borderBottomColor: "black",
       marginVertical: "0.5mm",
@@ -113,7 +117,7 @@ const Billing = () => {
       marginBottom: "0.5mm",
     },
     detailContainer: {
-      width: "58mm",
+      width: "54mm",
       marginTop: "0mm",
     },
     detailRow: {
@@ -122,7 +126,7 @@ const Billing = () => {
       fontSize: "8pt",
     },
     label: {
-      width: "18mm",
+      width: "16mm",
       textAlign: "left",
     },
     colon: {
@@ -130,11 +134,11 @@ const Billing = () => {
       textAlign: "center",
     },
     value: {
-      width: "33mm",
+      width: "31mm",
       textAlign: "right",
     },
     tableHeader: {
-      width: "58mm",
+      width: "54mm",
       marginTop: "0.5mm",
     },
     tableHeaderRow1: {
@@ -149,14 +153,14 @@ const Billing = () => {
       fontWeight: "bold",
       marginBottom: "0.5mm",
     },
-    col1: { width: "15mm", textAlign: "left" },
-    col2: { width: "12mm", textAlign: "left" },
-    col3: { width: "8mm", textAlign: "right" },
-    col4: { width: "8mm", textAlign: "right" },
-    col5: { width: "8mm", textAlign: "right" },
-    col6: { width: "7mm", textAlign: "right" },
+    col1: { width: "13mm", textAlign: "left" },
+    col2: { width: "11mm", textAlign: "left" },
+    col3: { width: "7mm", textAlign: "right" },
+    col4: { width: "7mm", textAlign: "right" },
+    col5: { width: "7mm", textAlign: "right" },
+    col6: { width: "9mm", textAlign: "right" },
     itemsContainer: {
-      width: "58mm",
+      width: "54mm",
     },
     tableRow: {
       flexDirection: "row",
@@ -164,7 +168,7 @@ const Billing = () => {
       fontSize: "7.5pt",
     },
     totalsContainer: {
-      width: "58mm",
+      width: "54mm",
       marginTop: "0.5mm",
     },
     totalRow: {
@@ -174,19 +178,19 @@ const Billing = () => {
       fontWeight: "bold",
     },
     footer: {
-      width: "58mm",
+      width: "54mm",
       textAlign: "center",
       fontSize: "8pt",
       fontWeight: "bold",
-      marginTop: "0.5mm",
+      marginTop: "1.5mm",
       marginBottom: "0mm",
     },
     footer2: {
-      width: "58mm",
+      width: "54mm",
       textAlign: "center",
       fontSize: "8pt",
       fontWeight: "bold",
-      marginTop: "0mm",
+      marginTop: "2mm",
       marginBottom: "1mm",
     },
   });
@@ -214,152 +218,154 @@ const Billing = () => {
             <Image src={logo} style={{ width: "30mm", height: "20mm" }} />
           </View>
 
-          <View style={styles.header}>
-            <Text style={styles.companyName}>
-              {companyDetails.company_name || "Company Name"}
-            </Text>
-            <Text style={styles.tagline}>Hair | Skin | Makeup | Spa</Text>
-            <Text style={styles.address}>
-              {companyDetails.address || "Address"}
-            </Text>
-            <Text style={styles.phone}>
-              Ph: {companyDetails.contact_number || "Phone Number"}
-            </Text>
-          </View>
-
-          <View style={styles.line} />
-
-          <Text style={styles.title}>SALES INVOICE</Text>
-          <Text style={styles.subtitle}>(Soozhakkarai Medu)</Text>
-          <View style={styles.line} />
-
-          <View style={styles.detailContainer}>
-            <View style={styles.detailRow}>
-              <Text style={styles.label}>Invoice No</Text>
-              <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>{item.member_no || "-"}</Text>
-            </View>
-            <View style={styles.detailRow}>
-              <Text style={styles.label}>Date</Text>
-              <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>
-                {item.billing_date.split(" ")[0]}
+          <View style={styles.contentWrapper}>
+            <View style={styles.header}>
+              <Text style={styles.companyName}>
+                {companyDetails.company_name || "Company Name"}
+              </Text>
+              <Text style={styles.tagline}>Hair | Skin | Makeup | Spa</Text>
+              <Text style={styles.address}>
+                {companyDetails.address || "Address"}
+              </Text>
+              <Text style={styles.phone}>
+                Ph: {companyDetails.contact_number || "Phone Number"}
               </Text>
             </View>
-            <View style={styles.detailRow}>
-              <Text style={styles.label}>Customer</Text>
-              <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>{item.name || "-"}</Text>
-            </View>
-            <View style={styles.detailRow}>
-              <Text style={styles.label}>Mobile</Text>
-              <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>{item.phone || "-"}</Text>
-            </View>
-            <View style={styles.detailRow}>
-              <Text style={styles.label}>Membership</Text>
-              <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>{item.membership || "-"}</Text>
-            </View>
-          </View>
 
-          <View style={styles.line} />
+            <View style={styles.line} />
 
-          <View style={styles.tableHeader}>
-            <View style={styles.tableHeaderRow1}>
-              <Text style={styles.col1}>Service &</Text>
-              <Text style={styles.col2}>Service</Text>
-              <Text style={styles.col3}>Rate</Text>
-              <Text style={styles.col4}>Dis</Text>
-              <Text style={styles.col5}>Qty</Text>
-              <Text style={styles.col6}>Amt</Text>
-            </View>
-            <View style={styles.tableHeaderRow2}>
-              <Text style={styles.col1}>Products</Text>
-              <Text style={styles.col2}>Provider</Text>
-              <View style={styles.col3} />
-              <View style={styles.col4} />
-              <View style={styles.col5} />
-              <View style={styles.col6} />
-            </View>
-          </View>
-          <View style={styles.line} />
+            <Text style={styles.title}>SALES INVOICE</Text>
+            <Text style={styles.subtitle}>(Soozhakkarai Medu)</Text>
+            <View style={styles.line} />
 
-          <View style={styles.itemsContainer}>
-            {details.map((d, index) => (
-              <View key={index} style={styles.tableRow}>
-                <Text style={styles.col1}>
-                  {String(d.productandservice_name || "-").substring(0, 14)}
-                </Text>
-                <Text style={styles.col2}>
-                  {String(d.staff_name || "-").substring(0, 7)}
-                </Text>
-                <Text style={styles.col3}>
-                  {parseFloat(d.productandservice_price || 0).toFixed(0)}
-                </Text>
-                <Text style={styles.col4}>
-                  {parseFloat(d.discount_amount || 0).toFixed(0)}
-                </Text>
-                <Text style={styles.col5}>{parseFloat(d.qty || 1)}</Text>
-                <Text style={styles.col6}>
-                  {parseFloat(d.total || 0).toFixed(0)}
+            <View style={styles.detailContainer}>
+              <View style={styles.detailRow}>
+                <Text style={styles.label}>Invoice No</Text>
+                <Text style={styles.colon}>:</Text>
+                <Text style={styles.value}>{item.member_no || "-"}</Text>
+              </View>
+              <View style={styles.detailRow}>
+                <Text style={styles.label}>Date</Text>
+                <Text style={styles.colon}>:</Text>
+                <Text style={styles.value}>
+                  {item.billing_date.split(" ")[0]}
                 </Text>
               </View>
-            ))}
-          </View>
+              <View style={styles.detailRow}>
+                <Text style={styles.label}>Customer</Text>
+                <Text style={styles.colon}>:</Text>
+                <Text style={styles.value}>{item.name || "-"}</Text>
+              </View>
+              <View style={styles.detailRow}>
+                <Text style={styles.label}>Mobile</Text>
+                <Text style={styles.colon}>:</Text>
+                <Text style={styles.value}>{item.phone || "-"}</Text>
+              </View>
+              <View style={styles.detailRow}>
+                <Text style={styles.label}>Membership</Text>
+                <Text style={styles.colon}>:</Text>
+                <Text style={styles.value}>{item.membership || "-"}</Text>
+              </View>
+            </View>
 
-          <View style={styles.line} />
+            <View style={styles.line} />
 
-          <View style={styles.totalsContainer}>
-            <View style={styles.totalRow}>
-              <Text style={styles.label}>Total Qty</Text>
-              <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>{details.length}</Text>
+            <View style={styles.tableHeader}>
+              <View style={styles.tableHeaderRow1}>
+                <Text style={styles.col1}>Service &</Text>
+                <Text style={styles.col2}>Service</Text>
+                <Text style={styles.col3}>Rate</Text>
+                <Text style={styles.col4}>Dis</Text>
+                <Text style={styles.col5}>Qty</Text>
+                <Text style={styles.col6}>Amt</Text>
+              </View>
+              <View style={styles.tableHeaderRow2}>
+                <Text style={styles.col1}>Products</Text>
+                <Text style={styles.col2}>Provider</Text>
+                <View style={styles.col3} />
+                <View style={styles.col4} />
+                <View style={styles.col5} />
+                <View style={styles.col6} />
+              </View>
             </View>
-            <View style={styles.totalRow}>
-              <Text style={styles.label}>Subtotal</Text>
-              <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>
-                {parseFloat(item.subtotal || item.total || 0).toFixed(2)}
-              </Text>
-            </View>
-            <View style={styles.totalRow}>
-              <Text style={styles.label}>Discount</Text>
-              <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>
-                {parseFloat(item.discount || 0).toFixed(2)}
-              </Text>
-            </View>
-            <View style={styles.totalRow}>
-              <Text style={styles.label}>Grand Total</Text>
-              <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>
-                {parseFloat(item.total || 0).toFixed(2)}
-              </Text>
-            </View>
-            <View style={styles.totalRow}>
-              <Text style={styles.label}>Paid</Text>
-              <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>
-                {parseFloat(item.paid || 0).toFixed(2)}
-              </Text>
-            </View>
-            <View style={styles.totalRow}>
-              <Text style={styles.label}>Balance</Text>
-              <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>
-                {parseFloat(item.balance || 0).toFixed(2)}
-              </Text>
-            </View>
-          </View>
+            <View style={styles.line} />
 
-          <View style={styles.line} />
+            <View style={styles.itemsContainer}>
+              {details.map((d, index) => (
+                <View key={index} style={styles.tableRow}>
+                  <Text style={styles.col1}>
+                    {String(d.productandservice_name || "-").substring(0, 14)}
+                  </Text>
+                  <Text style={styles.col2}>
+                    {String(d.staff_name || "-").substring(0, 7)}
+                  </Text>
+                  <Text style={styles.col3}>
+                    {parseFloat(d.productandservice_price || 0).toFixed(0)}
+                  </Text>
+                  <Text style={styles.col4}>
+                    {parseFloat(d.discount_amount || 0).toFixed(0)}
+                  </Text>
+                  <Text style={styles.col5}>{parseFloat(d.qty || 1)}</Text>
+                  <Text style={styles.col6}>
+                    {parseFloat(d.total || 0).toFixed(0)}
+                  </Text>
+                </View>
+              ))}
+            </View>
 
-          <View style={styles.footer}>
-            <Text>We wish to have your support always.</Text>
-          </View>
-          <View style={styles.footer2}>
-            <Text>*** THANK YOU. PLEASE VISIT AGAIN ***</Text>
+            <View style={styles.line} />
+
+            <View style={styles.totalsContainer}>
+              <View style={styles.totalRow}>
+                <Text style={styles.label}>Total Qty</Text>
+                <Text style={styles.colon}>:</Text>
+                <Text style={styles.value}>{details.length}</Text>
+              </View>
+              <View style={styles.totalRow}>
+                <Text style={styles.label}>Subtotal</Text>
+                <Text style={styles.colon}>:</Text>
+                <Text style={styles.value}>
+                  {parseFloat(item.subtotal || item.total || 0).toFixed(2)}
+                </Text>
+              </View>
+              <View style={styles.totalRow}>
+                <Text style={styles.label}>Discount</Text>
+                <Text style={styles.colon}>:</Text>
+                <Text style={styles.value}>
+                  {parseFloat(item.discount || 0).toFixed(2)}
+                </Text>
+              </View>
+              <View style={styles.totalRow}>
+                <Text style={styles.label}>Grand Total</Text>
+                <Text style={styles.colon}>:</Text>
+                <Text style={styles.value}>
+                  {parseFloat(item.total || 0).toFixed(2)}
+                </Text>
+              </View>
+              <View style={styles.totalRow}>
+                <Text style={styles.label}>Paid</Text>
+                <Text style={styles.colon}>:</Text>
+                <Text style={styles.value}>
+                  {parseFloat(item.paid || 0).toFixed(2)}
+                </Text>
+              </View>
+              <View style={styles.totalRow}>
+                <Text style={styles.label}>Balance</Text>
+                <Text style={styles.colon}>:</Text>
+                <Text style={styles.value}>
+                  {parseFloat(item.balance || 0).toFixed(2)}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.line} />
+
+            <View style={styles.footer}>
+              <Text>We wish to have your support always.</Text>
+            </View>
+            <View style={styles.footer2}>
+              <Text>*** THANK YOU. PLEASE VISIT AGAIN ***</Text>
+            </View>
           </View>
         </Page>
       </Document>
@@ -372,11 +378,11 @@ const Billing = () => {
       <Invoice item={item} companyDetails={companyDetails} />
     ).toBlob();
     const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `billing_${item.member_no}.pdf`;
-    link.click();
-    URL.revokeObjectURL(url);
+    const newWindow = window.open(url, "_blank");
+    newWindow.onload = () => {
+      newWindow.print();
+      URL.revokeObjectURL(url);
+    };
   };
 
   const filteredBilling = billing.filter(
