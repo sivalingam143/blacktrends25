@@ -131,16 +131,14 @@ const Category = () => {
       category?.category_name?.toLowerCase()?.includes(searchTerm.toLowerCase())
     ) || [];
 
-  const RoleHead = ["No", "Category Name", "Created At"];
+  const RoleHead = ["No", "Category Name"];
   const RoleData =
     filteredCategories?.length > 0
       ? filteredCategories.map((category, index) => ({
           values: [
             index + 1,
             category.category_name,
-            category.create_at
-              ? new Date(category.create_at).toLocaleDateString()
-              : "N/A",
+
             <ActionButton
               options={[
                 {
