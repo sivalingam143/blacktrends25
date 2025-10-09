@@ -198,10 +198,14 @@ const Billing = () => {
 
     // 🔹 FOOTER
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(8);
-    doc.text("*** THANK YOU ***", 29, y, { align: "center" });
+    doc.setFontSize(6);
+    doc.text("We wish to have your support always.", 29, y, {
+      align: "center",
+    });
     y += 3;
-    doc.text("PLEASE VISIT AGAIN", 29, y, { align: "center" });
+    doc.text("*** THANK YOU.PLEASE VISIT AGAIN ***", 29, y, {
+      align: "center",
+    });
 
     // 🔹 SAVE PDF
     doc.save(`billing_${item.member_no}.pdf`);
