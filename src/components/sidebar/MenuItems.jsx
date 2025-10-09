@@ -27,6 +27,10 @@ const MenuItems = [
     icon: <BsFilePlus />,
     submenu: [
       {
+        path: "/category",
+        text: "Category",
+      },
+      {
         path: "/member",
         text: "Members",
       },
