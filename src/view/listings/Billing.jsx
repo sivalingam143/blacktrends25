@@ -7,7 +7,15 @@ import { MdOutlineDelete } from "react-icons/md";
 import { LiaEditSolid } from "react-icons/lia";
 import { HiOutlineDotsVertical } from "react-icons/hi";
 import { FaPrint } from "react-icons/fa";
-import jsPDF from "jspdf";
+import {
+  pdf,
+  Document,
+  Page,
+  Text,
+  View,
+  StyleSheet,
+  Image,
+} from "@react-pdf/renderer";
 import logo from "../../assets/images/storelogo.png";
 import PageTitle from "../../components/PageTitle";
 import NotifyData from "../../components/NotifyData";
@@ -46,7 +54,144 @@ const Billing = () => {
     }
   };
 
-  const handlePrint = (item) => {
+  const styles = StyleSheet.create({
+    page: {
+      padding: 0,
+      margin: 0,
+      backgroundColor: "#FFFFFF",
+      width: "58mm",
+      height: "auto",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+    },
+    logo: {
+      width: "30mm",
+      height: "20mm",
+      marginTop: "5mm",
+      alignSelf: "center",
+    },
+    header: {
+      width: "58mm",
+      textAlign: "center",
+      marginBottom: "2mm",
+    },
+    companyName: {
+      fontSize: "14pt",
+      fontWeight: "bold",
+      marginBottom: "1mm",
+    },
+    tagline: {
+      fontSize: "10pt",
+      marginBottom: "0.5mm",
+    },
+    address: {
+      fontSize: "7pt",
+      marginBottom: "0.5mm",
+    },
+    phone: {
+      fontSize: "7pt",
+      marginBottom: "0.5mm",
+    },
+    line: {
+      width: "58mm",
+      borderBottomWidth: 1,
+      borderBottomColor: "black",
+      marginVertical: "0.5mm",
+      height: 0,
+    },
+    title: {
+      fontSize: "9pt",
+      fontWeight: "bold",
+      textAlign: "center",
+      marginTop: "0.5mm",
+      marginBottom: "0mm",
+    },
+    subtitle: {
+      fontSize: "7pt",
+      textAlign: "center",
+      marginBottom: "0.5mm",
+    },
+    detailContainer: {
+      width: "58mm",
+      marginTop: "0mm",
+    },
+    detailRow: {
+      flexDirection: "row",
+      marginBottom: "1.5mm",
+      fontSize: "8pt",
+    },
+    label: {
+      width: "18mm",
+      textAlign: "left",
+    },
+    colon: {
+      width: "7mm",
+      textAlign: "center",
+    },
+    value: {
+      width: "33mm",
+      textAlign: "right",
+    },
+    tableHeader: {
+      width: "58mm",
+      marginTop: "0.5mm",
+    },
+    tableHeaderRow1: {
+      flexDirection: "row",
+      fontSize: "8pt",
+      fontWeight: "bold",
+      marginBottom: "0.5mm",
+    },
+    tableHeaderRow2: {
+      flexDirection: "row",
+      fontSize: "8pt",
+      fontWeight: "bold",
+      marginBottom: "0.5mm",
+    },
+    col1: { width: "15mm", textAlign: "left" },
+    col2: { width: "12mm", textAlign: "left" },
+    col3: { width: "8mm", textAlign: "right" },
+    col4: { width: "8mm", textAlign: "right" },
+    col5: { width: "8mm", textAlign: "right" },
+    col6: { width: "7mm", textAlign: "right" },
+    itemsContainer: {
+      width: "58mm",
+    },
+    tableRow: {
+      flexDirection: "row",
+      marginBottom: "1.5mm",
+      fontSize: "7.5pt",
+    },
+    totalsContainer: {
+      width: "58mm",
+      marginTop: "0.5mm",
+    },
+    totalRow: {
+      flexDirection: "row",
+      marginBottom: "1.5mm",
+      fontSize: "8.5pt",
+      fontWeight: "bold",
+    },
+    footer: {
+      width: "58mm",
+      textAlign: "center",
+      fontSize: "8pt",
+      fontWeight: "bold",
+      marginTop: "0.5mm",
+      marginBottom: "0mm",
+    },
+    footer2: {
+      width: "58mm",
+      textAlign: "center",
+      fontSize: "8pt",
+      fontWeight: "bold",
+      marginTop: "0mm",
+      marginBottom: "1mm",
+    },
+  });
+
+  const Invoice = ({ item, companyDetails }) => {
     let details = [];
     try {
       details = item.productandservice_details
@@ -56,160 +201,182 @@ const Billing = () => {
       console.error("Error parsing details:", e);
     }
 
-    const companyDetails = companies[0] || {};
     const numItems = details.length;
-    const contentHeight = 114.5 + numItems * 3;
-    const totalHeight = Math.ceil(contentHeight + 5); // bottom margin
+    const contentHeight = 200 + numItems * 4;
+    const totalHeight = Math.ceil(contentHeight + 20);
 
-    const doc = new jsPDF({
-      unit: "mm",
-      format: [58, totalHeight],
-    });
+    const pageHeight = `${totalHeight}mm`;
 
-    let y = 5; // keep top margin small (only top & bottom space)
+    return (
+      <Document>
+        <Page size={{ width: "58mm", height: pageHeight }} style={styles.page}>
+          <View style={styles.logo}>
+            <Image src={logo} style={{ width: "30mm", height: "20mm" }} />
+          </View>
 
-    // 🔹 LOGO
-    doc.addImage(logo, "PNG", 14, y, 30, 20);
-    y += 25;
+          <View style={styles.header}>
+            <Text style={styles.companyName}>
+              {companyDetails.company_name || "Company Name"}
+            </Text>
+            <Text style={styles.tagline}>Hair | Skin | Makeup | Spa</Text>
+            <Text style={styles.address}>
+              {companyDetails.address || "Address"}
+            </Text>
+            <Text style={styles.phone}>
+              Ph: {companyDetails.contact_number || "Phone Number"}
+            </Text>
+          </View>
 
-    // 🔹 HEADER
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(12);
-    doc.text(companyDetails.company_name || "Company Name", 29, y, {
-      align: "center",
-    });
-    y += 5;
-    doc.setFontSize(9);
-    doc.text("Hair | Skin | Makeup | Spa", 29, y, { align: "center" });
-    y += 4;
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(6);
-    doc.text(companyDetails.address || "Address", 29, y, { align: "center" });
-    y += 3.5;
-    doc.text(`Ph: ${companyDetails.contact_number || "Phone Number"}`, 29, y, {
-      align: "center",
-    });
+          <View style={styles.line} />
 
-    y += 4;
-    doc.line(0, y, 58, y); // 👈 full-width line (no side margin)
-    y += 3;
+          <Text style={styles.title}>SALES INVOICE</Text>
+          <Text style={styles.subtitle}>(Soozhakkarai Medu)</Text>
+          <View style={styles.line} />
 
-    doc.setFontSize(8);
-    doc.setFont("helvetica", "bold");
-    doc.text("SALES INVOICE", 29, y, { align: "center" });
-    y += 3;
-    doc.setFontSize(6);
-    doc.text("(Soozhakkarai Medu)", 29, y, { align: "center" });
-    y += 2;
-    doc.line(0, y, 58, y);
-    y += 3;
+          <View style={styles.detailContainer}>
+            <View style={styles.detailRow}>
+              <Text style={styles.label}>Invoice No</Text>
+              <Text style={styles.colon}>:</Text>
+              <Text style={styles.value}>{item.member_no || "-"}</Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Text style={styles.label}>Date</Text>
+              <Text style={styles.colon}>:</Text>
+              <Text style={styles.value}>
+                {item.billing_date.split(" ")[0]}
+              </Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Text style={styles.label}>Customer</Text>
+              <Text style={styles.colon}>:</Text>
+              <Text style={styles.value}>{item.name || "-"}</Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Text style={styles.label}>Mobile</Text>
+              <Text style={styles.colon}>:</Text>
+              <Text style={styles.value}>{item.phone || "-"}</Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Text style={styles.label}>Membership</Text>
+              <Text style={styles.colon}>:</Text>
+              <Text style={styles.value}>{item.membership || "-"}</Text>
+            </View>
+          </View>
 
-    // 🔹 INVOICE DETAILS
-    const leftX = 0; // 👈 No left padding
-    const colonX = 18;
-    const valueX = 25;
+          <View style={styles.line} />
 
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(7);
+          <View style={styles.tableHeader}>
+            <View style={styles.tableHeaderRow1}>
+              <Text style={styles.col1}>Service &</Text>
+              <Text style={styles.col2}>Service</Text>
+              <Text style={styles.col3}>Rate</Text>
+              <Text style={styles.col4}>Dis</Text>
+              <Text style={styles.col5}>Qty</Text>
+              <Text style={styles.col6}>Amt</Text>
+            </View>
+            <View style={styles.tableHeaderRow2}>
+              <Text style={styles.col1}>Products</Text>
+              <Text style={styles.col2}>Provider</Text>
+              <View style={styles.col3} />
+              <View style={styles.col4} />
+              <View style={styles.col5} />
+              <View style={styles.col6} />
+            </View>
+          </View>
+          <View style={styles.line} />
 
-    const addDetail = (label, value) => {
-      doc.text(label, leftX, y);
-      doc.text(":", colonX, y);
-      doc.text(String(value), valueX, y);
-      y += 3;
-    };
+          <View style={styles.itemsContainer}>
+            {details.map((d, index) => (
+              <View key={index} style={styles.tableRow}>
+                <Text style={styles.col1}>
+                  {String(d.productandservice_name || "-").substring(0, 14)}
+                </Text>
+                <Text style={styles.col2}>
+                  {String(d.staff_name || "-").substring(0, 7)}
+                </Text>
+                <Text style={styles.col3}>
+                  {parseFloat(d.productandservice_price || 0).toFixed(0)}
+                </Text>
+                <Text style={styles.col4}>
+                  {parseFloat(d.discount_amount || 0).toFixed(0)}
+                </Text>
+                <Text style={styles.col5}>{parseFloat(d.qty || 1)}</Text>
+                <Text style={styles.col6}>
+                  {parseFloat(d.total || 0).toFixed(0)}
+                </Text>
+              </View>
+            ))}
+          </View>
 
-    addDetail("Invoice No", item.member_no || "-");
-    addDetail("Date", item.billing_date.split(" ")[0]);
-    addDetail("Customer", item.name || "-");
-    addDetail("Mobile", item.phone || "-");
-    addDetail("Membership", item.membership || "-");
+          <View style={styles.line} />
 
-    y += 2;
-    doc.line(0, y, 58, y);
-    y += 3;
+          <View style={styles.totalsContainer}>
+            <View style={styles.totalRow}>
+              <Text style={styles.label}>Total Qty</Text>
+              <Text style={styles.colon}>:</Text>
+              <Text style={styles.value}>{details.length}</Text>
+            </View>
+            <View style={styles.totalRow}>
+              <Text style={styles.label}>Subtotal</Text>
+              <Text style={styles.colon}>:</Text>
+              <Text style={styles.value}>
+                {parseFloat(item.subtotal || item.total || 0).toFixed(2)}
+              </Text>
+            </View>
+            <View style={styles.totalRow}>
+              <Text style={styles.label}>Discount</Text>
+              <Text style={styles.colon}>:</Text>
+              <Text style={styles.value}>
+                {parseFloat(item.discount || 0).toFixed(2)}
+              </Text>
+            </View>
+            <View style={styles.totalRow}>
+              <Text style={styles.label}>Grand Total</Text>
+              <Text style={styles.colon}>:</Text>
+              <Text style={styles.value}>
+                {parseFloat(item.total || 0).toFixed(2)}
+              </Text>
+            </View>
+            <View style={styles.totalRow}>
+              <Text style={styles.label}>Paid</Text>
+              <Text style={styles.colon}>:</Text>
+              <Text style={styles.value}>
+                {parseFloat(item.paid || 0).toFixed(2)}
+              </Text>
+            </View>
+            <View style={styles.totalRow}>
+              <Text style={styles.label}>Balance</Text>
+              <Text style={styles.colon}>:</Text>
+              <Text style={styles.value}>
+                {parseFloat(item.balance || 0).toFixed(2)}
+              </Text>
+            </View>
+          </View>
 
-    // 🔹 ITEM TABLE HEADER
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(7);
-    doc.text("Service &", 0, y);
-    doc.text("Service", 15, y);
-    doc.text("Rate", 27, y);
-    doc.text("Dis", 35, y);
-    doc.text("Qty", 43, y);
-    doc.text("Amt", 56, y, { align: "right" }); // 👈 Full width right align
-    y += 2.5;
-    doc.text("Products", 0, y);
-    doc.text("Provider", 15, y);
-    y += 2.5;
-    doc.line(0, y, 58, y);
-    y += 3;
+          <View style={styles.line} />
 
-    // 🔹 ITEM DETAILS
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(6.5);
+          <View style={styles.footer}>
+            <Text>We wish to have your support always.</Text>
+          </View>
+          <View style={styles.footer2}>
+            <Text>*** THANK YOU. PLEASE VISIT AGAIN ***</Text>
+          </View>
+        </Page>
+      </Document>
+    );
+  };
 
-    details.forEach((d) => {
-      if (y > totalHeight - 10) return; // prevent overflow
-      const name = String(d.productandservice_name || "-").substring(0, 14);
-      const staff = String(d.staff_name || "-").substring(0, 7);
-      const rate = parseFloat(d.productandservice_price || 0).toFixed(0);
-      const dis = parseFloat(d.discount_amount || 0).toFixed(0);
-      const qty = parseFloat(d.qty || 1);
-      const total = parseFloat(d.total || 0).toFixed(0);
-
-      doc.text(name, 0, y);
-      doc.text(staff, 15, y);
-      doc.text(rate, 27, y);
-      doc.text(dis, 35, y);
-      doc.text(String(qty), 43, y);
-      doc.text(total, 56, y, { align: "right" });
-      y += 3;
-    });
-
-    doc.line(0, y, 58, y);
-    y += 3;
-
-    // 🔹 TOTALS
-    const subtotal = parseFloat(item.subtotal || item.total || 0);
-    const discount = parseFloat(item.discount || 0);
-    const grand = parseFloat(item.total || 0);
-    const paid = parseFloat(item.paid || 0);
-    const balance = parseFloat(item.balance || 0);
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(7.5);
-
-    const addTotalLine = (label, value) => {
-      doc.text(label, leftX, y);
-      doc.text(":", colonX, y);
-      doc.text(String(value), valueX, y);
-      y += 3;
-    };
-
-    addTotalLine("Total Qty", details.length);
-    addTotalLine("Subtotal", subtotal.toFixed(2));
-    addTotalLine("Discount", discount.toFixed(2));
-    addTotalLine("Grand Total", grand.toFixed(2));
-    addTotalLine("Paid", paid.toFixed(2));
-    addTotalLine("Balance", balance.toFixed(2));
-
-    y += 2;
-    doc.line(0, y, 58, y);
-    y += 3;
-
-    // 🔹 FOOTER
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(7);
-    doc.text("We wish to have your support always.", 29, y, {
-      align: "center",
-    });
-    y += 3;
-    doc.text("*** THANK YOU. PLEASE VISIT AGAIN ***", 29, y, {
-      align: "center",
-    });
-
-    doc.save(`billing_${item.member_no}.pdf`);
+  const handlePrint = async (item) => {
+    const companyDetails = companies[0] || {};
+    const blob = await pdf(
+      <Invoice item={item} companyDetails={companyDetails} />
+    ).toBlob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `billing_${item.member_no}.pdf`;
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   const filteredBilling = billing.filter(
@@ -247,7 +414,7 @@ const Billing = () => {
           {
             label: "Delete",
             icon: <MdOutlineDelete />,
-            onClick: () => handleDelete(item.id),
+            onClick: () => handleDelete(item.billing_id),
           },
         ]}
         label={<HiOutlineDotsVertical />}
