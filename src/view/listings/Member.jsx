@@ -6,6 +6,7 @@ import { Buttons, ActionButton } from "../../components/Buttons";
 import { MdOutlineDelete } from "react-icons/md";
 import { LiaEditSolid } from "react-icons/lia";
 import { HiOutlineDotsVertical } from "react-icons/hi";
+import * as XLSX from "xlsx";
 import PageTitle from "../../components/PageTitle";
 import NotifyData from "../../components/NotifyData";
 import TableUI from "../../components/TableUI";
@@ -33,6 +34,45 @@ const Member = () => {
   }, [dispatch]);
 
   const handleCreate = () => navigate("/member/create");
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "-";
+    const [year, month, day] = dateStr.split(" ")[0].split("-");
+    return `${day}-${month}-${year}`;
+  };
+
+  const handleExport = () => {
+    const wsData = [
+      [
+        "S.No",
+        "Member No",
+        "Name",
+        "Phone",
+        "Membership",
+        "Last Visit Date",
+        "Total Visit Count",
+        "Total Spending",
+      ], // headers
+      ...filteredMember.map((m, index) => [
+        index + 1,
+        m.member_no,
+        m.name,
+        m.phone,
+        m.membership,
+        formatDate(m.last_visit_date),
+        m.total_visit_count,
+        m.total_spending,
+      ]),
+    ];
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    XLSX.utils.book_append_sheet(wb, ws, "Members");
+    XLSX.writeFile(
+      wb,
+      `Members_${new Date().toISOString().split("T")[0]}.xlsx`
+    );
+  };
+
   const handleEdit = (m) => navigate(`/member/edit/${m.member_id}`);
 
   const handleDelete = async (id) => {
@@ -141,6 +181,11 @@ const Member = () => {
               btnlabel="Add New"
               className="add-btn"
               onClick={handleCreate}
+            />
+            <Buttons
+              btnlabel="Download Excel"
+              className="add-btn ms-2"
+              onClick={handleExport}
             />
           </Col>
           <Col xs="12" lg="3" className="py-2">
