@@ -56,9 +56,13 @@ const Billing = () => {
     }
 
     const companyDetails = companies[0] || {};
+    const numItems = details.length;
+    const contentHeight = 114.5 + numItems * 3;
+    const totalHeight = Math.ceil(contentHeight + 5); // bottom margin
+
     const doc = new jsPDF({
       unit: "mm",
-      format: [58, 150],
+      format: [58, totalHeight],
     });
 
     let y = 5; // keep top margin small (only top & bottom space)
@@ -145,7 +149,7 @@ const Billing = () => {
     doc.setFontSize(6.5);
 
     details.forEach((d) => {
-      if (y > 150) return;
+      if (y > totalHeight - 10) return; // prevent overflow
       const name = String(d.productandservice_name || "-").substring(0, 14);
       const staff = String(d.staff_name || "-").substring(0, 7);
       const rate = parseFloat(d.productandservice_price || 0).toFixed(0);
