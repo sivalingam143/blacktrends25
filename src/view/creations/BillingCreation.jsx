@@ -362,23 +362,13 @@ const BillingCreation = () => {
 
       if (field === "category_id") {
         row.category_id = value;
-        // Clear product if it doesn't match the new category
-        const filteredProducts = products.filter(
-          (p) => p.category_id === value
-        );
-        if (
-          row.product_id &&
-          !filteredProducts.find(
-            (p) => p.productandservice_id === row.product_id
-          )
-        ) {
-          row.product_id = "";
-          row.product_name = "";
-          row.product_price = 0;
-          row.qty = 1;
-          row.row_total = 0;
-          row.discount_amount = 0;
-        }
+        // Always clear product when category changes
+        row.product_id = "";
+        row.product_name = "";
+        row.product_price = 0;
+        row.qty = 1;
+        row.row_total = 0;
+        row.discount_amount = 0;
       } else if (field === "product_id") {
         const selectedProduct = products.find(
           (p) => p.productandservice_id === value
