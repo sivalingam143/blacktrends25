@@ -632,7 +632,7 @@ const BillingCreation = () => {
                               )
                             }
                             options={discountTypeOptions}
-                            style={{ width: "10px" }}
+                            style={{ width: "50px" }}
                           />
                           <TextInputform
                             formtype="text"
