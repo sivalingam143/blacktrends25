@@ -166,7 +166,7 @@ const Billing = () => {
     tableRow: {
       flexDirection: "row",
       marginBottom: "1.5mm",
-      fontSize: "7.5pt",
+      fontSize: "6pt",
     },
     totalsContainer: {
       width: "54mm",
