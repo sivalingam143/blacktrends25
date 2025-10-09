@@ -9,6 +9,7 @@ import { HiOutlineDotsVertical } from "react-icons/hi";
 import PageTitle from "../../components/PageTitle";
 import NotifyData from "../../components/NotifyData";
 import TableUI from "../../components/TableUI";
+import { DropDown } from "../../components/Forms";
 import {
   fetchMembers,
   deleteMember,
@@ -21,6 +22,7 @@ const Member = () => {
   const navigate = useNavigate();
   const { member, status } = useSelector((s) => s.member);
   const [searchTerm, setSearchTerm] = useState("");
+  const [membershipFilter, setMembershipFilter] = useState("");
 
   // modal state
   const [showGoldModal, setShowGoldModal] = React.useState(false);
@@ -65,13 +67,25 @@ const Member = () => {
     }
   };
 
-  const filteredMember = member.filter(
-    (m) =>
-      (m.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-      String(m.phone || "")
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase())
-  );
+  const membershipOptions = [
+    { value: "All", label: "All" },
+    { value: "Yes", label: "Yes" },
+    { value: "No", label: "No" },
+  ];
+
+  const filteredMember = member.filter((m) => {
+    const nameMatch = (m.name || "")
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const phoneMatch = String(m.phone || "")
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const membershipMatch =
+      !membershipFilter ||
+      membershipFilter === "All" ||
+      m.membership === membershipFilter;
+    return (nameMatch || phoneMatch) && membershipMatch;
+  });
 
   // ---------- table ----------
   const headers = ["No", "Name", "Phone", "Gold"];
@@ -130,14 +144,26 @@ const Member = () => {
             />
           </Col>
           <Col xs="12" lg="3" className="py-2">
-            <input
-              type="text"
-              placeholder="Search by name or phone..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="form-control"
+            <div className="d-flex gap-2">
+              <input
+                type="text"
+                placeholder="Search by name or phone..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="form-control flex-grow-1"
+              />
+            </div>
+          </Col>
+          <Col xs="12" lg="3" className="py-2">
+            <DropDown
+              placeholder="Membership"
+              value={membershipFilter}
+              onChange={(e) => setMembershipFilter(e.target.value)}
+              options={membershipOptions}
+              width="150px"
             />
           </Col>
+
           <Col xs="12" className="py-3">
             <TableUI
               headers={headers}
