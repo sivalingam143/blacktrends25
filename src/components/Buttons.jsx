@@ -1,9 +1,14 @@
 import React from "react";
 import Dropdown from "react-bootstrap/Dropdown";
-const Buttons = ({ type, btnlabel, className, onClick }) => {
+const Buttons = ({ type, btnlabel, className, onClick, disabled }) => {
   return (
     <>
-      <button type={type} className={className} onClick={onClick}>
+      <button
+        type={type}
+        className={className}
+        onClick={onClick}
+        disabled={disabled}
+      >
         {btnlabel}
       </button>
     </>
