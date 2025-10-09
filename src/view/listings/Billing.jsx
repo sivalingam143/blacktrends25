@@ -60,7 +60,7 @@ const Billing = () => {
       margin: 0,
       backgroundColor: "#FFFFFF",
       width: "58mm",
-      height: "auto",
+      height: "fit-content",
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
