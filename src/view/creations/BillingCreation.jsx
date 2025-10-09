@@ -550,124 +550,137 @@ const BillingCreation = () => {
         <Row className="mb-4">
           {/* Left: Container 2 - Product/Service Table - Full Width */}
           <Col md={12}>
-            <Table className="mb-3">
-              <thead>
-                <tr>
-                  <th>Category</th>
-                  <th>Product/Service</th>
-                  <th>Qty</th>
-                  <th>Discount</th>
-                  <th>Service Provider</th>
-                  <th>Total</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((row, index) => {
-                  const filteredProducts = row.category_id
-                    ? products.filter((p) => p.category_id === row.category_id)
-                    : [];
-                  const filteredProductOptions = filteredProducts.map((p) => ({
-                    value: p.productandservice_id,
-                    label: p.productandservice_name,
-                  }));
-                  return (
-                    <tr key={index}>
-                      <td>
-                        <DropDown
-                          placeholder="Select"
-                          value={row.category_id}
-                          onChange={(e) =>
-                            handleRowChange(
-                              index,
-                              "category_id",
-                              e.target.value
-                            )
-                          }
-                          options={categoryOptions}
-                        />
-                      </td>
-                      <td>
-                        <DropDown
-                          key={row.category_id}
-                          placeholder="Select"
-                          value={row.product_id}
-                          onChange={(e) =>
-                            handleRowChange(index, "product_id", e.target.value)
-                          }
-                          options={filteredProductOptions}
-                        />
-                      </td>
-                      <td>
-                        <TextInputform
-                          formtype="text"
-                          PlaceHolder="Qty"
-                          value={row.qty}
-                          onChange={(e) =>
-                            handleRowChange(index, "qty", e.target.value)
-                          }
-                          style={{ width: "60px" }}
-                        />
-                      </td>
-                      <td>
-                        {/* MODIFIED: Added gap-2 for spacing between dropdown and input */}
-                        <div className="d-flex gap-2">
+            <div className="table-responsive">
+              <Table className="mb-3">
+                <thead>
+                  <tr>
+                    <th>Category</th>
+                    <th>Product/Service</th>
+                    <th>Qty</th>
+                    <th>Discount</th>
+                    <th>Service Provider</th>
+                    <th>Total</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((row, index) => {
+                    const filteredProducts = row.category_id
+                      ? products.filter(
+                          (p) => p.category_id === row.category_id
+                        )
+                      : [];
+                    const filteredProductOptions = filteredProducts.map(
+                      (p) => ({
+                        value: p.productandservice_id,
+                        label: p.productandservice_name,
+                      })
+                    );
+                    return (
+                      <tr key={index}>
+                        <td>
                           <DropDown
-                            placeholder="Type"
-                            value={row.discount_type || "INR"}
+                            placeholder="Select"
+                            value={row.category_id}
                             onChange={(e) =>
                               handleRowChange(
                                 index,
-                                "discount_type",
+                                "category_id",
                                 e.target.value
                               )
                             }
-                            options={discountTypeOptions}
-                            style={{ width: "50px" }}
+                            options={categoryOptions}
                           />
+                        </td>
+                        <td>
+                          <DropDown
+                            key={row.category_id}
+                            placeholder="Select"
+                            value={row.product_id}
+                            onChange={(e) =>
+                              handleRowChange(
+                                index,
+                                "product_id",
+                                e.target.value
+                              )
+                            }
+                            options={filteredProductOptions}
+                          />
+                        </td>
+                        <td>
                           <TextInputform
                             formtype="text"
-                            step="0.01"
-                            PlaceHolder="Amount"
-                            value={row.discount}
+                            PlaceHolder="Qty"
+                            value={row.qty}
                             onChange={(e) =>
-                              handleRowChange(index, "discount", e.target.value)
+                              handleRowChange(index, "qty", e.target.value)
                             }
-                            style={{ width: "70px" }}
+                            style={{ width: "60px" }}
                           />
-                        </div>
-                      </td>
-                      <td>
-                        {/* Single Select */}
-                        <Select
-                          options={staffOptions}
-                          value={
-                            staffOptions.find(
-                              (opt) => opt.value === row.staff_id
-                            ) || null
-                          }
-                          onChange={(selected) =>
-                            handleRowChange(index, "staff_id", selected)
-                          }
-                          placeholder="Select"
-                        />
-                      </td>
-                      <td>₹{row.row_total.toFixed(2)}</td>
-                      <td>
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          onClick={() => removeRow(index)}
-                        >
-                          Delete
-                        </Button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </Table>
-
+                        </td>
+                        <td>
+                          {/* MODIFIED: Added gap-2 for spacing between dropdown and input */}
+                          <div className="d-flex gap-2">
+                            <DropDown
+                              placeholder="Type"
+                              value={row.discount_type || "INR"}
+                              onChange={(e) =>
+                                handleRowChange(
+                                  index,
+                                  "discount_type",
+                                  e.target.value
+                                )
+                              }
+                              options={discountTypeOptions}
+                              style={{ width: "50px" }}
+                            />
+                            <TextInputform
+                              formtype="text"
+                              step="0.01"
+                              PlaceHolder="Amount"
+                              value={row.discount}
+                              onChange={(e) =>
+                                handleRowChange(
+                                  index,
+                                  "discount",
+                                  e.target.value
+                                )
+                              }
+                              style={{ width: "70px" }}
+                            />
+                          </div>
+                        </td>
+                        <td>
+                          {/* Single Select */}
+                          <Select
+                            options={staffOptions}
+                            value={
+                              staffOptions.find(
+                                (opt) => opt.value === row.staff_id
+                              ) || null
+                            }
+                            onChange={(selected) =>
+                              handleRowChange(index, "staff_id", selected)
+                            }
+                            placeholder="Select"
+                          />
+                        </td>
+                        <td>₹{row.row_total.toFixed(2)}</td>
+                        <td>
+                          <Button
+                            variant="danger"
+                            size="sm"
+                            onClick={() => removeRow(index)}
+                          >
+                            Delete
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </Table>
+            </div>
             <Button variant="success" onClick={addRow}>
               Add Row
             </Button>
