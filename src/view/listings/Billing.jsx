@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -7,7 +7,16 @@ import { MdOutlineDelete } from "react-icons/md";
 import { LiaEditSolid } from "react-icons/lia";
 import { HiOutlineDotsVertical } from "react-icons/hi";
 import { FaPrint } from "react-icons/fa";
-import jsPDF from "jspdf";
+import {
+  pdf,
+  Document,
+  Page,
+  Text,
+  View,
+  StyleSheet,
+  Image,
+} from "@react-pdf/renderer";
+import logo from "../../assets/images/storelogo.png";
 import PageTitle from "../../components/PageTitle";
 import NotifyData from "../../components/NotifyData";
 import TableUI from "../../components/TableUI";
@@ -20,6 +29,7 @@ const Billing = () => {
   const navigate = useNavigate();
   const { billing } = useSelector((s) => s.billing);
   const companies = useSelector((s) => s.company.company);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     dispatch(fetchBillings(""));
@@ -44,7 +54,149 @@ const Billing = () => {
     }
   };
 
-  const handlePrint = (item) => {
+  const styles = StyleSheet.create({
+    page: {
+      padding: 0,
+      margin: 0,
+      backgroundColor: "#FFFFFF",
+      width: "58mm",
+      height: "fit-content",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+    },
+    logo: {
+      width: "30mm",
+      height: "20mm",
+      marginTop: "2mm",
+      marginBottom: "2mm",
+      alignSelf: "center",
+    },
+    contentWrapper: {
+      width: "54mm",
+      alignSelf: "center",
+    },
+    header: {
+      width: "54mm",
+      textAlign: "center",
+      marginBottom: "2mm",
+    },
+    companyName: {
+      fontSize: "14pt",
+      fontWeight: "bold",
+      marginBottom: "1mm",
+    },
+    tagline: {
+      fontSize: "10pt",
+      marginBottom: "0.5mm",
+    },
+    address: {
+      fontSize: "7pt",
+      marginBottom: "0.5mm",
+    },
+    phone: {
+      fontSize: "7pt",
+      marginBottom: "0.5mm",
+    },
+    line: {
+      width: "54mm",
+      borderBottomWidth: 1,
+      borderBottomColor: "black",
+      marginVertical: "0.5mm",
+      height: 0,
+    },
+    title: {
+      fontSize: "9pt",
+      fontWeight: "bold",
+      textAlign: "center",
+      marginTop: "0.5mm",
+      marginBottom: "0mm",
+    },
+    subtitle: {
+      fontSize: "7pt",
+      textAlign: "center",
+      marginBottom: "0.5mm",
+    },
+    detailContainer: {
+      width: "54mm",
+      marginTop: "0mm",
+    },
+    detailRow: {
+      flexDirection: "row",
+      marginBottom: "1.5mm",
+      fontSize: "8pt",
+    },
+    label: {
+      width: "20mm",
+      textAlign: "left",
+    },
+    colon: {
+      width: "7mm",
+      textAlign: "center",
+    },
+    value: {
+      width: "31mm",
+      textAlign: "right",
+    },
+    tableHeader: {
+      width: "54mm",
+      marginTop: "0.5mm",
+    },
+    tableHeaderRow1: {
+      flexDirection: "row",
+      fontSize: "8pt",
+      fontWeight: "bold",
+      marginBottom: "0.5mm",
+    },
+    tableHeaderRow2: {
+      flexDirection: "row",
+      fontSize: "8pt",
+      fontWeight: "bold",
+      marginBottom: "0.5mm",
+    },
+    col1: { width: "13mm", textAlign: "left" },
+    col2: { width: "11mm", textAlign: "left" },
+    col3: { width: "7mm", textAlign: "right" },
+    col4: { width: "7mm", textAlign: "right" },
+    col5: { width: "7mm", textAlign: "right" },
+    col6: { width: "9mm", textAlign: "right" },
+    itemsContainer: {
+      width: "54mm",
+    },
+    tableRow: {
+      flexDirection: "row",
+      marginBottom: "1.5mm",
+      fontSize: "6pt",
+    },
+    totalsContainer: {
+      width: "54mm",
+      marginTop: "0.5mm",
+    },
+    totalRow: {
+      flexDirection: "row",
+      marginBottom: "1.5mm",
+      fontSize: "8.5pt",
+      fontWeight: "bold",
+    },
+    footer: {
+      width: "54mm",
+      textAlign: "center",
+      fontSize: "8pt",
+      fontWeight: "bold",
+      marginTop: "5.5mm",
+      marginBottom: "0mm",
+    },
+    footer2: {
+      width: "54mm",
+      textAlign: "center",
+      fontSize: "8pt",
+      fontWeight: "bold",
+      marginTop: "5.5mm",
+      marginBottom: "0mm",
+    },
+  });
+
+  const Invoice = ({ item, companyDetails }) => {
     let details = [];
     try {
       details = item.productandservice_details
@@ -54,156 +206,199 @@ const Billing = () => {
       console.error("Error parsing details:", e);
     }
 
-    const companyDetails = companies[0] || {};
-    const doc = new jsPDF({
-      unit: "mm",
-      format: [58, 200],
-    });
+    const numItems = details.length;
+    const contentHeight = 200 + numItems * 4;
+    const totalHeight = Math.ceil(contentHeight + 20);
 
-    let y = 5;
+    const pageHeight = `${totalHeight}mm`;
 
-    // 🔹 HEADER
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
-    doc.text(companyDetails.company_name || "Company Name", 29, y, {
-      align: "center",
-    });
-    y += 4;
-    doc.setFontSize(8);
-    doc.text("Hair & Skin", 29, y, { align: "center" });
-    y += 3;
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(6);
-    doc.text(companyDetails.address || "Address", 29, y, { align: "center" });
-    y += 2.5;
-    doc.text(`Ph: ${companyDetails.contact_number || "Phone Number"}`, 29, y, {
-      align: "center",
-    });
-    y += 2.5;
-    doc.text(`GST: ${companyDetails.gst_no || "GST No"}`, 29, y, {
-      align: "center",
-    });
-    y += 3;
+    return (
+      <Document>
+        <Page size={{ width: "58mm", height: pageHeight }} style={styles.page}>
+          <View style={styles.logo}>
+            <Image src={logo} style={{ width: "30mm", height: "20mm" }} />
+          </View>
 
-    // Separator
-    doc.line(3, y, 55, y);
-    y += 3;
+          <View style={styles.contentWrapper}>
+            <View style={styles.header}>
+              <Text style={styles.companyName}>
+                {companyDetails.company_name || "Company Name"}
+              </Text>
+              <Text style={styles.tagline}>Hair | Skin | Makeup | Spa</Text>
+              <Text style={styles.address}>
+                {companyDetails.address || "Address"}
+              </Text>
+              <Text style={styles.phone}>
+                Ph: {companyDetails.contact_number || "Phone Number"}
+              </Text>
+            </View>
 
-    // 🔹 INVOICE TITLE
-    doc.setFontSize(7);
-    doc.setFont("helvetica", "bold");
-    doc.text("SALES INVOICE", 29, y, { align: "center" });
-    y += 3;
-    doc.line(3, y, 55, y);
-    y += 2;
+            <View style={styles.line} />
 
-    // 🔹 INVOICE DETAILS (aligned)
-    const leftX = 3;
-    const colonX = 20;
-    const valueX = 27;
+            <Text style={styles.title}>SALES INVOICE</Text>
+            <Text style={styles.subtitle}>(Soozhakkarai Medu)</Text>
+            <View style={styles.line} />
 
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(6);
+            <View style={styles.detailContainer}>
+              <View style={styles.detailRow}>
+                <Text style={styles.label}>Invoice No</Text>
+                <Text style={styles.colon}>:</Text>
+                <Text style={styles.value}>{item.member_no || "-"}</Text>
+              </View>
+              <View style={styles.detailRow}>
+                <Text style={styles.label}>Date</Text>
+                <Text style={styles.colon}>:</Text>
+                <Text style={styles.value}>
+                  {item.billing_date.split(" ")[0]}
+                </Text>
+              </View>
+              <View style={styles.detailRow}>
+                <Text style={styles.label}>Customer</Text>
+                <Text style={styles.colon}>:</Text>
+                <Text style={styles.value}>{item.name || "-"}</Text>
+              </View>
+              <View style={styles.detailRow}>
+                <Text style={styles.label}>Mobile</Text>
+                <Text style={styles.colon}>:</Text>
+                <Text style={styles.value}>{item.phone || "-"}</Text>
+              </View>
+              <View style={styles.detailRow}>
+                <Text style={styles.label}>Membership</Text>
+                <Text style={styles.colon}>:</Text>
+                <Text style={styles.value}>{item.membership || "-"}</Text>
+              </View>
+            </View>
 
-    const addDetail = (label, value) => {
-      doc.text(label, leftX, y);
-      doc.text(":", colonX, y);
-      doc.text(String(value), valueX, y);
-      y += 3;
-    };
+            <View style={styles.line} />
 
-    addDetail("Invoice No", item.member_no || "-");
-    addDetail("Date", item.billing_date.split(" ")[0]);
-    addDetail("Customer", item.name || "-");
-    addDetail("Mobile", item.phone || "-");
-    addDetail("Membership", item.membership || "-");
+            <View style={styles.tableHeader}>
+              <View style={styles.tableHeaderRow1}>
+                <Text style={styles.col1}>Service &</Text>
+                <Text style={styles.col2}>Service</Text>
+                <Text style={styles.col3}>Rate</Text>
+                <Text style={styles.col4}>Dis</Text>
+                <Text style={styles.col5}>Qty</Text>
+                <Text style={styles.col6}>Amt</Text>
+              </View>
+              <View style={styles.tableHeaderRow2}>
+                <Text style={styles.col1}>Products</Text>
+                <Text style={styles.col2}>Provider</Text>
+                <View style={styles.col3} />
+                <View style={styles.col4} />
+                <View style={styles.col5} />
+                <View style={styles.col6} />
+              </View>
+            </View>
+            <View style={styles.line} />
 
-    y += 2;
-    doc.line(3, y, 55, y);
-    y += 3;
+            <View style={styles.itemsContainer}>
+              {details.map((d, index) => (
+                <View key={index} style={styles.tableRow}>
+                  <Text style={styles.col1}>
+                    {String(d.productandservice_name || "-").substring(0, 14)}
+                  </Text>
+                  <Text style={styles.col2}>
+                    {String(d.staff_name || "-").substring(0, 7)}
+                  </Text>
+                  <Text style={styles.col3}>
+                    {parseFloat(d.productandservice_price || 0).toFixed(0)}
+                  </Text>
+                  <Text style={styles.col4}>
+                    {parseFloat(d.discount_amount || 0).toFixed(0)}
+                  </Text>
+                  <Text style={styles.col5}>{parseFloat(d.qty || 1)}</Text>
+                  <Text style={styles.col6}>
+                    {parseFloat(d.total || 0).toFixed(0)}
+                  </Text>
+                </View>
+              ))}
+            </View>
 
-    // 🔹 ITEM TABLE HEADER
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(6);
-    doc.text("Item", 3, y);
-    doc.text("Stf", 22, y);
-    doc.text("Rate", 30, y);
-    doc.text("Dis", 38, y);
-    doc.text("Qty", 44, y);
-    doc.text("Amt", 55, y, { align: "right" });
-    y += 2;
+            <View style={styles.line} />
 
-    doc.line(3, y, 55, y); // line below header
-    y += 2;
+            <View style={styles.totalsContainer}>
+              <View style={styles.totalRow}>
+                <Text style={styles.label}>Total Qty</Text>
+                <Text style={styles.colon}>:</Text>
+                <Text style={styles.value}>{details.length}</Text>
+              </View>
+              <View style={styles.totalRow}>
+                <Text style={styles.label}>Subtotal</Text>
+                <Text style={styles.colon}>:</Text>
+                <Text style={styles.value}>
+                  {parseFloat(item.subtotal || item.total || 0).toFixed(2)}
+                </Text>
+              </View>
+              <View style={styles.totalRow}>
+                <Text style={styles.label}>Discount</Text>
+                <Text style={styles.colon}>:</Text>
+                <Text style={styles.value}>
+                  {parseFloat(item.discount || 0).toFixed(2)}
+                </Text>
+              </View>
+              <View style={styles.totalRow}>
+                <Text style={styles.label}>Grand Total</Text>
+                <Text style={styles.colon}>:</Text>
+                <Text style={styles.value}>
+                  {parseFloat(item.total || 0).toFixed(2)}
+                </Text>
+              </View>
+              <View style={styles.totalRow}>
+                <Text style={styles.label}>Paid</Text>
+                <Text style={styles.colon}>:</Text>
+                <Text style={styles.value}>
+                  {parseFloat(item.paid || 0).toFixed(2)}
+                </Text>
+              </View>
+              <View style={styles.totalRow}>
+                <Text style={styles.label}>Balance</Text>
+                <Text style={styles.colon}>:</Text>
+                <Text style={styles.value}>
+                  {parseFloat(item.balance || 0).toFixed(2)}
+                </Text>
+              </View>
+            </View>
 
-    // 🔹 ITEM DETAILS (NO line per item)
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(5.5);
-    let totalQty = details.length; // Count of products instead of sum of quantities
+            <View style={styles.line} />
 
-    details.forEach((d, i) => {
-      if (y > 160) return; // stop if height exceeded
-
-      const name = String(d.productandservice_name || "-").substring(0, 15);
-      const staff = String(d.staff_name || "-").substring(0, 6);
-      const rate = parseFloat(d.productandservice_price || 0).toFixed(0);
-      const dis = parseFloat(d.discount_amount || 0).toFixed(0);
-      const qty = parseFloat(d.qty || 1);
-      const total = parseFloat(d.total || 0).toFixed(0);
-
-      doc.text(name, 3, y);
-      doc.text(staff, 22, y);
-      doc.text(rate, 30, y);
-      doc.text(dis, 38, y);
-      doc.text(String(qty), 44, y);
-      doc.text(total, 55, y, { align: "right" });
-      y += 3;
-    });
-
-    // line below last item
-    doc.line(3, y, 55, y);
-    y += 3;
-
-    // 🔹 TOTALS SECTION (aligned)
-    const subtotal = parseFloat(item.subtotal || item.total || 0);
-    const discount = parseFloat(item.discount || 0);
-    const grand = parseFloat(item.total || 0);
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(6.5);
-
-    const addTotalLine = (label, value) => {
-      doc.text(label, leftX, y);
-      doc.text(":", colonX, y);
-      doc.text(String(value), valueX, y);
-      y += 3;
-    };
-
-    addTotalLine("Total Qty", totalQty);
-    addTotalLine("Subtotal", subtotal.toFixed(2));
-    addTotalLine("Discount", discount.toFixed(2));
-    addTotalLine("Grand Total", grand.toFixed(2));
-
-    y += 2;
-    doc.line(3, y, 55, y);
-    y += 3;
-
-    // 🔹 FOOTER
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(8);
-    doc.text("*** THANK YOU ***", 29, y, { align: "center" });
-    y += 3;
-    doc.text("PLEASE VISIT AGAIN", 29, y, { align: "center" });
-
-    // 🔹 SAVE PDF
-    doc.save(`billing_${item.member_no}.pdf`);
+            <View style={styles.footer}>
+              <Text>We wish to have your support always.</Text>
+            </View>
+            <View style={styles.footer2}>
+              <Text>*** THANK YOU. PLEASE VISIT AGAIN ***</Text>
+            </View>
+          </View>
+        </Page>
+      </Document>
+    );
   };
+
+  const handlePrint = async (item) => {
+    const companyDetails = companies[0] || {};
+    const blob = await pdf(
+      <Invoice item={item} companyDetails={companyDetails} />
+    ).toBlob();
+    const url = URL.createObjectURL(blob);
+    const newWindow = window.open(url, "_blank");
+    newWindow.onload = () => {
+      newWindow.print();
+      URL.revokeObjectURL(url);
+    };
+  };
+
+  const filteredBilling = billing.filter(
+    (item) =>
+      (item.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      String(item.member_no || "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
+  );
 
   // 🔹 TABLE HEADERS
   const headers = ["No", "Date", "Member No", "Name", "Total"];
 
   // 🔹 TABLE BODY
-  const body = billing.map((item, idx) => ({
+  const body = filteredBilling.map((item, idx) => ({
     key: item.billing_id,
     values: [
       idx + 1,
@@ -226,7 +421,7 @@ const Billing = () => {
           {
             label: "Delete",
             icon: <MdOutlineDelete />,
-            onClick: () => handleDelete(item.id),
+            onClick: () => handleDelete(item.billing_id),
           },
         ]}
         label={<HiOutlineDotsVertical />}
@@ -246,6 +441,15 @@ const Billing = () => {
               btnlabel="Add New"
               className="add-btn"
               onClick={handleCreate}
+            />
+          </Col>
+          <Col xs="12" lg="3" className="py-2">
+            <input
+              type="text"
+              placeholder="Search by name or member no..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="form-control"
             />
           </Col>
           <Col xs="12" className="py-3">

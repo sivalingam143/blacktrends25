@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -6,9 +6,11 @@ import { Buttons, ActionButton } from "../../components/Buttons";
 import { MdOutlineDelete } from "react-icons/md";
 import { LiaEditSolid } from "react-icons/lia";
 import { HiOutlineDotsVertical } from "react-icons/hi";
+import * as XLSX from "xlsx";
 import PageTitle from "../../components/PageTitle";
 import NotifyData from "../../components/NotifyData";
 import TableUI from "../../components/TableUI";
+import { DropDown } from "../../components/Forms";
 import {
   fetchMembers,
   deleteMember,
@@ -20,6 +22,8 @@ const Member = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { member, status } = useSelector((s) => s.member);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [membershipFilter, setMembershipFilter] = useState("");
 
   // modal state
   const [showGoldModal, setShowGoldModal] = React.useState(false);
@@ -30,6 +34,45 @@ const Member = () => {
   }, [dispatch]);
 
   const handleCreate = () => navigate("/member/create");
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "-";
+    const [year, month, day] = dateStr.split(" ")[0].split("-");
+    return `${day}-${month}-${year}`;
+  };
+
+  const handleExport = () => {
+    const wsData = [
+      [
+        "S.No",
+        "Member No",
+        "Name",
+        "Phone",
+        "Membership",
+        "Last Visit Date",
+        "Total Visit Count",
+        "Total Spending",
+      ], // headers
+      ...filteredMember.map((m, index) => [
+        index + 1,
+        m.member_no,
+        m.name,
+        m.phone,
+        m.membership,
+        formatDate(m.last_visit_date),
+        m.total_visit_count,
+        m.total_spending,
+      ]),
+    ];
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    XLSX.utils.book_append_sheet(wb, ws, "Members");
+    XLSX.writeFile(
+      wb,
+      `Members_${new Date().toISOString().split("T")[0]}.xlsx`
+    );
+  };
+
   const handleEdit = (m) => navigate(`/member/edit/${m.member_id}`);
 
   const handleDelete = async (id) => {
@@ -64,9 +107,29 @@ const Member = () => {
     }
   };
 
+  const membershipOptions = [
+    { value: "All", label: "All" },
+    { value: "Yes", label: "Yes" },
+    { value: "No", label: "No" },
+  ];
+
+  const filteredMember = member.filter((m) => {
+    const nameMatch = (m.name || "")
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const phoneMatch = String(m.phone || "")
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const membershipMatch =
+      !membershipFilter ||
+      membershipFilter === "All" ||
+      m.membership === membershipFilter;
+    return (nameMatch || phoneMatch) && membershipMatch;
+  });
+
   // ---------- table ----------
-  const headers = ["No", "Name", "Phone", "Gold"];
-  const body = member.map((m, idx) => ({
+  const headers = ["No", "Name", "Phone", "Membership"];
+  const body = filteredMember.map((m, idx) => ({
     key: m.member_id,
     values: [
       idx + 1,
@@ -118,6 +181,31 @@ const Member = () => {
               btnlabel="Add New"
               className="add-btn"
               onClick={handleCreate}
+            />
+            <Buttons
+              btnlabel="Download Excel"
+              className="add-btn ms-2"
+              onClick={handleExport}
+            />
+          </Col>
+          <Col xs="12" lg="3" className="py-2">
+            <div className="d-flex gap-2">
+              <input
+                type="text"
+                placeholder="Search by name or phone..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="form-control flex-grow-1"
+              />
+            </div>
+          </Col>
+          <Col xs="12" lg="3" className="py-2">
+            <DropDown
+              placeholder="Membership"
+              value={membershipFilter}
+              onChange={(e) => setMembershipFilter(e.target.value)}
+              options={membershipOptions}
+              width="150px"
             />
           </Col>
 

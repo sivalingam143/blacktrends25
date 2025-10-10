@@ -23,6 +23,7 @@ import {
   addBilling,
   updateBilling,
 } from "../../slice/BillingSlice";
+import { fetchCategories } from "../../slice/CategorySlice";
 
 const BillingCreation = () => {
   const dispatch = useDispatch();
@@ -34,6 +35,7 @@ const BillingCreation = () => {
     (s) => s.productandservice
   );
   const { staff } = useSelector((s) => s.staff);
+  const { categories } = useSelector((s) => s.categories);
   const isEdit = !!id;
 
   const [form, setForm] = useState({
@@ -51,6 +53,7 @@ const BillingCreation = () => {
   const [overall_discount, setOverallDiscount] = useState(0);
   const [discount_type, setDiscountType] = useState("INR");
   const [grand_total, setGrandTotal] = useState(0);
+  const [paid, setPaid] = useState(0);
   const [submitting, setSubmitting] = useState(false);
 
   // New Member Modal States
@@ -68,6 +71,35 @@ const BillingCreation = () => {
     label: m.phone,
   }));
 
+  // Category options
+  const categoryOptions = categories.map((cat) => ({
+    value: cat.category_id,
+    label: cat.category_name,
+  }));
+
+  // Prepare staff options for single-select
+  const staffOptions = staff.map((st) => ({
+    value: st.staff_id,
+    label: st.name,
+  }));
+
+  // Prepare product options for DropDown
+  const productOptions = products.map((p) => ({
+    value: p.productandservice_id,
+    label: p.productandservice_name,
+  }));
+
+  // Prepare discount type options for DropDown
+  const discountTypeOptions = [
+    { value: "INR", label: "INR" },
+    { value: "PER", label: "%" },
+  ];
+  // New Member Membership Options
+  const newMemberMembershipOptions = [
+    { value: "No", label: "No" },
+    { value: "Yes", label: "Yes" },
+  ];
+
   const formatDate = (dateStr) => {
     if (!dateStr) return "-";
     const [year, month, day] = dateStr.split("-");
@@ -78,6 +110,7 @@ const BillingCreation = () => {
     dispatch(fetchMembers(""));
     dispatch(fetchProductAndServices(""));
     dispatch(fetchStaff(""));
+    dispatch(fetchCategories(""));
     dispatch(fetchBillings(""));
   }, [dispatch]);
 
@@ -93,6 +126,7 @@ const BillingCreation = () => {
         });
         setOverallDiscount(parseFloat(rec.discount));
         setDiscountType(rec.discount_type || "INR");
+        setPaid(parseFloat(rec.paid) || 0);
 
         // Parse product details if exists
         let parsedRows = [];
@@ -126,6 +160,7 @@ const BillingCreation = () => {
               }
 
               return {
+                category_id: detail.category_id || product?.category_id || "",
                 product_id: productId,
                 product_name:
                   detail.productandservice_name ||
@@ -166,7 +201,7 @@ const BillingCreation = () => {
         }
       }
     }
-  }, [id, billing, isEdit, products, staff]);
+  }, [id, billing, isEdit, products, staff, categories]);
 
   // Recalculate totals
   useEffect(() => {
@@ -256,6 +291,10 @@ const BillingCreation = () => {
     setOverallDiscount(parseFloat(e.target.value) || 0);
   };
 
+  const handlePaidChange = (e) => {
+    setPaid(parseFloat(e.target.value) || 0);
+  };
+
   // New Member Form Handlers
   const handleNewMemberChange = (e) => {
     const { name, value } = e.target;
@@ -321,13 +360,23 @@ const BillingCreation = () => {
       const newRows = [...prev];
       const row = { ...newRows[index] };
 
-      if (field === "product_id") {
+      if (field === "category_id") {
+        row.category_id = value;
+        // Always clear product when category changes
+        row.product_id = "";
+        row.product_name = "";
+        row.product_price = 0;
+        row.qty = 1;
+        row.row_total = 0;
+        row.discount_amount = 0;
+      } else if (field === "product_id") {
         const selectedProduct = products.find(
           (p) => p.productandservice_id === value
         );
         row.product_id = value;
         row.product_name = selectedProduct?.productandservice_name || "";
         row.product_price = selectedProduct?.productandservice_price || 0;
+        row.category_id = selectedProduct?.category_id || "";
       } else if (field === "staff_id") {
         // Single staff handling
         row.staff_id = value ? value.value : null;
@@ -357,6 +406,7 @@ const BillingCreation = () => {
   // Add row
   const addRow = () => {
     const newRow = {
+      category_id: "",
       product_id: "",
       product_name: "",
       product_price: 0,
@@ -402,11 +452,13 @@ const BillingCreation = () => {
     }
 
     try {
+      const balance = grand_total - paid;
       let billingPayload = {
         ...form,
         member_id: form.member_id,
         productandservice_details: JSON.stringify(
           rows.map((r) => ({
+            category_id: r.category_id,
             productandservice_id: r.product_id,
             productandservice_name: r.product_name,
             productandservice_price: r.product_price,
@@ -424,6 +476,8 @@ const BillingCreation = () => {
         discount: overall_discount,
         discount_type,
         total: grand_total,
+        paid,
+        balance,
       };
 
       if (isEdit) {
@@ -442,28 +496,7 @@ const BillingCreation = () => {
     }
   };
 
-  // Prepare staff options for single-select
-  const staffOptions = staff.map((st) => ({
-    value: st.staff_id,
-    label: st.name,
-  }));
-
-  // Prepare product options for DropDown
-  const productOptions = products.map((p) => ({
-    value: p.productandservice_id,
-    label: p.productandservice_name,
-  }));
-
-  // Prepare discount type options for DropDown
-  const discountTypeOptions = [
-    { value: "INR", label: "INR" },
-    { value: "PER", label: "%" },
-  ];
-  // New Member Membership Options
-  const newMemberMembershipOptions = [
-    { value: "No", label: "No" },
-    { value: "Yes", label: "Yes" },
-  ];
+  const balance = grand_total - paid;
 
   return (
     <div id="main">
@@ -520,96 +553,121 @@ const BillingCreation = () => {
             <Table className="mb-3">
               <thead>
                 <tr>
-                  <th>Product/Service Dropdown</th>
+                  <th>Category</th>
+                  <th>Product/Service</th>
                   <th>Qty</th>
                   <th>Discount</th>
-                  <th>Service Provider Dropdown</th>
+                  <th>Service Provider</th>
                   <th>Total</th>
                   <th>Action</th>
                 </tr>
               </thead>
               <tbody>
-                {rows.map((row, index) => (
-                  <tr key={index}>
-                    <td>
-                      <DropDown
-                        placeholder="Select Product/Service"
-                        value={row.product_id}
-                        onChange={(e) =>
-                          handleRowChange(index, "product_id", e.target.value)
-                        }
-                        options={productOptions}
-                        style={{ width: "20px" }}
-                      />
-                    </td>
-                    <td>
-                      <TextInputform
-                        formtype="text"
-                        PlaceHolder="Qty"
-                        value={row.qty}
-                        onChange={(e) =>
-                          handleRowChange(index, "qty", e.target.value)
-                        }
-                        style={{ width: "40px" }}
-                      />
-                    </td>
-                    <td>
-                      {/* MODIFIED: Added gap-2 for spacing between dropdown and input */}
-                      <div className="d-flex gap-2">
+                {rows.map((row, index) => {
+                  const filteredProducts = row.category_id
+                    ? products.filter((p) => p.category_id === row.category_id)
+                    : [];
+                  const filteredProductOptions = filteredProducts.map((p) => ({
+                    value: p.productandservice_id,
+                    label: p.productandservice_name,
+                  }));
+                  return (
+                    <tr key={index}>
+                      <td>
                         <DropDown
-                          placeholder="Type"
-                          value={row.discount_type || "INR"}
+                          placeholder="Select"
+                          value={row.category_id}
                           onChange={(e) =>
                             handleRowChange(
                               index,
-                              "discount_type",
+                              "category_id",
                               e.target.value
                             )
                           }
-                          options={discountTypeOptions}
-                          style={{ width: "40px" }}
+                          options={categoryOptions}
                         />
+                      </td>
+                      <td>
+                        <DropDown
+                          key={row.category_id}
+                          placeholder="Select"
+                          value={row.product_id}
+                          onChange={(e) =>
+                            handleRowChange(index, "product_id", e.target.value)
+                          }
+                          options={filteredProductOptions}
+                        />
+                      </td>
+                      <td>
                         <TextInputform
                           formtype="text"
-                          step="0.01"
-                          PlaceHolder="Amount"
-                          value={row.discount}
+                          PlaceHolder="Qty"
+                          value={row.qty}
                           onChange={(e) =>
-                            handleRowChange(index, "discount", e.target.value)
+                            handleRowChange(index, "qty", e.target.value)
                           }
                           style={{ width: "60px" }}
                         />
-                      </div>
-                    </td>
-                    <td>
-                      {/* Single Select */}
-                      <Select
-                        options={staffOptions}
-                        value={
-                          staffOptions.find(
-                            (opt) => opt.value === row.staff_id
-                          ) || null
-                        }
-                        onChange={(selected) =>
-                          handleRowChange(index, "staff_id", selected)
-                        }
-                        placeholder="Select Staff"
-                      />
-                    </td>
-                    <td>₹{row.row_total.toFixed(2)}</td>
-                    <td>
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        onClick={() => removeRow(index)}
-                      >
-                        Delete
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td>
+                        {/* MODIFIED: Added gap-2 for spacing between dropdown and input */}
+                        <div className="d-flex gap-2">
+                          <DropDown
+                            placeholder="Type"
+                            value={row.discount_type || "INR"}
+                            onChange={(e) =>
+                              handleRowChange(
+                                index,
+                                "discount_type",
+                                e.target.value
+                              )
+                            }
+                            options={discountTypeOptions}
+                            style={{ width: "50px" }}
+                          />
+                          <TextInputform
+                            formtype="text"
+                            step="0.01"
+                            PlaceHolder="Amount"
+                            value={row.discount}
+                            onChange={(e) =>
+                              handleRowChange(index, "discount", e.target.value)
+                            }
+                            style={{ width: "70px" }}
+                          />
+                        </div>
+                      </td>
+                      <td>
+                        {/* Single Select */}
+                        <Select
+                          options={staffOptions}
+                          value={
+                            staffOptions.find(
+                              (opt) => opt.value === row.staff_id
+                            ) || null
+                          }
+                          onChange={(selected) =>
+                            handleRowChange(index, "staff_id", selected)
+                          }
+                          placeholder="Select"
+                        />
+                      </td>
+                      <td>₹{row.row_total.toFixed(2)}</td>
+                      <td>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => removeRow(index)}
+                        >
+                          Delete
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </Table>
+
             <Button variant="success" onClick={addRow}>
               Add Row
             </Button>
@@ -650,9 +708,27 @@ const BillingCreation = () => {
                     />
                   </div>
                 </div>
-                <div className="d-flex justify-content-between align-items-center border-top pt-2">
+                <div className="mb-3 d-flex justify-content-between align-items-center  pt-2">
                   <strong>Total</strong>
                   <span>₹{grand_total.toFixed(2)}</span>
+                </div>
+                <div className="mb-3 d-flex justify-content-between align-items-center">
+                  <div>
+                    <label>Paid</label>
+                  </div>
+                  <div className="input-group" style={{ width: "150px" }}>
+                    <TextInputform
+                      formtype="text"
+                      step="0.01"
+                      PlaceHolder="Amount"
+                      value={paid}
+                      onChange={handlePaidChange}
+                    />
+                  </div>
+                </div>
+                <div className="d-flex justify-content-between align-items-center  pt-2">
+                  <strong>{balance >= 0 ? "Balance" : "Change"}</strong>
+                  <span>₹{Math.abs(balance).toFixed(2)}</span>
                 </div>
               </Card.Body>
             </Card>
@@ -661,7 +737,7 @@ const BillingCreation = () => {
           {/* Right: Stats Container - Compact for 3 Fields */}
           {form.member_id && (
             <Col md={4}>
-              <Card className="h-100">
+              <Card>
                 <Card.Header>Member Status</Card.Header>
                 <Card.Body className="p-2">
                   {(() => {

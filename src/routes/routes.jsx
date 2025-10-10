@@ -1,11 +1,13 @@
 import DashBoard from "../view/listings/DashBoard";
 import User from "../view/listings/User";
 import Company from "../view/listings/Company";
+import Category from "../view/listings/Category";
 import Member from "../view/listings/Member";
 import Staff from "../view/listings/Staff";
 import ProductAndService from "../view/listings/ProductAndService";
 import Billing from "../view/listings/Billing";
 import CompanyCreation from "../view/creations/CompanyCreation";
+import CategoryCreation from "../view/creations/CategoryCreation";
 import MemberCreation from "../view/creations/MemberCreation";
 import StaffCreation from "../view/creations/StaffCreation";
 import ProductAndServiceCreation from "../view/creations/ProductAndServiceCreation";
@@ -21,6 +23,11 @@ const routes = [
   { path: "/company", component: Company },
   { path: "/company/create", component: CompanyCreation },
   { path: "/company/edit/:id", component: CompanyCreation },
+
+  // ---- category routes ----
+  { path: "/category", component: Category },
+  { path: "/category/create", component: CategoryCreation },
+  { path: "/category/edit/:id", component: CategoryCreation },
 
   // ---- member routes ----
   { path: "/member", component: Member },

@@ -14,6 +14,7 @@ export const addProductAndServiceApi = async (psData) => {
     action: "addProductAndService",
     productandservice_name: psData.productandservice_name,
     productandservice_price: psData.productandservice_price,
+    category_id: psData.category_id,
   };
   const { data } = await axiosInstance.post(API_ENDPOINT, payload);
   return data;
@@ -26,6 +27,7 @@ export const updateProductAndServiceApi = async (psData) => {
     edit_productandservice_id: psData.productandservice_id,
     productandservice_name: psData.productandservice_name,
     productandservice_price: psData.productandservice_price,
+    category_id: psData.category_id,
   };
   const { data } = await axiosInstance.post(API_ENDPOINT, payload);
   return data;

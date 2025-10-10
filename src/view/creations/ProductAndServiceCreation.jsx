@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Col, Container, Row } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
-import { TextInputform } from "../../components/Forms";
+import { TextInputform, DropDown } from "../../components/Forms";
 import { Buttons } from "../../components/Buttons";
 import NotifyData from "../../components/NotifyData";
 import {
@@ -10,23 +10,27 @@ import {
   addProductAndService,
   updateProductAndService,
 } from "../../slice/ProductAndServiceSlice";
+import { fetchCategories } from "../../slice/CategorySlice";
 
 const ProductAndServiceCreation = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { id } = useParams();
   const { productandservice } = useSelector((s) => s.productandservice);
+  const { categories } = useSelector((s) => s.categories);
   const isEdit = !!id;
 
   const [form, setForm] = useState({
     productandservice_name: "",
     productandservice_price: "",
+    category_id: "",
   });
   const [submitting, setSubmitting] = useState(false);
 
   // load list (for edit lookup)
   useEffect(() => {
     dispatch(fetchProductAndServices(""));
+    dispatch(fetchCategories());
   }, [dispatch]);
 
   // pre-fill on edit
@@ -37,6 +41,7 @@ const ProductAndServiceCreation = () => {
         setForm({
           productandservice_name: rec.productandservice_name,
           productandservice_price: rec.productandservice_price,
+          category_id: rec.category_id,
         });
       }
     }
@@ -51,7 +56,11 @@ const ProductAndServiceCreation = () => {
     if (submitting) return;
     setSubmitting(true);
 
-    if (!form.productandservice_name || !form.productandservice_price) {
+    if (
+      !form.productandservice_name ||
+      !form.productandservice_price ||
+      !form.category_id
+    ) {
       NotifyData("Required fields missing", "error");
       setSubmitting(false);
       return;
@@ -76,10 +85,25 @@ const ProductAndServiceCreation = () => {
     }
   };
 
+  const categoryOptions = categories.map((cat) => ({
+    value: cat.category_id,
+    label: cat.category_name,
+  }));
+
   return (
     <div id="main">
       <Container fluid className="p-3">
         <Row>
+          <Col lg="4" md="6" xs="12" className="py-3">
+            <DropDown
+              textlabel="Category"
+              placeholder="Select Category"
+              name="category_id"
+              value={form.category_id}
+              onChange={handleChange}
+              options={categoryOptions}
+            />
+          </Col>
           <Col lg="4" md="6" xs="12" className="py-3">
             <TextInputform
               formLabel="Product & Service Name"
