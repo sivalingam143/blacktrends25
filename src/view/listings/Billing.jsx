@@ -398,7 +398,7 @@ const Billing = () => {
   );
 
   // 🔹 TABLE HEADERS
-  const headers = ["No", "Date", "Member No", "Name", "Total"];
+  const headers = ["No", "Date", "Member No", "Name", "Phone", "Total"];
 
   // 🔹 TABLE BODY
   const body = filteredBilling.map((item, idx) => ({
@@ -408,6 +408,7 @@ const Billing = () => {
       formatDate(item.billing_date.split(" ")[0]),
       item.member_no,
       item.name,
+      item.phone,
       `₹ ${parseFloat(item.total).toFixed(2)}`,
       <ActionButton
         options={[
