@@ -264,17 +264,17 @@ const DashboardReports = () => {
                 </Text>
               </div>
 
-              <Row gutter={[12, 12]} justify="end">
-                <Col xs={24} sm={12} md={10} lg={6}>
+              <Row gutter={12} align="middle">
+                <Col xs={24} lg={8} className="py-3">
                   <Row gutter={8}>
-                    <Col xs={24} sm={12}>
+                    <Col xs={12}>
                       <Calender
                         setLabel={setStaffFrom}
                         calenderlabel="From Date"
                         initialDate={staffFrom}
                       />
                     </Col>
-                    <Col xs={24} sm={12}>
+                    <Col xs={12}>
                       <Calender
                         setLabel={setStaffTo}
                         calenderlabel="To Date"
@@ -283,31 +283,37 @@ const DashboardReports = () => {
                     </Col>
                   </Row>
                 </Col>
-                <Col xs={24} sm={12} md={8} lg={6} className="py-4">
-                  <Input
-                    placeholder="Search staff..."
-                    prefix={<SearchOutlined />}
-                    allowClear
-                    value={staffSearchText}
-                    onChange={(e) => handleStaffSearchChange(e.target.value)}
-                  />
-                </Col>
-                <Col xs={24} sm={12} md={6} lg={4} className="py-4">
-                  <Button
-                    type="primary"
-                    icon={<FileExcelOutlined />}
-                    onClick={handleStaffExcelDownload}
-                    style={{ marginRight: 8 }}
-                  >
-                    Excel
-                  </Button>
-                  <Button
-                    type="primary"
-                    icon={<FilePdfOutlined />}
-                    onClick={handleStaffPDFDownload}
-                  >
-                    PDF
-                  </Button>
+                <Col xs={24} lg={16}>
+                  <Row gutter={12} justify="end" align="middle">
+                    <Col flex="200px" xs={24} sm={12} md={8}>
+                      <Input
+                        placeholder="Search staff..."
+                        prefix={<SearchOutlined />}
+                        allowClear
+                        value={staffSearchText}
+                        onChange={(e) =>
+                          handleStaffSearchChange(e.target.value)
+                        }
+                      />
+                    </Col>
+                    <Col flex="none" xs={24} sm={12} md={6}>
+                      <Button
+                        type="primary"
+                        icon={<FileExcelOutlined />}
+                        onClick={handleStaffExcelDownload}
+                        style={{ marginRight: 8 }}
+                      >
+                        Excel
+                      </Button>
+                      <Button
+                        type="primary"
+                        icon={<FilePdfOutlined />}
+                        onClick={handleStaffPDFDownload}
+                      >
+                        PDF
+                      </Button>
+                    </Col>
+                  </Row>
                 </Col>
               </Row>
             </div>
@@ -345,17 +351,17 @@ const DashboardReports = () => {
                   Total Records: {member?.length || 0}
                 </Text>
               </div>
-              <Row gutter={[12, 12]} justify="end">
-                <Col xs={24} sm={12} md={10} lg={6}>
-                  <Row gutter={8} style={{ marginTop: 4 }}>
-                    <Col xs={24} sm={12}>
+              <Row gutter={12} align="middle">
+                <Col xs={24} lg={8} className="py-3">
+                  <Row gutter={8}>
+                    <Col xs={12}>
                       <Calender
                         setLabel={setMemberFrom}
                         calenderlabel="From Date"
                         initialDate={memberFrom}
                       />
                     </Col>
-                    <Col xs={24} sm={12}>
+                    <Col xs={12}>
                       <Calender
                         setLabel={setMemberTo}
                         calenderlabel="To Date"
@@ -364,31 +370,37 @@ const DashboardReports = () => {
                     </Col>
                   </Row>
                 </Col>
-                <Col xs={24} sm={12} md={8} lg={6} className="py-4">
-                  <Input
-                    placeholder="Search members..."
-                    prefix={<SearchOutlined />}
-                    allowClear
-                    value={memberSearchText}
-                    onChange={(e) => handleMemberSearchChange(e.target.value)}
-                  />
-                </Col>
-                <Col xs={24} sm={12} md={6} lg={4} className="py-4">
-                  <Button
-                    type="primary"
-                    icon={<FileExcelOutlined />}
-                    onClick={handleMemberExcelDownload}
-                    style={{ marginRight: 8 }}
-                  >
-                    Excel
-                  </Button>
-                  <Button
-                    type="primary"
-                    icon={<FilePdfOutlined />}
-                    onClick={handleMemberPDFDownload}
-                  >
-                    PDF
-                  </Button>
+                <Col xs={24} lg={16}>
+                  <Row gutter={12} justify="end" align="middle">
+                    <Col flex="200px" xs={24} sm={12} md={8}>
+                      <Input
+                        placeholder="Search members..."
+                        prefix={<SearchOutlined />}
+                        allowClear
+                        value={memberSearchText}
+                        onChange={(e) =>
+                          handleMemberSearchChange(e.target.value)
+                        }
+                      />
+                    </Col>
+                    <Col flex="none" xs={24} sm={12} md={6}>
+                      <Button
+                        type="primary"
+                        icon={<FileExcelOutlined />}
+                        onClick={handleMemberExcelDownload}
+                        style={{ marginRight: 8 }}
+                      >
+                        Excel
+                      </Button>
+                      <Button
+                        type="primary"
+                        icon={<FilePdfOutlined />}
+                        onClick={handleMemberPDFDownload}
+                      >
+                        PDF
+                      </Button>
+                    </Col>
+                  </Row>
                 </Col>
               </Row>
             </div>
