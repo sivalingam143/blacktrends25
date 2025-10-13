@@ -226,7 +226,7 @@ const Member = () => {
             {
               label: "Delete",
               icon: <MdOutlineDelete />,
-              onClick: () => handleDelete(m.member_id),
+              onClick: () => handleDelete(m.id),
             },
           ]}
           label={<HiOutlineDotsVertical />}

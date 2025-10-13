@@ -39,6 +39,7 @@ export const updateMemberApi = async (memberData) => {
 export const deleteMemberApi = async (memberId) => {
   const payload = { action: "deleteMember", delete_member_id: memberId };
   const { data } = await axiosInstance.post(API_ENDPOINT, payload);
+  console.log(data);
   return data;
 };
 
