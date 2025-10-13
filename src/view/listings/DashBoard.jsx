@@ -190,7 +190,7 @@ const DashboardReports = () => {
       key: "total",
       align: "right",
       sorter: (a, b) => a.total - b.total,
-      render: (t) => `₹${t || 0}`,
+      render: (t) => `₹${(parseFloat(t) || 0).toFixed(2)}`,
     },
   ];
 
@@ -246,7 +246,7 @@ const DashboardReports = () => {
       key: "total",
       align: "right",
       sorter: (a, b) => a.total - b.total,
-      render: (t) => `₹${t || 0}`,
+      render: (t) => `₹${(parseFloat(t) || 0).toFixed(2)}`,
     },
   ];
 
@@ -260,7 +260,7 @@ const DashboardReports = () => {
         backgroundColor: "#f9f9f9",
       }}
     >
-      {label}: ₹{total.toLocaleString("en-IN")}
+      {label}: ₹{total.toFixed(2).toLocaleString("en-IN")}
     </div>
   );
 
