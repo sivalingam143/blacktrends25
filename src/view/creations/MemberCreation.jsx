@@ -31,7 +31,7 @@ const MemberCreation = () => {
     dispatch(fetchMembers(""));
   }, [dispatch]);
 
-  // pre-fill on edit
+  // pre-fill on edit - keep original membership, even if expired
   useEffect(() => {
     if (isEdit && member.length) {
       const rec = member.find((m) => m.member_id === id);
@@ -39,8 +39,14 @@ const MemberCreation = () => {
         setForm({
           name: rec.name,
           phone: rec.phone,
-          membership: rec.membership,
+          membership: rec.membership, // Keep as is (Yes even if expired)
         });
+        if (rec.is_expired === "expired") {
+          NotifyData(
+            `${rec.name}'s Gold membership expired. You can renew or downgrade.`,
+            "warning"
+          );
+        }
       }
     }
   }, [id, member, isEdit]);
@@ -53,6 +59,18 @@ const MemberCreation = () => {
   const handleGoldRadio = (e) => {
     const newVal = e.target.value;
     if (newVal === form.membership) return;
+
+    // Block downgrade if not expired
+    if (isEdit && form.membership === "Yes" && newVal === "No") {
+      const rec = member.find((m) => m.member_id === id);
+      if (rec && rec.is_expired !== "expired") {
+        NotifyData(
+          "Cannot downgrade Gold membership before 1 year expiry",
+          "error"
+        );
+        return;
+      }
+    }
 
     // Show confirmation modal
     setPendingGold(newVal);
@@ -70,6 +88,7 @@ const MemberCreation = () => {
   const cancelGoldChange = () => {
     setShowGoldModal(false);
     setPendingGold(null);
+    // No change on cancel
   };
 
   const submit = async () => {
@@ -103,6 +122,11 @@ const MemberCreation = () => {
     form.name || (isEdit ? "this member" : "New Member");
   const wantYes = pendingGold === "Yes";
 
+  // Get current rec for disable
+  const currentRec = isEdit ? member.find((m) => m.member_id === id) : null;
+  const isActiveGold =
+    currentRec?.membership === "Yes" && currentRec?.is_expired !== "expired";
+
   return (
     <div id="main">
       <Container fluid className="p-3">
@@ -126,7 +150,7 @@ const MemberCreation = () => {
             />
           </Col>
 
-          {/* Gold radio – appears in both create & edit */}
+          {/* Gold radio */}
           <Col lg="4" md="6" xs="12" className="py-3 d-flex align-items-center">
             <div className="me-3">Gold Membership:</div>
             <div className="form-check form-check-inline">
@@ -138,6 +162,7 @@ const MemberCreation = () => {
                 value="Yes"
                 checked={form.membership === "Yes"}
                 onChange={handleGoldRadio}
+                disabled={isActiveGold}
               />
               <label className="form-check-label" htmlFor="goldYes">
                 Yes
@@ -152,9 +177,10 @@ const MemberCreation = () => {
                 value="No"
                 checked={form.membership === "No"}
                 onChange={handleGoldRadio}
+                disabled={isActiveGold}
               />
               <label className="form-check-label" htmlFor="goldNo">
-                No
+                No {isActiveGold && "(Locked until expiry)"}
               </label>
             </div>
           </Col>
@@ -173,7 +199,10 @@ const MemberCreation = () => {
             }
             className="border-0 submit-btn me-3"
             onClick={submit}
-            disabled={submitting}
+            disabled={
+              submitting ||
+              (isEdit && isActiveGold && form.membership === "Yes")
+            } // Allow submit if changing to No (expired) or Yes (new)
           />
           <Buttons
             btnlabel="Cancel"
@@ -184,12 +213,13 @@ const MemberCreation = () => {
         </div>
       </Container>
 
-      {/* Confirmation modal for gold change */}
+      {/* Confirmation modal for gold change - pass isExpired if needed */}
       <GoldConfirmModal
         show={showGoldModal}
         onHide={cancelGoldChange}
         memberName={memberDisplayName}
         wantYes={wantYes}
+        isExpired={currentRec?.is_expired === "expired"}
         onConfirm={confirmGoldChange}
       />
     </div>

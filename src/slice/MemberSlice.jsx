@@ -109,12 +109,14 @@ const memberSlice = createSlice({
 
     common(builder);
 
-    // toggle gold – optimistically update the array
+    // toggle gold – optimistically update the array, add expired logic if needed
     builder.addCase(toggleGold.fulfilled, (state, action) => {
       const { member_id, makeGold } = action.payload;
       const goldVal = makeGold ? "Yes" : "No";
       const idx = state.member.findIndex((m) => m.member_id === member_id);
-      if (idx !== -1) state.member[idx].membership = goldVal;
+      if (idx !== -1) {
+        state.member[idx].membership = goldVal;
+      }
     });
   },
 });

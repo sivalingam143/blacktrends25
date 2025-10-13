@@ -41,6 +41,18 @@ const Member = () => {
     return `${day}-${month}-${year}`;
   };
 
+  // New function to calculate days left until expiry
+  const calculateDaysLeft = (activatedAt) => {
+    if (!activatedAt) return 0;
+    const activatedDate = new Date(activatedAt);
+    const expiryDate = new Date(activatedDate);
+    expiryDate.setFullYear(activatedDate.getFullYear() + 1);
+    const now = new Date(); // Current date: Oct 13, 2025
+    const diffTime = expiryDate - now;
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 0;
+  };
+
   const handleExport = () => {
     const wsData = [
       [
@@ -49,20 +61,33 @@ const Member = () => {
         "Name",
         "Phone",
         "Membership",
+        "Status", // Status column with days
         "Last Visit Date",
         "Total Visit Count",
         "Total Spending",
       ], // headers
-      ...filteredMember.map((m, index) => [
-        index + 1,
-        m.member_no,
-        m.name,
-        m.phone,
-        m.membership,
-        formatDate(m.last_visit_date),
-        m.total_visit_count,
-        m.total_spending,
-      ]),
+      ...filteredMember.map((m, index) => {
+        let statusText = "-";
+        if (m.membership === "Yes") {
+          const daysLeft = calculateDaysLeft(m.membership_activated_at);
+          if (m.is_expired === "expired") {
+            statusText = "Expired - Renew?";
+          } else {
+            statusText = `Expires in ${daysLeft} days`;
+          }
+        }
+        return [
+          index + 1,
+          m.member_no,
+          m.name,
+          m.phone,
+          m.membership,
+          statusText,
+          formatDate(m.last_visit_date),
+          m.total_visit_count,
+          m.total_spending,
+        ];
+      }),
     ];
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet(wsData);
@@ -86,22 +111,34 @@ const Member = () => {
   };
 
   const openGoldModal = (member) => {
-    const wantYes = member.membership !== "Yes";
-    setPendingMember({ ...member, wantYes });
+    const isExpired = member.is_expired === "expired";
+    if (member.membership === "Yes" && !isExpired) {
+      NotifyData("Cannot change Gold membership until 1 year expiry", "error");
+      return; // Block if active Yes
+    }
+    const wantYes = !isExpired ? member.membership !== "Yes" : true; // For expired Yes, default to renew (Yes)
+    setPendingMember({ ...member, wantYes, isExpired });
     setShowGoldModal(true);
   };
 
   const confirmGold = async () => {
     if (!pendingMember) return;
     try {
+      const { isExpired, wantYes } = pendingMember;
       const msg = await dispatch(
         toggleGold({
           member_id: pendingMember.member_id,
-          makeGold: pendingMember.wantYes,
+          makeGold: wantYes,
         })
       ).unwrap();
-      NotifyData("Gold membership updated", "success");
+      NotifyData(
+        isExpired && wantYes
+          ? "Membership renewed!"
+          : "Gold membership updated",
+        "success"
+      );
       setShowGoldModal(false);
+      dispatch(fetchMembers("")); // Refresh list
     } catch (e) {
       NotifyData(e.message, "error");
     }
@@ -128,49 +165,96 @@ const Member = () => {
   });
 
   // ---------- table ----------
-  const headers = ["No", "Name", "Phone", "Membership"];
-  const body = filteredMember.map((m, idx) => ({
-    key: m.member_id,
-    values: [
-      idx + 1,
-      m.name,
-      m.phone,
+  const headers = ["No", "Name", "Phone", "Membership", "Status"]; // Status column
+  const body = filteredMember.map((m, idx) => {
+    const isExpired = m.is_expired === "expired";
+    const isActiveGold = m.membership === "Yes" && !isExpired;
+    let statusDisplay = "-";
+    if (m.membership === "Yes") {
+      if (isExpired) {
+        statusDisplay = (
+          <span
+            className="blink expired"
+            style={{ fontWeight: "bold", textDecoration: "underline" }}
+          >
+            Expired - Renew?
+          </span>
+        );
+      } else {
+        const daysLeft = calculateDaysLeft(m.membership_activated_at);
+        statusDisplay = `Expires in ${daysLeft} days`;
+      }
+    }
+    const membershipDisplay = (
       <div
         key={m.member_id}
-        className="form-check form-switch"
+        className={`form-check form-switch ${
+          isActiveGold ? "disabled-toggle" : ""
+        }`}
         onClick={() => openGoldModal(m)}
-        style={{ cursor: "pointer" }}
+        style={{ cursor: isActiveGold ? "not-allowed" : "pointer" }}
       >
         <input
           className="form-check-input"
           type="checkbox"
           checked={m.membership === "Yes"}
           readOnly
+          disabled={isActiveGold}
         />
-        <label className="form-check-label">
-          {m.membership === "Yes" ? "Yes" : "No"}
+        <label
+          className={`form-check-label ${isActiveGold ? "text-muted" : ""}`}
+        >
+          {m.membership} {isActiveGold && "(Locked until expiry)"}
         </label>
-      </div>,
-      <ActionButton
-        options={[
-          {
-            label: "Edit",
-            icon: <LiaEditSolid />,
-            onClick: () => handleEdit(m),
-          },
-          {
-            label: "Delete",
-            icon: <MdOutlineDelete />,
-            onClick: () => handleDelete(m.id),
-          },
-        ]}
-        label={<HiOutlineDotsVertical />}
-      />,
-    ],
-  }));
+      </div>
+    );
+    return {
+      key: m.member_id,
+      values: [
+        idx + 1,
+        m.name,
+        m.phone,
+        membershipDisplay,
+        statusDisplay, // Dynamic status
+        <ActionButton
+          options={[
+            {
+              label: "Edit",
+              icon: <LiaEditSolid />,
+              onClick: () => handleEdit(m),
+            },
+            {
+              label: "Delete",
+              icon: <MdOutlineDelete />,
+              onClick: () => handleDelete(m.member_id),
+            },
+          ]}
+          label={<HiOutlineDotsVertical />}
+        />,
+      ],
+    };
+  });
 
   return (
     <div id="main">
+      <style>{`
+        .blink {
+          animation: blink 1s infinite;
+        }
+        @keyframes blink {
+          0% { opacity: 1; color: red; }
+          50% { opacity: 0.5; color: orange; }
+          100% { opacity: 1; color: red; }
+        }
+        .expired {
+          font-weight: bold;
+          text-decoration: underline;
+        }
+        .disabled-toggle {
+          opacity: 0.6;
+          pointer-events: none;
+        }
+      `}</style>
       <Container fluid>
         <Row>
           <Col xs="6" className="py-3">
@@ -227,6 +311,7 @@ const Member = () => {
         onHide={() => setShowGoldModal(false)}
         memberName={pendingMember?.name}
         wantYes={pendingMember?.wantYes}
+        isExpired={pendingMember?.isExpired}
         onConfirm={confirmGold}
       />
     </div>
