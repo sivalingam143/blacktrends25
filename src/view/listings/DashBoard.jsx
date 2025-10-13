@@ -1,17 +1,7 @@
 import React, { useEffect, useState } from "react";
 import moment from "moment";
 import { useSelector, useDispatch } from "react-redux";
-import {
-  Tabs,
-  Card,
-  Input,
-  Table,
-  Typography,
-  DatePicker,
-  Row,
-  Col,
-  Button,
-} from "antd";
+import { Tabs, Card, Input, Table, Typography, Row, Col, Button } from "antd";
 import { fetchStaffReport, fetchMemberReport } from "../../slice/BillingSlice";
 import {
   SearchOutlined,
@@ -22,7 +12,7 @@ import {
   FilePdfOutlined,
 } from "@ant-design/icons";
 import "./Dashboard.css";
-import { formatDate } from "../../components/Forms";
+import { formatDate, Calender } from "../../components/Forms";
 import {
   downloadStaffExcel,
   downloadStaffPDF,
@@ -32,20 +22,19 @@ import {
 
 const { TabPane } = Tabs;
 const { Text } = Typography;
-const { RangePicker } = DatePicker;
 
 const DashboardReports = () => {
   const dispatch = useDispatch();
   const [staffSearchText, setStaffSearchText] = useState("");
   const [memberSearchText, setMemberSearchText] = useState("");
-  const [staffDateRange, setStaffDateRange] = useState([
-    moment().startOf("year"),
-    moment(),
-  ]);
-  const [memberDateRange, setMemberDateRange] = useState([
-    moment().startOf("year"),
-    moment(),
-  ]);
+  const [staffFrom, setStaffFrom] = useState(
+    moment().startOf("year").format("YYYY-MM-DD")
+  );
+  const [staffTo, setStaffTo] = useState(moment().format("YYYY-MM-DD"));
+  const [memberFrom, setMemberFrom] = useState(
+    moment().startOf("year").format("YYYY-MM-DD")
+  );
+  const [memberTo, setMemberTo] = useState(moment().format("YYYY-MM-DD"));
 
   const {
     staffReport: staff,
@@ -64,51 +53,38 @@ const DashboardReports = () => {
     0
   );
 
-  // STAFF
-  const staffFromDate = staffDateRange[0]?.format("YYYY-MM-DD") || "";
-  const staffToDate = staffDateRange[1]?.format("YYYY-MM-DD") || "";
-
-  // MEMBER
-  const memberFromDate = memberDateRange[0]?.format("YYYY-MM-DD") || "";
-  const memberToDate = memberDateRange[1]?.format("YYYY-MM-DD") || "";
-
   // Fetch reports
   useEffect(() => {
-    if (staffFromDate && staffToDate) {
+    if (staffFrom && staffTo) {
       dispatch(
         fetchStaffReport({
-          fromDate: staffFromDate,
-          toDate: staffToDate,
+          fromDate: staffFrom,
+          toDate: staffTo,
           searchText: staffSearchText,
         })
       );
     }
-  }, [dispatch, staffFromDate, staffToDate, staffSearchText]);
+  }, [dispatch, staffFrom, staffTo, staffSearchText]);
 
   useEffect(() => {
-    if (memberFromDate && memberToDate) {
+    if (memberFrom && memberTo) {
       dispatch(
         fetchMemberReport({
-          fromDate: memberFromDate,
-          toDate: memberToDate,
+          fromDate: memberFrom,
+          toDate: memberTo,
           searchText: memberSearchText,
         })
       );
     }
-  }, [dispatch, memberFromDate, memberToDate, memberSearchText]);
-
-  const handleStaffDateChange = (dates) =>
-    setStaffDateRange(dates || [moment().startOf("year"), moment()]);
-  const handleMemberDateChange = (dates) =>
-    setMemberDateRange(dates || [moment().startOf("year"), moment()]);
+  }, [dispatch, memberFrom, memberTo, memberSearchText]);
 
   const handleStaffSearchChange = (value) => {
     setStaffSearchText(value);
-    if (staffFromDate && staffToDate) {
+    if (staffFrom && staffTo) {
       dispatch(
         fetchStaffReport({
-          fromDate: staffFromDate,
-          toDate: staffToDate,
+          fromDate: staffFrom,
+          toDate: staffTo,
           searchText: value,
         })
       );
@@ -117,11 +93,11 @@ const DashboardReports = () => {
 
   const handleMemberSearchChange = (value) => {
     setMemberSearchText(value);
-    if (memberFromDate && memberToDate) {
+    if (memberFrom && memberTo) {
       dispatch(
         fetchMemberReport({
-          fromDate: memberFromDate,
-          toDate: memberToDate,
+          fromDate: memberFrom,
+          toDate: memberTo,
           searchText: value,
         })
       );
@@ -130,19 +106,19 @@ const DashboardReports = () => {
 
   // Download handlers
   const handleStaffExcelDownload = () => {
-    downloadStaffExcel(staff, staffFromDate, staffToDate, staffColumns);
+    downloadStaffExcel(staff, staffFrom, staffTo, staffColumns);
   };
 
   const handleStaffPDFDownload = () => {
-    downloadStaffPDF(staff, staffFromDate, staffToDate);
+    downloadStaffPDF(staff, staffFrom, staffTo);
   };
 
   const handleMemberExcelDownload = () => {
-    downloadMemberExcel(member, memberFromDate, memberToDate, memberColumns);
+    downloadMemberExcel(member, memberFrom, memberTo, memberColumns);
   };
 
   const handleMemberPDFDownload = () => {
-    downloadMemberPDF(member, memberFromDate, memberToDate);
+    downloadMemberPDF(member, memberFrom, memberTo);
   };
 
   const staffColumns = [
@@ -280,24 +256,32 @@ const DashboardReports = () => {
             <div className="report-header">
               <div className="header-left">
                 <h3>
-                  <UserOutlined /> Staff Report ({staffFromDate} to{" "}
-                  {staffToDate})
+                  <UserOutlined /> Staff Report ({formatDate(staffFrom)} to{" "}
+                  {formatDate(staffTo)})
                 </h3>
                 <Text type="secondary">
                   Total Records: {staff?.length || 0}
                 </Text>
               </div>
+
               <Row gutter={[12, 12]} justify="end">
                 <Col xs={24} sm={12} md={10} lg={6}>
-                  <Text strong>
-                    <CalendarOutlined /> Date Range:
-                  </Text>
-                  <RangePicker
-                    value={staffDateRange}
-                    onChange={handleStaffDateChange}
-                    format="DD-MM-YYYY"
-                    style={{ width: "100%", marginTop: 4 }}
-                  />
+                  <Row gutter={8}>
+                    <Col xs={24} sm={12}>
+                      <Calender
+                        setLabel={setStaffFrom}
+                        calenderlabel="From Date"
+                        initialDate={staffFrom}
+                      />
+                    </Col>
+                    <Col xs={24} sm={12}>
+                      <Calender
+                        setLabel={setStaffTo}
+                        calenderlabel="To Date"
+                        initialDate={staffTo}
+                      />
+                    </Col>
+                  </Row>
                 </Col>
                 <Col xs={24} sm={12} md={8} lg={6} className="py-4">
                   <Input
@@ -354,8 +338,8 @@ const DashboardReports = () => {
             <div className="report-header">
               <div className="header-left">
                 <h3>
-                  <TeamOutlined /> Member Report ({memberFromDate} to{" "}
-                  {memberToDate})
+                  <TeamOutlined /> Member Report ({formatDate(memberFrom)} to{" "}
+                  {formatDate(memberTo)})
                 </h3>
                 <Text type="secondary">
                   Total Records: {member?.length || 0}
@@ -363,15 +347,22 @@ const DashboardReports = () => {
               </div>
               <Row gutter={[12, 12]} justify="end">
                 <Col xs={24} sm={12} md={10} lg={6}>
-                  <Text strong>
-                    <CalendarOutlined /> Date Range:
-                  </Text>
-                  <RangePicker
-                    value={memberDateRange}
-                    onChange={handleMemberDateChange}
-                    format="DD-MM-YYYY"
-                    style={{ width: "100%", marginTop: 4 }}
-                  />
+                  <Row gutter={8} style={{ marginTop: 4 }}>
+                    <Col xs={24} sm={12}>
+                      <Calender
+                        setLabel={setMemberFrom}
+                        calenderlabel="From Date"
+                        initialDate={memberFrom}
+                      />
+                    </Col>
+                    <Col xs={24} sm={12}>
+                      <Calender
+                        setLabel={setMemberTo}
+                        calenderlabel="To Date"
+                        initialDate={memberTo}
+                      />
+                    </Col>
+                  </Row>
                 </Col>
                 <Col xs={24} sm={12} md={8} lg={6} className="py-4">
                   <Input
