@@ -492,6 +492,23 @@ const BillingCreation = () => {
 
   const balance = grand_total - paid;
 
+  // Custom filter for product select
+  const productFilterOption = (option, rawInput) => {
+    if (!rawInput) return true;
+    const inputValue = rawInput.trim().toLowerCase();
+    const label = option.label;
+    // If input is numeric, exact match serial
+    const isNumeric = /^\d+$/.test(inputValue);
+    if (isNumeric) {
+      const serialMatch = label.match(/^(\d+)/);
+      const serial = serialMatch ? serialMatch[1] : "";
+      return serial === inputValue;
+    } else {
+      // Search in entire label
+      return label.toLowerCase().includes(inputValue);
+    }
+  };
+
   return (
     <div id="main">
       <Container fluid className="p-3">
@@ -567,6 +584,14 @@ const BillingCreation = () => {
                       ? `${p.serial_number} - ${p.productandservice_name} `
                       : p.productandservice_name,
                   }));
+                  const productValue = row.product_id
+                    ? filteredProductOptions.find(
+                        (opt) => opt.value === row.product_id
+                      ) || {
+                        value: row.product_id,
+                        label: row.product_name,
+                      }
+                    : null;
                   return (
                     <tr key={index}>
                       <td>
@@ -584,15 +609,26 @@ const BillingCreation = () => {
                         />
                       </td>
                       <td>
-                        <DropDown
-                          placeholder="Select Product/Service"
-                          name="product_id"
-                          value={row.product_id}
-                          onChange={(e) =>
-                            handleRowChange(index, "product_id", e.target.value)
-                          }
+                        <Select
                           options={filteredProductOptions}
-                          width="250px"
+                          value={productValue}
+                          onChange={(selected) =>
+                            handleRowChange(
+                              index,
+                              "product_id",
+                              selected ? selected.value : ""
+                            )
+                          }
+                          placeholder="Select Product/Service"
+                          isSearchable={true}
+                          filterOption={productFilterOption}
+                          className="flex-grow-1"
+                          styles={{
+                            control: (provided) => ({
+                              ...provided,
+                              minWidth: "250px",
+                            }),
+                          }}
                         />
                       </td>
 
