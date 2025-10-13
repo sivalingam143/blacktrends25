@@ -45,17 +45,21 @@ const ProductAndService = () => {
         .includes(searchTerm.toLowerCase()) ||
       (item.category_name || "")
         .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      (item.serial_number || "")
+        .toLowerCase()
         .includes(searchTerm.toLowerCase())
   );
 
   // ---------- table ----------
-  const headers = ["No", "Name", "Category", "Price"];
+  const headers = ["No", "Name", "Category", "Serial No", "Price"];
   const body = filteredProductAndService.map((item, idx) => ({
     key: item.productandservice_id,
     values: [
       idx + 1,
       item.productandservice_name,
       item.category_name,
+      item.serial_number || "-",
       `₹ ${parseFloat(item.productandservice_price).toFixed(2)}`,
       <ActionButton
         options={[
@@ -92,7 +96,7 @@ const ProductAndService = () => {
           <Col xs="12" lg="3" className="py-2">
             <input
               type="text"
-              placeholder="Search by name or category..."
+              placeholder="Search by name, category, or serial no..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="form-control"

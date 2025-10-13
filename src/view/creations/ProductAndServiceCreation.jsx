@@ -24,6 +24,7 @@ const ProductAndServiceCreation = () => {
     productandservice_name: "",
     productandservice_price: "",
     category_id: "",
+    serial_no: "",
   });
   const [submitting, setSubmitting] = useState(false);
 
@@ -42,6 +43,7 @@ const ProductAndServiceCreation = () => {
           productandservice_name: rec.productandservice_name,
           productandservice_price: rec.productandservice_price,
           category_id: rec.category_id,
+          serial_no: rec.serial_number || "",
         });
       }
     }
@@ -59,7 +61,8 @@ const ProductAndServiceCreation = () => {
     if (
       !form.productandservice_name ||
       !form.productandservice_price ||
-      !form.category_id
+      !form.category_id ||
+      !form.serial_no
     ) {
       NotifyData("Required fields missing", "error");
       setSubmitting(false);
@@ -122,6 +125,15 @@ const ProductAndServiceCreation = () => {
               type="number"
               step="0.01"
               min="0"
+              onChange={handleChange}
+            />
+          </Col>
+          <Col lg="4" md="6" xs="12" className="py-3">
+            <TextInputform
+              formLabel="Serial No"
+              PlaceHolder="Enter serial number"
+              name="serial_no"
+              value={form.serial_no}
               onChange={handleChange}
             />
           </Col>
