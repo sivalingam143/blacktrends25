@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Col, Container, Row } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
@@ -22,6 +22,9 @@ const MemberCreation = () => {
   });
   const [submitting, setSubmitting] = useState(false);
 
+  // Flag to track if expired warning has been shown (to avoid duplicates)
+  const hasShownExpiredWarning = useRef(false);
+
   // Modal state for gold confirmation
   const [showGoldModal, setShowGoldModal] = useState(false);
   const [pendingGold, setPendingGold] = useState(null);
@@ -33,7 +36,7 @@ const MemberCreation = () => {
 
   // pre-fill on edit - keep original membership, even if expired
   useEffect(() => {
-    if (isEdit && member.length) {
+    if (isEdit && member.length && !hasShownExpiredWarning.current) {
       const rec = member.find((m) => m.member_id === id);
       if (rec) {
         setForm({
@@ -41,11 +44,12 @@ const MemberCreation = () => {
           phone: rec.phone,
           membership: rec.membership, // Keep as is (Yes even if expired)
         });
-        if (rec.is_expired === "expired") {
+        if (rec.is_expired === "expired" && !hasShownExpiredWarning.current) {
           NotifyData(
             `${rec.name}'s Gold membership expired. You can renew or downgrade.`,
             "warning"
           );
+          hasShownExpiredWarning.current = true; // Set flag to prevent duplicates
         }
       }
     }
