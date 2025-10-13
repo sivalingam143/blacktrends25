@@ -52,15 +52,21 @@ const ProductAndService = () => {
   );
 
   // ---------- table ----------
-  const headers = ["No", "Serial No", "Name", "Category", "Price"];
+  const headers = [
+    "No",
+
+    "Product and Service",
+    "Category",
+    "Serial No",
+    "Price",
+  ];
   const body = filteredProductAndService.map((item, idx) => ({
     key: item.productandservice_id,
     values: [
       idx + 1,
-      item.serial_number || "-",
       item.productandservice_name,
       item.category_name,
-
+      item.serial_number || "-",
       `₹ ${parseFloat(item.productandservice_price).toFixed(2)}`,
       <ActionButton
         options={[
