@@ -564,7 +564,7 @@ const BillingCreation = () => {
                   const filteredProductOptions = filteredProducts.map((p) => ({
                     value: p.productandservice_id,
                     label: p.serial_number
-                      ? `${p.productandservice_name} - ${p.serial_number}`
+                      ? `${p.serial_number} - ${p.productandservice_name} `
                       : p.productandservice_name,
                   }));
                   return (
