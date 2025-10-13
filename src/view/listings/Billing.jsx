@@ -391,6 +391,9 @@ const Billing = () => {
       (item.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
       String(item.member_no || "")
         .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      String(item.phone || "")
+        .toLowerCase()
         .includes(searchTerm.toLowerCase())
   );
 
@@ -446,7 +449,7 @@ const Billing = () => {
           <Col xs="12" lg="3" className="py-2">
             <input
               type="text"
-              placeholder="Search by name or member no..."
+              placeholder="Search by name or phone or member no.."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="form-control"
