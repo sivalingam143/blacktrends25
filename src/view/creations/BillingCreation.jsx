@@ -584,26 +584,18 @@ const BillingCreation = () => {
                         />
                       </td>
                       <td>
-                        <Select
-                          key={row.category_id}
+                        <DropDown
+                          placeholder="Select Product/Service"
+                          name="product_id"
+                          value={row.product_id}
+                          onChange={(e) =>
+                            handleRowChange(index, "product_id", e.target.value)
+                          }
                           options={filteredProductOptions}
-                          value={
-                            filteredProductOptions.find(
-                              (opt) => opt.value === row.product_id
-                            ) || null
-                          }
-                          onChange={(selected) =>
-                            handleRowChange(
-                              index,
-                              "product_id",
-                              selected ? selected.value : ""
-                            )
-                          }
-                          placeholder="Select Product/Service (search by name or serial)"
-                          isSearchable={true}
-                          className="flex-grow-1"
+                          width="250px"
                         />
                       </td>
+
                       <td>
                         <TextInputform
                           formtype="text"
