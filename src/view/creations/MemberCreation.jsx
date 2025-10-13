@@ -203,10 +203,6 @@ const MemberCreation = () => {
             }
             className="border-0 submit-btn me-3"
             onClick={submit}
-            disabled={
-              submitting ||
-              (isEdit && isActiveGold && form.membership === "Yes")
-            } // Allow submit if changing to No (expired) or Yes (new)
           />
           <Buttons
             btnlabel="Cancel"
