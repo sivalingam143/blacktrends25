@@ -83,12 +83,6 @@ const BillingCreation = () => {
     label: st.name,
   }));
 
-  // Prepare product options for DropDown
-  const productOptions = products.map((p) => ({
-    value: p.productandservice_id,
-    label: p.productandservice_name,
-  }));
-
   // Prepare discount type options for DropDown
   const discountTypeOptions = [
     { value: "INR", label: "INR" },
@@ -566,10 +560,12 @@ const BillingCreation = () => {
                 {rows.map((row, index) => {
                   const filteredProducts = row.category_id
                     ? products.filter((p) => p.category_id === row.category_id)
-                    : [];
+                    : products;
                   const filteredProductOptions = filteredProducts.map((p) => ({
                     value: p.productandservice_id,
-                    label: p.productandservice_name,
+                    label: p.serial_number
+                      ? `${p.productandservice_name} - ${p.serial_number}`
+                      : p.productandservice_name,
                   }));
                   return (
                     <tr key={index}>
@@ -588,14 +584,24 @@ const BillingCreation = () => {
                         />
                       </td>
                       <td>
-                        <DropDown
+                        <Select
                           key={row.category_id}
-                          placeholder="Select"
-                          value={row.product_id}
-                          onChange={(e) =>
-                            handleRowChange(index, "product_id", e.target.value)
-                          }
                           options={filteredProductOptions}
+                          value={
+                            filteredProductOptions.find(
+                              (opt) => opt.value === row.product_id
+                            ) || null
+                          }
+                          onChange={(selected) =>
+                            handleRowChange(
+                              index,
+                              "product_id",
+                              selected ? selected.value : ""
+                            )
+                          }
+                          placeholder="Select Product/Service (search by name or serial)"
+                          isSearchable={true}
+                          className="flex-grow-1"
                         />
                       </td>
                       <td>
