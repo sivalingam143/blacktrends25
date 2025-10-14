@@ -16,7 +16,8 @@ import {
   StyleSheet,
   Image,
 } from "@react-pdf/renderer";
-import * as buffer from "buffer"; // Add this import for Buffer polyfill
+import * as buffer from "buffer";
+import axiosInstance from "../../config/API";
 import logo from "../../assets/images/storelogo.png";
 import PageTitle from "../../components/PageTitle";
 import NotifyData from "../../components/NotifyData";
@@ -59,6 +60,90 @@ const Billing = () => {
       dispatch(fetchBillings(""));
     } catch (e) {
       NotifyData(e.message, "error");
+    }
+  };
+
+  // UPDATED: Function to upload PDF blob and get URL using axiosInstance
+  const uploadPdfBlob = async (blob) => {
+    const formData = new FormData();
+    formData.append("pdf_file", blob, `invoice-${Date.now()}.pdf`);
+    formData.append("action", "uploadPdf"); // To match PHP action
+
+    try {
+      // Assuming the billing endpoint is '/billing.php' - adjust if needed
+      const response = await axiosInstance.post("/billing.php", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      const data = response.data;
+      if (data.head.code === 200) {
+        return data.body.pdf_url;
+      } else {
+        throw new Error(data.head.msg || "Upload failed");
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+      throw error;
+    }
+  };
+
+  // UPDATED: generateWhatsAppURL function (from your example, but with PDF link)
+  const generateWhatsAppURL = (number, message, pdfUrl = null) => {
+    let fullMessage = message;
+    if (pdfUrl) {
+      fullMessage += `\n\nஉங்கள் பில் PDF: ${pdfUrl}`;
+    }
+    return `https://wa.me/${number}?text=${encodeURIComponent(fullMessage)}`;
+  };
+
+  // UPDATED: handleWhatsAppShare - Now uploads PDF, gets link, and sends via WhatsApp URL
+  const handleWhatsAppShare = async (item) => {
+    if (!item.phone) {
+      NotifyData("Phone number not available for this bill!", "error");
+      return;
+    }
+
+    try {
+      const companyDetails = companies[0] || {};
+      const blob = await pdf(
+        <Invoice item={item} companyDetails={companyDetails} />
+      ).toBlob();
+
+      // Upload PDF to get public URL
+      const pdfUrl = await uploadPdfBlob(blob);
+
+      // Prepare message
+      const phoneStr = String(item.phone || "");
+      const phoneDigits = phoneStr.replace(/\D/g, "");
+      const internationalPhone =
+        phoneDigits.length === 10 ? `91${phoneDigits}` : phoneDigits;
+
+      const message = `Hi ${item.name}`;
+
+      // Open WhatsApp with message + PDF link
+      const waUrl = generateWhatsAppURL(internationalPhone, message, pdfUrl);
+      window.open(waUrl, "_blank");
+
+      NotifyData("WhatsApp opened with message and PDF link!", "success");
+    } catch (error) {
+      console.error("WhatsApp share failed:", error);
+      // Fallback: Open WhatsApp with just message (no PDF)
+      const phoneStr = String(item.phone || "");
+      const phoneDigits = phoneStr.replace(/\D/g, "");
+      const internationalPhone =
+        phoneDigits.length === 10 ? `91${phoneDigits}` : phoneDigits;
+      const message = `Hi ${
+        item.name
+      }, உங்கள் பில் PDF share செய்ய முயற்சி. Print option use பண்ணி manual send பண்ணுங்க. Total: ₹${item.total.toFixed(
+        2
+      )}.`;
+      const waUrl = generateWhatsAppURL(internationalPhone, message);
+      window.open(waUrl, "_blank");
+      NotifyData(
+        "PDF upload failed – opened WhatsApp with message only. Please send PDF manually via print.",
+        "warning"
+      );
     }
   };
 
@@ -392,77 +477,6 @@ const Billing = () => {
       newWindow.print();
       URL.revokeObjectURL(url);
     };
-  };
-
-  const handleWhatsAppShare = async (item) => {
-    if (!item.phone) {
-      NotifyData("Phone number not available for this bill!", "error");
-      return;
-    }
-
-    const companyDetails = companies[0] || {};
-    const phoneDigits = String(item.phone || "").replace(/\D/g, "");
-    const internationalPhone =
-      phoneDigits.length === 10 ? `91${phoneDigits}` : phoneDigits;
-
-    try {
-      const blob = await pdf(
-        <Invoice item={item} companyDetails={companyDetails} />
-      ).toBlob();
-
-      const fileName = `invoice-${item.billing_id || Date.now()}.pdf`;
-      const shareFile = new File([blob], fileName, { type: "application/pdf" });
-
-      // Mobile direct share
-      if (navigator.canShare && navigator.canShare({ files: [shareFile] })) {
-        await navigator.share({
-          title: `Invoice ${item.billing_id || ""}`,
-          text: `Hi ${
-            item.name
-          }, உங்கள் பில் இங்கே. Total: ₹${item.total.toFixed(2)}.`,
-          files: [shareFile],
-        });
-        NotifyData("PDF shared successfully!", "success");
-      } else {
-        // Desktop fallback
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-
-        NotifyData(
-          `PDF downloaded! Opening WhatsApp Web to send message...`,
-          "info"
-        );
-
-        const message = encodeURIComponent(`Hi ${item.name}`);
-        window.open(
-          `https://wa.me/${internationalPhone}?text=${message}`,
-          "_blank"
-        );
-      }
-    } catch (error) {
-      console.error("WhatsApp share failed:", error);
-      NotifyData(
-        "Unable to share PDF directly. Please use print option and send manually.",
-        "warning"
-      );
-      const message = encodeURIComponent(
-        `Hi ${
-          item.name
-        }, உங்கள் பில் share செய்ய முடியவில்லை. Total: ₹${item.total.toFixed(
-          2
-        )}.`
-      );
-      window.open(
-        `https://wa.me/${internationalPhone}?text=${message}`,
-        "_blank"
-      );
-    }
   };
 
   const filteredBilling = billing.filter(
