@@ -6,7 +6,7 @@ import { ActionButton, Buttons } from "../../components/Buttons";
 import { MdOutlineDelete } from "react-icons/md";
 import { LiaEditSolid } from "react-icons/lia";
 import { HiOutlineDotsVertical } from "react-icons/hi";
-import { FaPrint, FaWhatsapp } from "react-icons/fa";
+import { FaPrint, FaWhatsapp, FaSms } from "react-icons/fa";
 import {
   pdf,
   Document,
@@ -102,13 +102,24 @@ const Billing = () => {
     }
   };
 
-  // UPDATED: generateWhatsAppURL function (from your example, but with PDF link)
-  const generateWhatsAppURL = (number, message, pdfUrl = null) => {
+  // UPDATED: generateShareURL function for WhatsApp or SMS
+  const generateShareURL = (
+    number,
+    message,
+    pdfUrl = null,
+    type = "whatsapp"
+  ) => {
     let fullMessage = message;
     if (pdfUrl) {
       fullMessage += `\n\nஉங்கள் பில் PDF: ${pdfUrl}`;
     }
-    return `https://wa.me/${number}?text=${encodeURIComponent(fullMessage)}`;
+    const encodedMessage = encodeURIComponent(fullMessage);
+    if (type === "whatsapp") {
+      return `https://wa.me/${number}?text=${encodedMessage}`;
+    } else if (type === "sms") {
+      return `sms:${number}?body=${encodedMessage}`;
+    }
+    return "";
   };
 
   // UPDATED: handleWhatsAppShare - Now uploads PDF, shortens link, and sends via WhatsApp URL
@@ -139,10 +150,11 @@ const Billing = () => {
       const message = `Hi ${item.name}`;
 
       // Open WhatsApp with message + shortened PDF link
-      const waUrl = generateWhatsAppURL(
+      const waUrl = generateShareURL(
         internationalPhone,
         message,
-        shortPdfUrl
+        shortPdfUrl,
+        "whatsapp"
       );
       window.open(waUrl, "_blank");
 
@@ -162,10 +174,75 @@ const Billing = () => {
       }, உங்கள் பில் PDF share செய்ய முயற்சி. Print option use பண்ணி manual send பண்ணுங்க. Total: ₹${item.total.toFixed(
         2
       )}.`;
-      const waUrl = generateWhatsAppURL(internationalPhone, message);
+      const waUrl = generateShareURL(
+        internationalPhone,
+        message,
+        null,
+        "whatsapp"
+      );
       window.open(waUrl, "_blank");
       NotifyData(
         "PDF upload failed – opened WhatsApp with message only. Please send PDF manually via print.",
+        "warning"
+      );
+    }
+  };
+
+  // NEW: handleSMSShare - Uploads PDF, shortens link, and opens SMS composer with message + link
+  const handleSMSShare = async (item) => {
+    if (!item.phone) {
+      NotifyData("Phone number not available for this bill!", "error");
+      return;
+    }
+
+    try {
+      const companyDetails = companies[0] || {};
+      const blob = await pdf(
+        <Invoice item={item} companyDetails={companyDetails} />
+      ).toBlob();
+
+      // Upload PDF to get public URL
+      const pdfUrl = await uploadPdfBlob(blob);
+
+      // Shorten the PDF URL
+      const shortPdfUrl = await shortenUrl(pdfUrl);
+
+      // Prepare message
+      const phoneStr = String(item.phone || "");
+      const phoneDigits = phoneStr.replace(/\D/g, "");
+      const phoneNumber =
+        phoneDigits.length === 10 ? `91${phoneDigits}` : phoneDigits;
+
+      const message = `Hi ${
+        item.name
+      }, உங்கள் பில் இங்கே. Please find attached invoice for your recent visit. Total: ₹${item.total.toFixed(
+        2
+      )}.`;
+
+      // Open SMS composer with message + shortened PDF link
+      const smsUrl = generateShareURL(phoneNumber, message, shortPdfUrl, "sms");
+      window.open(smsUrl, "_blank");
+
+      NotifyData(
+        "SMS composer opened with message and shortened PDF link!",
+        "success"
+      );
+    } catch (error) {
+      console.error("SMS share failed:", error);
+      // Fallback: Open SMS with just message (no PDF)
+      const phoneStr = String(item.phone || "");
+      const phoneDigits = phoneStr.replace(/\D/g, "");
+      const phoneNumber =
+        phoneDigits.length === 10 ? `91${phoneDigits}` : phoneDigits;
+      const message = `Hi ${
+        item.name
+      }, உங்கள் பில் PDF share செய்ய முயற்சி. Print option use பண்ணி manual send பண்ணுங்க. Total: ₹${item.total.toFixed(
+        2
+      )}.`;
+      const smsUrl = generateShareURL(phoneNumber, message, null, "sms");
+      window.open(smsUrl, "_blank");
+      NotifyData(
+        "PDF upload failed – opened SMS with message only. Please send PDF manually via print.",
         "warning"
       );
     }
@@ -538,6 +615,11 @@ const Billing = () => {
             label: "WhatsApp",
             icon: <FaWhatsapp style={{ color: "#25D366" }} />,
             onClick: () => handleWhatsAppShare(item),
+          },
+          {
+            label: "SMS",
+            icon: <FaSms style={{ color: "#007BFF" }} />,
+            onClick: () => handleSMSShare(item),
           },
           {
             label: "Edit",
