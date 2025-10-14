@@ -157,11 +157,6 @@ const Billing = () => {
         "whatsapp"
       );
       window.open(waUrl, "_blank");
-
-      NotifyData(
-        "WhatsApp opened with message and shortened PDF link!",
-        "success"
-      );
     } catch (error) {
       console.error("WhatsApp share failed:", error);
       // Fallback: Open WhatsApp with just message (no PDF)
@@ -169,11 +164,7 @@ const Billing = () => {
       const phoneDigits = phoneStr.replace(/\D/g, "");
       const internationalPhone =
         phoneDigits.length === 10 ? `91${phoneDigits}` : phoneDigits;
-      const message = `Hi ${
-        item.name
-      }, உங்கள் பில் PDF share செய்ய முயற்சி. Print option use பண்ணி manual send பண்ணுங்க. Total: ₹${item.total.toFixed(
-        2
-      )}.`;
+      const message = `Hi ${item.name}`;
       const waUrl = generateShareURL(
         internationalPhone,
         message,
@@ -181,10 +172,6 @@ const Billing = () => {
         "whatsapp"
       );
       window.open(waUrl, "_blank");
-      NotifyData(
-        "PDF upload failed – opened WhatsApp with message only. Please send PDF manually via print.",
-        "warning"
-      );
     }
   };
 
@@ -213,20 +200,11 @@ const Billing = () => {
       const phoneNumber =
         phoneDigits.length === 10 ? `91${phoneDigits}` : phoneDigits;
 
-      const message = `Hi ${
-        item.name
-      }, உங்கள் பில் இங்கே. Please find attached invoice for your recent visit. Total: ₹${item.total.toFixed(
-        2
-      )}.`;
+      const message = `Hi ${item.name}`;
 
       // Open SMS composer with message + shortened PDF link
       const smsUrl = generateShareURL(phoneNumber, message, shortPdfUrl, "sms");
       window.open(smsUrl, "_blank");
-
-      NotifyData(
-        "SMS composer opened with message and shortened PDF link!",
-        "success"
-      );
     } catch (error) {
       console.error("SMS share failed:", error);
       // Fallback: Open SMS with just message (no PDF)
@@ -234,17 +212,9 @@ const Billing = () => {
       const phoneDigits = phoneStr.replace(/\D/g, "");
       const phoneNumber =
         phoneDigits.length === 10 ? `91${phoneDigits}` : phoneDigits;
-      const message = `Hi ${
-        item.name
-      }, உங்கள் பில் PDF share செய்ய முயற்சி. Print option use பண்ணி manual send பண்ணுங்க. Total: ₹${item.total.toFixed(
-        2
-      )}.`;
+      const message = `Hi ${item.name}`;
       const smsUrl = generateShareURL(phoneNumber, message, null, "sms");
       window.open(smsUrl, "_blank");
-      NotifyData(
-        "PDF upload failed – opened SMS with message only. Please send PDF manually via print.",
-        "warning"
-      );
     }
   };
 
