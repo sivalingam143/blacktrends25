@@ -6,7 +6,7 @@ import { ActionButton, Buttons } from "../../components/Buttons";
 import { MdOutlineDelete } from "react-icons/md";
 import { LiaEditSolid } from "react-icons/lia";
 import { HiOutlineDotsVertical } from "react-icons/hi";
-import { FaPrint } from "react-icons/fa";
+import { FaPrint, FaWhatsapp } from "react-icons/fa";
 import {
   pdf,
   Document,
@@ -16,6 +16,7 @@ import {
   StyleSheet,
   Image,
 } from "@react-pdf/renderer";
+import * as buffer from "buffer"; // Add this import for Buffer polyfill
 import logo from "../../assets/images/storelogo.png";
 import PageTitle from "../../components/PageTitle";
 import NotifyData from "../../components/NotifyData";
@@ -30,6 +31,13 @@ const Billing = () => {
   const { billing } = useSelector((s) => s.billing);
   const companies = useSelector((s) => s.company.company);
   const [searchTerm, setSearchTerm] = useState("");
+
+  // Add Buffer polyfill for browser
+  useEffect(() => {
+    if (typeof window !== "undefined" && !window.Buffer) {
+      window.Buffer = buffer.Buffer;
+    }
+  }, []);
 
   useEffect(() => {
     dispatch(fetchBillings(""));
@@ -386,6 +394,99 @@ const Billing = () => {
     };
   };
 
+  const handleWhatsAppShare = async (item) => {
+    if (!item.phone) {
+      NotifyData("Phone number not available for this bill!", "error");
+      return;
+    }
+
+    try {
+      const companyDetails = companies[0] || {};
+      const blob = await pdf(
+        <Invoice item={item} companyDetails={companyDetails} />
+      ).toBlob();
+
+      const phoneStr = String(item.phone || "");
+      const phoneDigits = phoneStr.replace(/\D/g, "");
+      const internationalPhone =
+        phoneDigits.length === 10 ? `91${phoneDigits}` : phoneDigits;
+
+      const fileName = `invoice-${item.billing_id || Date.now()}.pdf`;
+      const shareFile = new File([blob], fileName, { type: "application/pdf" });
+
+      // Prioritize direct share for immediate send (works on mobile)
+      if (navigator.canShare && navigator.canShare({ files: [shareFile] })) {
+        try {
+          await navigator.share({
+            title: `Invoice ${item.billing_id || ""}`,
+            text: `Hi ${
+              item.name
+            }, உங்கள் பில் இங்கே. Please find attached invoice for your recent visit. Total: ₹${item.total.toFixed(
+              2
+            )}.`,
+            files: [shareFile],
+          });
+          NotifyData(
+            "PDF shared directly – select WhatsApp to send!",
+            "success"
+          );
+        } catch (shareError) {
+          console.warn("Share failed, falling back:", shareError);
+          // Fallback to download + open
+          throw shareError; // To trigger fallback
+        }
+      } else {
+        // Fallback for desktop/browser without share support: Download and open WhatsApp
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        NotifyData(
+          `PDF downloaded! Now opening WhatsApp – attach the file to ${item.name}'s chat.`,
+          "info"
+        );
+
+        // Open WhatsApp Web/Desktop with pre-filled message
+        const message = encodeURIComponent(
+          `Hi ${item.name}, உங்கள் பில் attached. Total: ₹${item.total.toFixed(
+            2
+          )}. Please find the invoice PDF attached.`
+        );
+        window.open(
+          `https://wa.me/${internationalPhone}?text=${message}`,
+          "_blank"
+        );
+      }
+    } catch (error) {
+      console.error("WhatsApp share failed:", error);
+      const phoneStr = String(item.phone || "");
+      const phoneDigits = phoneStr.replace(/\D/g, "");
+      const internationalPhone =
+        phoneDigits.length === 10 ? `91${phoneDigits}` : phoneDigits;
+      // Ultimate fallback: Just open WhatsApp with message (no PDF, but notify)
+      const message = encodeURIComponent(
+        `Hi ${
+          item.name
+        }, உங்கள் பில் PDF share செய்ய முயற்சி. Print option use பண்ணி manual send பண்ணுங்க. Total: ₹${item.total.toFixed(
+          2
+        )}.`
+      );
+      window.open(
+        `https://wa.me/${internationalPhone}?text=${message}`,
+        "_blank"
+      );
+      NotifyData(
+        "Direct share not possible – opened WhatsApp. Please send PDF manually via print.",
+        "warning"
+      );
+    }
+  };
+
   const filteredBilling = billing.filter(
     (item) =>
       (item.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -416,6 +517,11 @@ const Billing = () => {
             label: "Print",
             icon: <FaPrint />,
             onClick: () => handlePrint(item),
+          },
+          {
+            label: "WhatsApp",
+            icon: <FaWhatsapp style={{ color: "#25D366" }} />,
+            onClick: () => handleWhatsAppShare(item),
           },
           {
             label: "Edit",

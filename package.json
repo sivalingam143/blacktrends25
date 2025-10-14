@@ -19,6 +19,7 @@
     "antd": "^5.22.2",
     "axios": "^1.7.9",
     "bootstrap": "^5.3.3",
+    "buffer": "^6.0.3",
     "jspdf": "^3.0.2",
     "jspdf-autotable": "^5.0.2",
     "lodash": "^4.17.21",
