@@ -17,6 +17,7 @@ import {
   Image,
 } from "@react-pdf/renderer";
 import * as buffer from "buffer";
+import axios from "axios";
 import axiosInstance from "../../config/API";
 import logo from "../../assets/images/storelogo.png";
 import PageTitle from "../../components/PageTitle";
@@ -63,6 +64,19 @@ const Billing = () => {
     }
   };
 
+  // NEW: Function to shorten URL using TinyURL API
+  const shortenUrl = async (url) => {
+    try {
+      const response = await axios.get(
+        `https://tinyurl.com/api-create.php?url=${encodeURIComponent(url)}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Shorten error:", error);
+      return url; // fallback to original URL
+    }
+  };
+
   // UPDATED: Function to upload PDF blob and get URL using axiosInstance
   const uploadPdfBlob = async (blob) => {
     const formData = new FormData();
@@ -97,7 +111,7 @@ const Billing = () => {
     return `https://wa.me/${number}?text=${encodeURIComponent(fullMessage)}`;
   };
 
-  // UPDATED: handleWhatsAppShare - Now uploads PDF, gets link, and sends via WhatsApp URL
+  // UPDATED: handleWhatsAppShare - Now uploads PDF, shortens link, and sends via WhatsApp URL
   const handleWhatsAppShare = async (item) => {
     if (!item.phone) {
       NotifyData("Phone number not available for this bill!", "error");
@@ -113,6 +127,9 @@ const Billing = () => {
       // Upload PDF to get public URL
       const pdfUrl = await uploadPdfBlob(blob);
 
+      // Shorten the PDF URL
+      const shortPdfUrl = await shortenUrl(pdfUrl);
+
       // Prepare message
       const phoneStr = String(item.phone || "");
       const phoneDigits = phoneStr.replace(/\D/g, "");
@@ -121,11 +138,18 @@ const Billing = () => {
 
       const message = `Hi ${item.name}`;
 
-      // Open WhatsApp with message + PDF link
-      const waUrl = generateWhatsAppURL(internationalPhone, message, pdfUrl);
+      // Open WhatsApp with message + shortened PDF link
+      const waUrl = generateWhatsAppURL(
+        internationalPhone,
+        message,
+        shortPdfUrl
+      );
       window.open(waUrl, "_blank");
 
-      NotifyData("WhatsApp opened with message and PDF link!", "success");
+      NotifyData(
+        "WhatsApp opened with message and shortened PDF link!",
+        "success"
+      );
     } catch (error) {
       console.error("WhatsApp share failed:", error);
       // Fallback: Open WhatsApp with just message (no PDF)
