@@ -400,43 +400,31 @@ const Billing = () => {
       return;
     }
 
+    const companyDetails = companies[0] || {};
+    const phoneDigits = String(item.phone || "").replace(/\D/g, "");
+    const internationalPhone =
+      phoneDigits.length === 10 ? `91${phoneDigits}` : phoneDigits;
+
     try {
-      const companyDetails = companies[0] || {};
       const blob = await pdf(
         <Invoice item={item} companyDetails={companyDetails} />
       ).toBlob();
 
-      const phoneStr = String(item.phone || "");
-      const phoneDigits = phoneStr.replace(/\D/g, "");
-      const internationalPhone =
-        phoneDigits.length === 10 ? `91${phoneDigits}` : phoneDigits;
-
       const fileName = `invoice-${item.billing_id || Date.now()}.pdf`;
       const shareFile = new File([blob], fileName, { type: "application/pdf" });
 
-      // Prioritize direct share for immediate send (works on mobile)
+      // Mobile direct share
       if (navigator.canShare && navigator.canShare({ files: [shareFile] })) {
-        try {
-          await navigator.share({
-            title: `Invoice ${item.billing_id || ""}`,
-            text: `Hi ${
-              item.name
-            }, உங்கள் பில் இங்கே. Please find attached invoice for your recent visit. Total: ₹${item.total.toFixed(
-              2
-            )}.`,
-            files: [shareFile],
-          });
-          NotifyData(
-            "PDF shared directly – select WhatsApp to send!",
-            "success"
-          );
-        } catch (shareError) {
-          console.warn("Share failed, falling back:", shareError);
-          // Fallback to download + open
-          throw shareError; // To trigger fallback
-        }
+        await navigator.share({
+          title: `Invoice ${item.billing_id || ""}`,
+          text: `Hi ${
+            item.name
+          }, உங்கள் பில் இங்கே. Total: ₹${item.total.toFixed(2)}.`,
+          files: [shareFile],
+        });
+        NotifyData("PDF shared successfully!", "success");
       } else {
-        // Fallback for desktop/browser without share support: Download and open WhatsApp
+        // Desktop fallback
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
@@ -447,16 +435,11 @@ const Billing = () => {
         URL.revokeObjectURL(url);
 
         NotifyData(
-          `PDF downloaded! Now opening WhatsApp – attach the file to ${item.name}'s chat.`,
+          `PDF downloaded! Opening WhatsApp Web to send message...`,
           "info"
         );
 
-        // Open WhatsApp Web/Desktop with pre-filled message
-        const message = encodeURIComponent(
-          `Hi ${item.name}, உங்கள் பில் attached. Total: ₹${item.total.toFixed(
-            2
-          )}. Please find the invoice PDF attached.`
-        );
+        const message = encodeURIComponent(`Hi ${item.name}`);
         window.open(
           `https://wa.me/${internationalPhone}?text=${message}`,
           "_blank"
@@ -464,25 +447,20 @@ const Billing = () => {
       }
     } catch (error) {
       console.error("WhatsApp share failed:", error);
-      const phoneStr = String(item.phone || "");
-      const phoneDigits = phoneStr.replace(/\D/g, "");
-      const internationalPhone =
-        phoneDigits.length === 10 ? `91${phoneDigits}` : phoneDigits;
-      // Ultimate fallback: Just open WhatsApp with message (no PDF, but notify)
+      NotifyData(
+        "Unable to share PDF directly. Please use print option and send manually.",
+        "warning"
+      );
       const message = encodeURIComponent(
         `Hi ${
           item.name
-        }, உங்கள் பில் PDF share செய்ய முயற்சி. Print option use பண்ணி manual send பண்ணுங்க. Total: ₹${item.total.toFixed(
+        }, உங்கள் பில் share செய்ய முடியவில்லை. Total: ₹${item.total.toFixed(
           2
         )}.`
       );
       window.open(
         `https://wa.me/${internationalPhone}?text=${message}`,
         "_blank"
-      );
-      NotifyData(
-        "Direct share not possible – opened WhatsApp. Please send PDF manually via print.",
-        "warning"
       );
     }
   };
