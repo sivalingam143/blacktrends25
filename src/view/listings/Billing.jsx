@@ -7,7 +7,6 @@ import { MdOutlineDelete } from "react-icons/md";
 import { LiaEditSolid } from "react-icons/lia";
 import { HiOutlineDotsVertical } from "react-icons/hi";
 import { FaPrint, FaWhatsapp, FaSms } from "react-icons/fa";
-import axios from "axios";
 import axiosInstance from "../../config/API";
 import PageTitle from "../../components/PageTitle";
 import NotifyData from "../../components/NotifyData";
@@ -47,35 +46,19 @@ const Billing = () => {
     }
   };
 
-  // NEW: Function to shorten URL using TinyURL API
-  const shortenUrl = async (url) => {
-    try {
-      const response = await axios.get(
-        `https://tinyurl.com/api-create.php?url=${encodeURIComponent(url)}`
-      );
-      return response.data;
-    } catch (error) {
-      console.error("Shorten error:", error);
-      return url; // fallback to original URL
-    }
-  };
-
-  // UPDATED: Function to upload PDF blob and get URL using axiosInstance
+  // ✅ Upload PDF to backend
   const uploadPdfBlob = async (blob) => {
     const formData = new FormData();
     formData.append("pdf_file", blob, `invoice-${Date.now()}.pdf`);
-    formData.append("action", "uploadPdf"); // To match PHP action
+    formData.append("action", "uploadPdf");
 
     try {
-      // Assuming the billing endpoint is '/billing.php' - adjust if needed
       const response = await axiosInstance.post("/billing.php", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+        headers: { "Content-Type": "multipart/form-data" },
       });
       const data = response.data;
       if (data.head.code === 200) {
-        return data.body.pdf_url;
+        return data.body.pdf_url; // ✅ Direct backend URL
       } else {
         throw new Error(data.head.msg || "Upload failed");
       }
@@ -85,18 +68,9 @@ const Billing = () => {
     }
   };
 
-  // UPDATED: generateShareURL function for WhatsApp or SMS
-  const generateShareURL = (
-    number,
-    message,
-    pdfUrl = null,
-    type = "whatsapp"
-  ) => {
-    let fullMessage = message;
-    if (pdfUrl) {
-      fullMessage += `\n\nஉங்கள் பில் PDF: ${pdfUrl}`;
-    }
-    const encodedMessage = encodeURIComponent(fullMessage);
+  // ✅ WhatsApp & SMS Share URL
+  const generateShareURL = (number, message, type = "whatsapp") => {
+    const encodedMessage = encodeURIComponent(message);
     if (type === "whatsapp") {
       return `https://wa.me/${number}?text=${encodedMessage}`;
     } else if (type === "sms") {
@@ -105,7 +79,7 @@ const Billing = () => {
     return "";
   };
 
-  // UPDATED: handleWhatsAppShare - Now uploads PDF, shortens link, and sends via WhatsApp URL
+  // ✅ WhatsApp Share for Salon / Spa
   const handleWhatsAppShare = async (item) => {
     if (!item.phone) {
       NotifyData("Phone number not available for this bill!", "error");
@@ -115,48 +89,28 @@ const Billing = () => {
     try {
       const companyDetails = companies[0] || {};
       const blob = await generateInvoicePdf(item, companyDetails);
-
-      // Upload PDF to get public URL
       const pdfUrl = await uploadPdfBlob(blob);
 
-      // Shorten the PDF URL
-      const shortPdfUrl = await shortenUrl(pdfUrl);
-
-      // Prepare message
-      const phoneStr = String(item.phone || "");
-      const phoneDigits = phoneStr.replace(/\D/g, "");
+      const phoneDigits = String(item.phone).replace(/\D/g, "");
       const internationalPhone =
         phoneDigits.length === 10 ? `91${phoneDigits}` : phoneDigits;
 
-      const message = `Hi ${item.name}`;
+      // 💈 Friendly + Professional Message
+      const message = `Hi ${item.name},\n\nThank you for visiting ${
+        companyDetails.company_name || "our salon & spa"
+      }.\nWe truly appreciate your time with us!\n\nPlease click the link below to download your invoice PDF 👇\n${pdfUrl}\n\nLooking forward to serving you again soon 💇‍♂️💆‍♀️\n\nWarm Regards,\n${
+        companyDetails.company_name || "Our Team"
+      }`;
 
-      // Open WhatsApp with message + shortened PDF link
-      const waUrl = generateShareURL(
-        internationalPhone,
-        message,
-        shortPdfUrl,
-        "whatsapp"
-      );
+      const waUrl = generateShareURL(internationalPhone, message, "whatsapp");
       window.open(waUrl, "_blank");
     } catch (error) {
       console.error("WhatsApp share failed:", error);
-      // Fallback: Open WhatsApp with just message (no PDF)
-      const phoneStr = String(item.phone || "");
-      const phoneDigits = phoneStr.replace(/\D/g, "");
-      const internationalPhone =
-        phoneDigits.length === 10 ? `91${phoneDigits}` : phoneDigits;
-      const message = `Hi ${item.name}`;
-      const waUrl = generateShareURL(
-        internationalPhone,
-        message,
-        null,
-        "whatsapp"
-      );
-      window.open(waUrl, "_blank");
+      NotifyData("Failed to share on WhatsApp", "error");
     }
   };
 
-  // NEW: handleSMSShare - Uploads PDF, shortens link, and opens SMS composer with message + link
+  // ✅ SMS Share for Salon / Spa
   const handleSMSShare = async (item) => {
     if (!item.phone) {
       NotifyData("Phone number not available for this bill!", "error");
@@ -166,37 +120,28 @@ const Billing = () => {
     try {
       const companyDetails = companies[0] || {};
       const blob = await generateInvoicePdf(item, companyDetails);
-
-      // Upload PDF to get public URL
       const pdfUrl = await uploadPdfBlob(blob);
 
-      // Shorten the PDF URL
-      const shortPdfUrl = await shortenUrl(pdfUrl);
-
-      // Prepare message
-      const phoneStr = String(item.phone || "");
-      const phoneDigits = phoneStr.replace(/\D/g, "");
+      const phoneDigits = String(item.phone).replace(/\D/g, "");
       const phoneNumber =
         phoneDigits.length === 10 ? `91${phoneDigits}` : phoneDigits;
 
-      const message = `Hi ${item.name}`;
+      // 💆‍♀️ Shorter version for SMS (limited characters)
+      const message = `Hi ${item.name}, Thank you for visiting ${
+        companyDetails.company_name || "our salon & spa"
+      }. Download your invoice PDF: ${pdfUrl} - Warm Regards, ${
+        companyDetails.company_name || "Our Team"
+      }`;
 
-      // Open SMS composer with message + shortened PDF link
-      const smsUrl = generateShareURL(phoneNumber, message, shortPdfUrl, "sms");
+      const smsUrl = generateShareURL(phoneNumber, message, "sms");
       window.open(smsUrl, "_blank");
     } catch (error) {
       console.error("SMS share failed:", error);
-      // Fallback: Open SMS with just message (no PDF)
-      const phoneStr = String(item.phone || "");
-      const phoneDigits = phoneStr.replace(/\D/g, "");
-      const phoneNumber =
-        phoneDigits.length === 10 ? `91${phoneDigits}` : phoneDigits;
-      const message = `Hi ${item.name}`;
-      const smsUrl = generateShareURL(phoneNumber, message, null, "sms");
-      window.open(smsUrl, "_blank");
+      NotifyData("Failed to send SMS", "error");
     }
   };
 
+  // ✅ Print PDF
   const handlePrint = async (item) => {
     const companyDetails = companies[0] || {};
     const blob = await generateInvoicePdf(item, companyDetails);
