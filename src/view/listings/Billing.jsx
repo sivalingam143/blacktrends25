@@ -95,10 +95,11 @@ const Billing = () => {
       const internationalPhone =
         phoneDigits.length === 10 ? `91${phoneDigits}` : phoneDigits;
 
-      // 💈 Friendly + Professional Message
+      // 💈 Friendly + Professional Message (With Review Link)
+      const reviewLink = "https://g.page/r/YourBusinessReviewLink/review"; // 🔗 Replace later with your actual Google review link
       const message = `Hi ${item.name},\n\nThank you for visiting ${
         companyDetails.company_name || "our salon & spa"
-      }.\nWe truly appreciate your time with us!\n\nPlease click the link below to download your invoice PDF 👇\n${pdfUrl}\n\nLooking forward to serving you again soon 💇‍♂️💆‍♀️\n\nWarm Regards,\n${
+      }.\nWe truly appreciate your time with us!\n\n🧾 Download your invoice below 👇\n${pdfUrl}\n\n💬 We'd love to hear your feedback!\nPlease share your review here:\n${reviewLink}\n\nLooking forward to serving you again soon 💇‍♂️💆‍♀️\n\nWarm Regards,\n${
         companyDetails.company_name || "Our Team"
       }`;
 
@@ -110,7 +111,6 @@ const Billing = () => {
     }
   };
 
-  // ✅ SMS Share for Salon / Spa
   const handleSMSShare = async (item) => {
     if (!item.phone) {
       NotifyData("Phone number not available for this bill!", "error");
@@ -126,10 +126,11 @@ const Billing = () => {
       const phoneNumber =
         phoneDigits.length === 10 ? `91${phoneDigits}` : phoneDigits;
 
-      // 💆‍♀️ Shorter version for SMS (limited characters)
+      // 💬 Short + Professional Message (With Review Link)
+      const reviewLink = "https://g.page/r/YourBusinessReviewLink/review"; // 🔗 Replace later with your real link
       const message = `Hi ${item.name}, Thank you for visiting ${
         companyDetails.company_name || "our salon & spa"
-      }. Download your invoice PDF: ${pdfUrl} - Warm Regards, ${
+      }. Download your invoice: ${pdfUrl} | Please leave your review: ${reviewLink} - ${
         companyDetails.company_name || "Our Team"
       }`;
 
