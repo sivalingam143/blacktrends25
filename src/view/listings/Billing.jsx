@@ -96,7 +96,7 @@ const Billing = () => {
         phoneDigits.length === 10 ? `91${phoneDigits}` : phoneDigits;
 
       // 💈 Friendly + Professional Message (With Correct Google Review Link)
-      const reviewLink = "https://g.page/r/BlackTrendsSalonVirudhunagar/review"; // 🔗 Replace with your actual Google review link
+      const reviewLink = "https://g.page/r/CStWMRIiiKCDEAE/review"; // 🔗 Replace with your actual Google review link
       const message = `Hi ${item.name},\n\nThank you for visiting ${
         companyDetails.company_name || "Black Trends Salon & Spa"
       }.\nWe truly appreciate your time with us!\n\n🧾 Download your invoice below 👇\n${pdfUrl}\n\n💬 We'd love to hear your feedback!\nPlease share your review here:\n${reviewLink}\n\nLooking forward to serving you again soon 💇‍♂️💆‍♀️\n\nWarm Regards,\n${
@@ -128,7 +128,7 @@ const Billing = () => {
         phoneDigits.length === 10 ? `91${phoneDigits}` : phoneDigits;
 
       // 💬 Short + Professional Message (With Correct Google Review Link)
-      const reviewLink = "https://g.page/r/BlackTrendsSalonVirudhunagar/review"; // 🔗 Replace with your actual Google review link
+      const reviewLink = "https://g.page/r/CStWMRIiiKCDEAE/review"; // 🔗 Replace with your actual Google review link
       const message = `Hi ${item.name}, Thank you for visiting ${
         companyDetails.company_name || "Black Trends Salon & Spa"
       }. Download your invoice: ${pdfUrl} | Please leave your review: ${reviewLink} - ${
