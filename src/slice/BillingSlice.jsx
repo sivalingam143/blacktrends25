@@ -6,6 +6,7 @@ import {
   deleteBillingApi,
   fetchStaffReportApi,
   fetchMemberReportApi,
+  getMilestoneDiscountApi,
 } from "../services/BillingService";
 
 /* ---- thunks ---- */
@@ -53,6 +54,11 @@ export const fetchMemberReport = createAsyncThunk(
     await fetchMemberReportApi(fromDate, toDate, searchText)
 );
 
+export const getMilestoneDiscount = createAsyncThunk(
+  "billing/getMilestoneDiscount",
+  async (memberId) => await getMilestoneDiscountApi(memberId)
+);
+
 /* ---- slice ---- */
 const billingSlice = createSlice({
   name: "billing",
@@ -60,10 +66,15 @@ const billingSlice = createSlice({
     billing: [],
     staffReport: [],
     memberReport: [],
+    milestoneDiscount: 0,
     status: "idle",
     error: null,
   },
-  reducers: {},
+  reducers: {
+    clearMilestoneDiscount: (state) => {
+      state.milestoneDiscount = 0;
+    },
+  },
   extraReducers: (builder) => {
     // fetch billings
     builder
@@ -107,6 +118,11 @@ const billingSlice = createSlice({
         s.error = a.error.message;
       });
 
+    // get milestone discount
+    builder.addCase(getMilestoneDiscount.fulfilled, (s, a) => {
+      s.milestoneDiscount = a.payload;
+    });
+
     // add / update / delete – just change UI status
     const common = (builder) =>
       builder
@@ -145,4 +161,5 @@ const billingSlice = createSlice({
   },
 });
 
+export const { clearMilestoneDiscount } = billingSlice.actions;
 export default billingSlice.reducer;

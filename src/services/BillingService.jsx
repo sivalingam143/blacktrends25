@@ -103,3 +103,14 @@ export const fetchMemberReportApi = async (
   console.log(data);
   return data.body || { member: [] };
 };
+
+/* ---------- GET MILESTONE DISCOUNT ---------- */
+export const getMilestoneDiscountApi = async (memberId) => {
+  const payload = {
+    action: "getMilestoneDiscount",
+    member_id: memberId,
+  };
+  const { data } = await axiosInstance.post(API_ENDPOINT, payload);
+  console.log(data);
+  return data.body?.extra_discount_rate || 0;
+};

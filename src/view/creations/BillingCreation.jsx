@@ -22,6 +22,8 @@ import {
   fetchBillings,
   addBilling,
   updateBilling,
+  getMilestoneDiscount,
+  clearMilestoneDiscount,
 } from "../../slice/BillingSlice";
 import { fetchCategories } from "../../slice/CategorySlice";
 
@@ -36,6 +38,9 @@ const BillingCreation = () => {
   );
   const { staff } = useSelector((s) => s.staff);
   const { categories } = useSelector((s) => s.categories);
+  const { milestoneDiscount: extraDiscountRate } = useSelector(
+    (s) => s.billing
+  );
   const isEdit = !!id;
 
   const [form, setForm] = useState({
@@ -217,8 +222,36 @@ const BillingCreation = () => {
       }
     : null;
 
+  // Helper function to apply discounts to rows
+  const applyDiscountsToRows = (rowsToUpdate, membership, extraRate) => {
+    return rowsToUpdate.map((row) => {
+      const rowSubtotal = (row.qty || 0) * (row.product_price || 0);
+      let totalDiscount = 0;
+      let totalDiscAmount = 0;
+
+      if (membership === "Yes") {
+        // Base 18% + extra
+        totalDiscount = 18 + extraRate;
+      } else if (membership === "No") {
+        // Just extra
+        totalDiscount = extraRate;
+      }
+
+      totalDiscAmount = (totalDiscount / 100) * rowSubtotal;
+      const newRowTotal = rowSubtotal - totalDiscAmount;
+
+      return {
+        ...row,
+        discount: totalDiscount,
+        discount_type: "PER",
+        discount_amount: totalDiscAmount,
+        row_total: newRowTotal,
+      };
+    });
+  };
+
   // Handle member change
-  const handleMemberChange = (selectedOption) => {
+  const handleMemberChange = async (selectedOption) => {
     if (selectedOption) {
       const selectedMember = member.find(
         (m) => m.phone === selectedOption.value
@@ -234,24 +267,31 @@ const BillingCreation = () => {
           membership: selectedMember.membership || "",
         }));
 
-        // If membership is 'Yes', apply 18% default discount to all existing rows
-        if (selectedMember.membership === "Yes") {
+        // Clear previous milestone discount
+        dispatch(clearMilestoneDiscount());
+
+        // Fetch milestone extra discount
+        if (selectedMember.member_id) {
+          const extraRate = await dispatch(
+            getMilestoneDiscount(selectedMember.member_id)
+          ).unwrap();
+          console.log("Extra discount rate:", extraRate);
+
+          // Apply discounts to all existing rows
           setRows((prevRows) =>
-            prevRows.map((row) => {
-              const rowSubtotal = (row.qty || 0) * (row.product_price || 0);
-              const discAmount = (18 / 100) * rowSubtotal;
-              return {
-                ...row,
-                discount: 18,
-                discount_type: "PER",
-                discount_amount: discAmount,
-              };
-            })
+            applyDiscountsToRows(prevRows, selectedMember.membership, extraRate)
           );
-          NotifyData(
-            "Membership 'Yes' detected - 18% discount applied to all rows!",
-            "info"
-          );
+
+          if (extraRate > 0) {
+            NotifyData(
+              `Milestone discount applied: ${extraRate}% extra (Total: ${
+                selectedMember.membership === "Yes" ? 28 : 10
+              }%)`,
+              "info"
+            );
+          } else {
+            NotifyData("Member found and details loaded!", "success");
+          }
         } else {
           NotifyData("Member found and details loaded!", "success");
         }
@@ -266,6 +306,7 @@ const BillingCreation = () => {
         phone: "",
         membership: "",
       }));
+      dispatch(clearMilestoneDiscount());
     }
   };
 
@@ -383,7 +424,7 @@ const BillingCreation = () => {
         row.discount_type = value;
       }
 
-      // Recalculate row total and discount_amount
+      // Recalculate row total and discount_amount (manual discount overrides auto)
       const rowSubtotal = (row.qty || 0) * (row.product_price || 0);
       let discAmount = row.discount || 0;
       if (row.discount_type === "PER") {
@@ -414,18 +455,20 @@ const BillingCreation = () => {
       product_price: 0,
       qty: 1,
       discount: 0,
-      discount_type: "INR",
+      discount_type: "PER",
       discount_amount: 0,
       // Single staff
       staff_id: null,
       staff_name: "",
       row_total: 0,
     };
-    // If membership is 'Yes', set default 18% discount
-    if (form.membership === "Yes") {
-      newRow.discount = 18;
-      newRow.discount_type = "PER";
-      newRow.discount_amount = (18 / 100) * (1 * 0); // 0 initially
+
+    // Apply auto discounts for new row
+    if (form.member_id && form.membership) {
+      const totalDiscount =
+        form.membership === "Yes" ? 18 + extraDiscountRate : extraDiscountRate;
+      newRow.discount = totalDiscount;
+      newRow.discount_amount = (totalDiscount / 100) * (1 * 0); // 0 initially
     }
 
     setRows((prev) => [...prev, newRow]);
@@ -808,6 +851,12 @@ const BillingCreation = () => {
                           <strong>Membership</strong>
                           <span>{selectedMember.membership || "-"}</span>
                         </div>
+                        {extraDiscountRate > 0 && (
+                          <div className="d-flex justify-content-between align-items-center">
+                            <strong>Extra Discount</strong>
+                            <span>{extraDiscountRate}%</span>
+                          </div>
+                        )}
                       </>
                     ) : (
                       <div className="text-center text-muted">
