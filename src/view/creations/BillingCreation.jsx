@@ -221,30 +221,37 @@ const BillingCreation = () => {
           }
         }
         setRows(parsedRows);
-        // If editing and membership is 'Yes', apply 18% default discount to all rows
-        if (rec.membership === "Yes") {
-          setRows((prevRows) =>
-            prevRows.map((row) => {
-              const rowSubtotal = (row.qty || 0) * (row.product_price || 0);
-              const discAmount = (18 / 100) * rowSubtotal;
-              return {
-                ...row,
-                discount: 18,
-                discount_type: "PER",
-                discount_amount: discAmount,
-              };
-            })
-          );
-        }
 
-        // Set wow content for edit mode
-        if (rec.membership) {
-          const totalDiscount = rec.membership === "Yes" ? 18 : 0;
-          const discText = `${totalDiscount}%`;
-          setWowContent(
-            `Wow! This client has a membership with Discount on Service ${discText}`
-          );
-        }
+        // Fetch extra discount and set wow content for edit mode
+        const setEditWowContent = async () => {
+          dispatch(clearMilestoneDiscount());
+          let extraRate = 0;
+          if (rec.member_id) {
+            extraRate = await dispatch(
+              getMilestoneDiscount(rec.member_id)
+            ).unwrap();
+          }
+          const totalDiscount =
+            rec.membership === "Yes" ? 18 + extraRate : extraRate;
+          if (totalDiscount > 0) {
+            const discText = `${totalDiscount}%`;
+            let extraText =
+              extraRate > 0 ? ` (Extra Milestone: ${extraRate}%)` : "";
+            setWowContent(
+              `Wow! This client has a membership with Discount on Service ${discText}${extraText}`
+            );
+          } else {
+            setWowContent("This client has no discount available.");
+          }
+
+          // Apply extra discount to rows if membership Yes
+          if (rec.membership === "Yes") {
+            setRows((prevRows) =>
+              applyDiscountsToRows(prevRows, rec.membership, extraRate)
+            );
+          }
+        };
+        setEditWowContent();
       }
     }
   }, [id, billing, isEdit, products, staff, categories]);
