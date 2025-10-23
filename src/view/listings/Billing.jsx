@@ -96,7 +96,7 @@ const Billing = () => {
         phoneDigits.length === 10 ? `91${phoneDigits}` : phoneDigits;
 
       // 💈 Friendly + Professional Message (With Correct Google Review Link)
-      const reviewLink = "https://g.page/r/BlackTrendsSalonVirudhunagar/review"; // 🔗 Replace with your actual Google review link
+      const reviewLink = "https://g.page/r/CStWMRIiiKCDEAE/review"; // 🔗 Replace with your actual Google review link
       const message = `Hi ${item.name},\n\nThank you for visiting ${
         companyDetails.company_name || "Black Trends Salon & Spa"
       }.\nWe truly appreciate your time with us!\n\n🧾 Download your invoice below 👇\n${pdfUrl}\n\n💬 We'd love to hear your feedback!\nPlease share your review here:\n${reviewLink}\n\nLooking forward to serving you again soon 💇‍♂️💆‍♀️\n\nWarm Regards,\n${
@@ -128,7 +128,7 @@ const Billing = () => {
         phoneDigits.length === 10 ? `91${phoneDigits}` : phoneDigits;
 
       // 💬 Short + Professional Message (With Correct Google Review Link)
-      const reviewLink = "https://g.page/r/BlackTrendsSalonVirudhunagar/review"; // 🔗 Replace with your actual Google review link
+      const reviewLink = "https://g.page/r/CStWMRIiiKCDEAE/review"; // 🔗 Replace with your actual Google review link
       const message = `Hi ${item.name}, Thank you for visiting ${
         companyDetails.company_name || "Black Trends Salon & Spa"
       }. Download your invoice: ${pdfUrl} | Please leave your review: ${reviewLink} - ${
@@ -166,8 +166,40 @@ const Billing = () => {
         .includes(searchTerm.toLowerCase())
   );
 
+  const getStaffNames = (item) => {
+    try {
+      const details = JSON.parse(item.productandservice_details);
+
+      if (!details || details.length === 0) {
+        return "";
+      }
+
+      const unique = [];
+
+      details.forEach((d) => {
+        if (d.staff_id && d.staff_name && d.staff_name.trim() !== "") {
+          if (!unique.some((u) => u.staff_id === d.staff_id)) {
+            unique.push(d);
+          }
+        }
+      });
+
+      return unique.map((s) => s.staff_name).join(", ");
+    } catch (e) {
+      return "";
+    }
+  };
+
   // 🔹 TABLE HEADERS
-  const headers = ["No", "Date", "Member No", "Name", "Phone", "Total"];
+  const headers = [
+    "No",
+    "Date",
+    "Member No",
+    "Name",
+    "Phone",
+    "Service Provider",
+    "Total",
+  ];
 
   // 🔹 TABLE BODY
   const body = filteredBilling.map((item, idx) => ({
@@ -178,6 +210,7 @@ const Billing = () => {
       item.member_no,
       item.name,
       item.phone,
+      getStaffNames(item) || "-",
       `₹ ${parseFloat(item.total).toFixed(2)}`,
       <ActionButton
         options={[

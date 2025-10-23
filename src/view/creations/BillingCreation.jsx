@@ -399,6 +399,14 @@ const BillingCreation = () => {
 
   // Add row
   const addRow = () => {
+    // If any existing row has no staff
+    const missingStaff = rows.some((r) => !r.staff_id);
+
+    if (missingStaff) {
+      NotifyData("Please select staff before adding a new row!", "error");
+      return; // stop adding row
+    }
+
     const newRow = {
       category_id: "",
       product_id: "",
