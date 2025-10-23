@@ -147,7 +147,8 @@ const styles = StyleSheet.create({
     fontSize: "8pt",
     fontWeight: "bold",
     marginTop: "5.5mm",
-    marginBottom: "0mm",
+    marginBottom: "3mm",
+    paddingBottom: "3mm",
   },
 });
 
@@ -184,7 +185,7 @@ const Invoice = ({ item, companyDetails }) => {
               {companyDetails.address || "Address"}
             </Text>
             <Text style={styles.phone}>
-              Ph: {companyDetails.contact_number || "Phone Number"}
+              Ph: {`${companyDetails.contact_number}, 70105 35346` || "Phone Number"}
             </Text>
           </View>
 
@@ -215,7 +216,7 @@ const Invoice = ({ item, companyDetails }) => {
             <View style={styles.detailRow}>
               <Text style={styles.label}>Mobile</Text>
               <Text style={styles.colon}>:</Text>
-              <Text style={styles.value}>{item.phone || "-"}</Text>
+             <Text style={styles.value}>{`${item.phone}`}</Text>
             </View>
             <View style={styles.detailRow}>
               <Text style={styles.label}>Membership</Text>
@@ -322,6 +323,9 @@ const Invoice = ({ item, companyDetails }) => {
           <View style={styles.footer2}>
             <Text>*** THANK YOU. PLEASE VISIT AGAIN ***</Text>
           </View>
+          <Text style={{ fontSize: "5pt", textAlign: "center" }}>
+             {"  "}
+          </Text>
         </View>
       </Page>
     </Document>
