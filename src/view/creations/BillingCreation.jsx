@@ -821,25 +821,22 @@ const BillingCreation = () => {
                   <span>₹{subtotal.toFixed(2)}</span>
                 </div>
                 <div className="mb-3 d-flex justify-content-between align-items-center">
-                  <div>
-                    <label>Discount</label>
-                    <div className="d-flex">
-                      <DropDown
-                        placeholder="Type"
-                        value={discount_type}
-                        onChange={handleDiscountTypeChange}
-                        options={discountTypeOptions}
-                        style={{ width: "80px" }}
-                      />
-                    </div>
-                  </div>
-                  <div className="input-group" style={{ width: "150px" }}>
+                  <strong>Discount</strong>
+                  <div className="d-flex gap-2 align-items-center">
+                    <DropDown
+                      placeholder="Type"
+                      value={discount_type}
+                      onChange={handleDiscountTypeChange}
+                      options={discountTypeOptions}
+                      style={{ width: "80px" }}
+                    />
                     <TextInputform
                       formtype="text"
                       step="0.01"
                       PlaceHolder="Amount"
                       value={overall_discount}
                       onChange={handleOverallDiscountChange}
+                      style={{ width: "100px" }}
                     />
                   </div>
                 </div>
@@ -849,35 +846,40 @@ const BillingCreation = () => {
                 </div>
                 {/* New: Payment Methods Section */}
                 <div className="mb-3">
-                  <label>Payment Method</label>
-                  <div className="d-flex gap-2 mb-2">
-                    <Select
-                      options={paymentOptions}
-                      value={paymentOptions.find(
-                        (opt) => opt.value === paymentMethod
-                      )}
-                      onChange={handlePaymentMethodChange}
-                      placeholder="Select Method"
-                      className="flex-grow-1"
-                      styles={{
-                        control: (provided) => ({
-                          ...provided,
-                          minWidth: "150px",
-                        }),
-                      }}
-                    />
-                    <TextInputform
-                      formtype="text"
-                      step="0.01"
-                      PlaceHolder="Amount"
-                      value={paymentAmount}
-                      onChange={handlePaymentAmountChange}
-                      style={{ width: "150px" }}
-                    />
-                    <Button variant="primary" size="sm" onClick={addPayment}>
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <strong>Payment Method</strong>
+                    <div className="d-flex gap-2 align-items-center">
+                      <Select
+                        options={paymentOptions}
+                        value={paymentOptions.find(
+                          (opt) => opt.value === paymentMethod
+                        )}
+                        onChange={handlePaymentMethodChange}
+                        placeholder="Select Method"
+                        className="flex-grow-1"
+                        styles={{
+                          control: (provided) => ({
+                            ...provided,
+                            minWidth: "150px",
+                          }),
+                        }}
+                      />
+                      <TextInputform
+                        formtype="text"
+                        step="0.01"
+                        PlaceHolder="Amount"
+                        value={paymentAmount}
+                        onChange={handlePaymentAmountChange}
+                        style={{ width: "150px" }}
+                      />
+                    </div>
+                  </div>
+                  <div className="py-2">
+                    <Button variant="success" size="sm" onClick={addPayment}>
                       Add
                     </Button>
                   </div>
+
                   {/* Payment List */}
                   {payments.length > 0 && (
                     <div className="border p-2 bg-light">
@@ -906,9 +908,7 @@ const BillingCreation = () => {
                   )}
                 </div>
                 <div className="mb-3 d-flex justify-content-between align-items-center">
-                  <div>
-                    <label>Paid</label>
-                  </div>
+                  <strong>Paid</strong>
                   <span>₹{paid.toFixed(2)}</span>
                 </div>
                 <div className="d-flex justify-content-between align-items-center  pt-2">
