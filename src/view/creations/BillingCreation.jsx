@@ -61,6 +61,10 @@ const BillingCreation = () => {
   const [paid, setPaid] = useState(0);
   const [submitting, setSubmitting] = useState(false);
 
+  const [paymentMethod, setPaymentMethod] = useState("Cash");
+  const [paymentAmount, setPaymentAmount] = useState(0);
+  const [payments, setPayments] = useState([]);
+
   // New Member Modal States
   const [showNewMemberModal, setShowNewMemberModal] = useState(false);
   const [newMemberForm, setNewMemberForm] = useState({
@@ -69,6 +73,12 @@ const BillingCreation = () => {
     membership: "No",
   });
   const [newMemberSubmitting, setNewMemberSubmitting] = useState(false);
+
+  // Payment method options
+  const paymentOptions = [
+    { value: "GPay", label: "GPay" },
+    { value: "Cash", label: "Cash" },
+  ];
 
   // Phone options for searchable dropdown
   const phoneOptions = member.map((m) => ({
@@ -105,6 +115,12 @@ const BillingCreation = () => {
     return `${day}-${month}-${year}`;
   };
 
+  // Update paid based on payments sum
+  useEffect(() => {
+    const totalPaid = payments.reduce((sum, p) => sum + p.amount, 0);
+    setPaid(totalPaid);
+  }, [payments]);
+
   useEffect(() => {
     dispatch(fetchMembers(""));
     dispatch(fetchProductAndServices(""));
@@ -113,6 +129,7 @@ const BillingCreation = () => {
     dispatch(fetchBillings(""));
   }, [dispatch]);
 
+  // Edit mode: Parse payment_details if exists
   useEffect(() => {
     if (isEdit && billing.length) {
       const rec = billing.find((b) => b.billing_id === id);
@@ -125,7 +142,16 @@ const BillingCreation = () => {
         });
         setOverallDiscount(parseFloat(rec.discount));
         setDiscountType(rec.discount_type || "INR");
-        setPaid(parseFloat(rec.paid) || 0);
+
+        // Parse payments if exists
+        if (rec.payment_details) {
+          try {
+            const parsedPayments = JSON.parse(rec.payment_details);
+            setPayments(parsedPayments || []);
+          } catch (e) {
+            console.error("Parse payment_details error:", e);
+          }
+        }
 
         // Parse product details if exists
         let parsedRows = [];
@@ -326,8 +352,31 @@ const BillingCreation = () => {
     setOverallDiscount(parseFloat(e.target.value) || 0);
   };
 
-  const handlePaidChange = (e) => {
-    setPaid(parseFloat(e.target.value) || 0);
+  // New: Handle Payment Method Change
+  const handlePaymentMethodChange = (selected) => {
+    setPaymentMethod(selected ? selected.value : "Cash");
+  };
+
+  // New: Handle Payment Amount Change
+  const handlePaymentAmountChange = (e) => {
+    setPaymentAmount(parseFloat(e.target.value) || 0);
+  };
+
+  // New: Add Payment
+  const addPayment = () => {
+    if (paymentAmount <= 0) {
+      NotifyData("Enter a valid amount!", "error");
+      return;
+    }
+    const newPayment = { method: paymentMethod, amount: paymentAmount };
+    setPayments((prev) => [...prev, newPayment]);
+    setPaymentAmount(0); // Reset input
+    NotifyData(`${paymentMethod}: ₹${paymentAmount} added!`, "success");
+  };
+
+  // New: Remove Payment
+  const removePayment = (index) => {
+    setPayments((prev) => prev.filter((_, i) => i !== index));
   };
 
   // New Member Form Handlers
@@ -523,6 +572,7 @@ const BillingCreation = () => {
         total: grand_total,
         paid,
         balance,
+        payment_details: JSON.stringify(payments),
       };
 
       if (isEdit) {
@@ -797,19 +847,69 @@ const BillingCreation = () => {
                   <strong>Total</strong>
                   <span>₹{grand_total.toFixed(2)}</span>
                 </div>
-                <div className="mb-3 d-flex justify-content-between align-items-center">
-                  <div>
-                    <label>Paid</label>
-                  </div>
-                  <div className="input-group" style={{ width: "150px" }}>
+                {/* New: Payment Methods Section */}
+                <div className="mb-3">
+                  <label>Payment Method</label>
+                  <div className="d-flex gap-2 mb-2">
+                    <Select
+                      options={paymentOptions}
+                      value={paymentOptions.find(
+                        (opt) => opt.value === paymentMethod
+                      )}
+                      onChange={handlePaymentMethodChange}
+                      placeholder="Select Method"
+                      className="flex-grow-1"
+                      styles={{
+                        control: (provided) => ({
+                          ...provided,
+                          minWidth: "150px",
+                        }),
+                      }}
+                    />
                     <TextInputform
                       formtype="text"
                       step="0.01"
                       PlaceHolder="Amount"
-                      value={paid}
-                      onChange={handlePaidChange}
+                      value={paymentAmount}
+                      onChange={handlePaymentAmountChange}
+                      style={{ width: "150px" }}
                     />
+                    <Button variant="primary" size="sm" onClick={addPayment}>
+                      Add
+                    </Button>
                   </div>
+                  {/* Payment List */}
+                  {payments.length > 0 && (
+                    <div className="border p-2 bg-light">
+                      <strong>Payments:</strong>
+                      <ul className="list-unstyled mb-0">
+                        {payments.map((p, index) => (
+                          <li
+                            key={index}
+                            className="d-flex justify-content-between align-items-center small"
+                          >
+                            <span>
+                              {p.method}: ₹{p.amount.toFixed(2)}
+                            </span>
+                            <Button
+                              variant="link"
+                              size="sm"
+                              className="p-0 text-danger"
+                              onClick={() => removePayment(index)}
+                            >
+                              Remove
+                            </Button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+                <div className="mb-3 d-flex justify-content-between align-items-center">
+                  <div>
+                    <label>Paid</label>
+                  </div>
+                  <span>₹{paid.toFixed(2)}</span>
                 </div>
                 <div className="d-flex justify-content-between align-items-center  pt-2">
                   <strong>{balance >= 0 ? "Balance" : "Change"}</strong>

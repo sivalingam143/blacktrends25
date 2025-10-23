@@ -26,6 +26,7 @@ export const addBillingApi = async (billingData) => {
     total: billingData.total,
     paid: billingData.paid,
     balance: billingData.balance,
+    payment_details: billingData.payment_details,
     membership: billingData.membership,
     created_by_id: userId,
   };
@@ -51,6 +52,7 @@ export const updateBillingApi = async (billingData) => {
     total: billingData.total,
     paid: billingData.paid,
     balance: billingData.balance,
+    payment_details: billingData.payment_details,
     membership: billingData.membership,
     updated_by_id: userId,
   };
