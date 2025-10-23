@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Col,
@@ -38,6 +38,7 @@ const BillingCreation = () => {
   const { categories } = useSelector((s) => s.categories);
   const isEdit = !!id;
 
+  /* ---------- FORM STATE ---------- */
   const [form, setForm] = useState({
     billing_date: new Date().toISOString().split("T")[0],
     member_id: "",
@@ -47,16 +48,31 @@ const BillingCreation = () => {
     membership: "",
     billing_id: "",
   });
-  console.log(form);
+
   const [rows, setRows] = useState([]);
   const [subtotal, setSubtotal] = useState(0);
   const [overall_discount, setOverallDiscount] = useState(0);
   const [discount_type, setDiscountType] = useState("INR");
   const [grand_total, setGrandTotal] = useState(0);
-  const [paid, setPaid] = useState(0);
+
+  /* ---------- PAYMENT METHOD STATE ---------- */
+  const paymentMethods = [
+    { value: "Cash", label: "Cash" },
+    { value: "Gpay", label: "Gpay" },
+  ];
+
+  const [paymentCash, setPaymentCash] = useState(0);
+  const [paymentGpay, setPaymentGpay] = useState(0);
+
+  // total paid = Cash + Gpay (auto-calculated)
+  const paid = useMemo(
+    () => (parseFloat(paymentCash) || 0) + (parseFloat(paymentGpay) || 0),
+    [paymentCash, paymentGpay]
+  );
+
   const [submitting, setSubmitting] = useState(false);
 
-  // New Member Modal States
+  /* ---------- NEW MEMBER MODAL ---------- */
   const [showNewMemberModal, setShowNewMemberModal] = useState(false);
   const [newMemberForm, setNewMemberForm] = useState({
     name: "",
@@ -65,30 +81,23 @@ const BillingCreation = () => {
   });
   const [newMemberSubmitting, setNewMemberSubmitting] = useState(false);
 
-  // Phone options for searchable dropdown
+  /* ---------- SELECT OPTIONS ---------- */
   const phoneOptions = member.map((m) => ({
     value: m.phone,
     label: m.phone,
   }));
-
-  // Category options
   const categoryOptions = categories.map((cat) => ({
     value: cat.category_id,
     label: cat.category_name,
   }));
-
-  // Prepare staff options for single-select
   const staffOptions = staff.map((st) => ({
     value: st.staff_id,
     label: st.name,
   }));
-
-  // Prepare discount type options for DropDown
   const discountTypeOptions = [
     { value: "INR", label: "INR" },
     { value: "PER", label: "%" },
   ];
-  // New Member Membership Options
   const newMemberMembershipOptions = [
     { value: "No", label: "No" },
     { value: "Yes", label: "Yes" },
@@ -100,6 +109,7 @@ const BillingCreation = () => {
     return `${day}-${month}-${year}`;
   };
 
+  /* ---------- FETCH DATA ---------- */
   useEffect(() => {
     dispatch(fetchMembers(""));
     dispatch(fetchProductAndServices(""));
@@ -108,11 +118,11 @@ const BillingCreation = () => {
     dispatch(fetchBillings(""));
   }, [dispatch]);
 
+  /* ---------- EDIT MODE ---------- */
   useEffect(() => {
     if (isEdit && billing.length) {
       const rec = billing.find((b) => b.billing_id === id);
       if (rec) {
-        // Set basic form
         setForm({
           ...rec,
           member_id: rec.member_id,
@@ -120,21 +130,29 @@ const BillingCreation = () => {
         });
         setOverallDiscount(parseFloat(rec.discount));
         setDiscountType(rec.discount_type || "INR");
-        setPaid(parseFloat(rec.paid) || 0);
+       // setPaid(parseFloat(rec.paid) || 0);
 
-        // Parse product details if exists
+        // ---- payment split (if saved) ----
+        // older records may not have payment_details JSON
+        if (rec.payment_details) {
+          try {
+            const pd = JSON.parse(rec.payment_details);
+            setPaymentCash(pd.cash || 0);
+            setPaymentGpay(pd.gpay || 0);
+          } catch (_) {}
+        }
+
+        // ---- rows ----
         let parsedRows = [];
         if (rec.productandservice_details) {
           try {
             const details = JSON.parse(rec.productandservice_details);
             parsedRows = details.map((detail) => {
-              // Handle both productandservice_id and old product_id for backward compatibility
               const productId =
                 detail.productandservice_id || detail.product_id;
               const product = products.find(
                 (p) => p.productandservice_id === productId
               );
-              // Single staff handling with staff_name from saved data if available
               const staffId = detail.staff_id;
               const savedStaffName = detail.staff_name || "";
               const staffItem = staffId
@@ -142,10 +160,7 @@ const BillingCreation = () => {
                 : null;
               const staffName =
                 savedStaffName || (staffItem ? staffItem.name : "");
-              // Use the saved row total instead of recalculating to avoid discount type mismatch
-              const rowTotal = detail.total || 0;
 
-              // Calculate discount_amount for edit mode
               const rowSubtotal =
                 (detail.qty || 0) * (product?.productandservice_price || 0);
               let discAmount = detail.discount || 0;
@@ -170,7 +185,7 @@ const BillingCreation = () => {
                 discount_amount: discAmount,
                 staff_id: staffId || null,
                 staff_name: staffName,
-                row_total: rowTotal,
+                row_total: detail.total || 0,
               };
             });
           } catch (e) {
@@ -178,7 +193,7 @@ const BillingCreation = () => {
           }
         }
         setRows(parsedRows);
-        // If editing and membership is 'Yes', apply 18% default discount to all rows
+
         if (rec.membership === "Yes") {
           setRows((prevRows) =>
             prevRows.map((row) => {
@@ -197,7 +212,7 @@ const BillingCreation = () => {
     }
   }, [id, billing, isEdit, products, staff, categories]);
 
-  // Recalculate totals
+  /* ---------- RECALCULATE TOTALS ---------- */
   useEffect(() => {
     const newSubtotal = rows.reduce((sum, row) => sum + row.row_total, 0);
     setSubtotal(newSubtotal);
@@ -217,14 +232,13 @@ const BillingCreation = () => {
       }
     : null;
 
-  // Handle member change
+  /* ---------- MEMBER HANDLERS ---------- */
   const handleMemberChange = (selectedOption) => {
     if (selectedOption) {
       const selectedMember = member.find(
         (m) => m.phone === selectedOption.value
       );
       if (selectedMember) {
-        // existing member
         setForm((prev) => ({
           ...prev,
           member_id: selectedMember.member_id,
@@ -234,7 +248,6 @@ const BillingCreation = () => {
           membership: selectedMember.membership || "",
         }));
 
-        // If membership is 'Yes', apply 18% default discount to all existing rows
         if (selectedMember.membership === "Yes") {
           setRows((prevRows) =>
             prevRows.map((row) => {
@@ -257,7 +270,6 @@ const BillingCreation = () => {
         }
       }
     } else {
-      // cleared
       setForm((prev) => ({
         ...prev,
         member_id: "",
@@ -277,19 +289,11 @@ const BillingCreation = () => {
     }));
   };
 
-  const handleDiscountTypeChange = (e) => {
-    setDiscountType(e.target.value);
-  };
-
-  const handleOverallDiscountChange = (e) => {
+  const handleDiscountTypeChange = (e) => setDiscountType(e.target.value);
+  const handleOverallDiscountChange = (e) =>
     setOverallDiscount(parseFloat(e.target.value) || 0);
-  };
 
-  const handlePaidChange = (e) => {
-    setPaid(parseFloat(e.target.value) || 0);
-  };
-
-  // New Member Form Handlers
+  /* ---------- NEW MEMBER ---------- */
   const handleNewMemberChange = (e) => {
     const { name, value } = e.target;
     setNewMemberForm((prev) => ({ ...prev, [name]: value }));
@@ -320,10 +324,8 @@ const BillingCreation = () => {
       const msg = await dispatch(addMember(payload)).unwrap();
       NotifyData(msg, "success");
 
-      // Refresh members list
       await dispatch(fetchMembers(""));
 
-      // Find the newly added member by phone and auto-populate
       const newMember = member.find((m) => m.phone === newMemberForm.phone);
       if (newMember) {
         setForm((prev) => ({
@@ -336,10 +338,8 @@ const BillingCreation = () => {
         }));
       }
 
-      // Close modal
       setShowNewMemberModal(false);
       setNewMemberForm({ name: "", phone: "", membership: "No" });
-
       NotifyData("New member added and loaded!", "success");
     } catch (e) {
       NotifyData(e.message, "error");
@@ -348,7 +348,7 @@ const BillingCreation = () => {
     }
   };
 
-  // Handle row changes
+  /* ---------- ROW HANDLERS ---------- */
   const handleRowChange = (index, field, value) => {
     setRows((prev) => {
       const newRows = [...prev];
@@ -356,7 +356,6 @@ const BillingCreation = () => {
 
       if (field === "category_id") {
         row.category_id = value;
-        // Always clear product when category changes
         row.product_id = "";
         row.product_name = "";
         row.product_price = 0;
@@ -372,7 +371,6 @@ const BillingCreation = () => {
         row.product_price = selectedProduct?.productandservice_price || 0;
         row.category_id = selectedProduct?.category_id || "";
       } else if (field === "staff_id") {
-        // Single staff handling
         row.staff_id = value ? value.value : null;
         row.staff_name = value ? value.label : "";
       } else if (field === "qty") {
@@ -383,7 +381,6 @@ const BillingCreation = () => {
         row.discount_type = value;
       }
 
-      // Recalculate row total and discount_amount
       const rowSubtotal = (row.qty || 0) * (row.product_price || 0);
       let discAmount = row.discount || 0;
       if (row.discount_type === "PER") {
@@ -397,14 +394,11 @@ const BillingCreation = () => {
     });
   };
 
-  // Add row
   const addRow = () => {
-    // If any existing row has no staff
     const missingStaff = rows.some((r) => !r.staff_id);
-
     if (missingStaff) {
       NotifyData("Please select staff before adding a new row!", "error");
-      return; // stop adding row
+      return;
     }
 
     const newRow = {
@@ -416,18 +410,14 @@ const BillingCreation = () => {
       discount: 0,
       discount_type: "INR",
       discount_amount: 0,
-      // Single staff
       staff_id: null,
       staff_name: "",
       row_total: 0,
     };
-    // If membership is 'Yes', set default 18% discount
     if (form.membership === "Yes") {
       newRow.discount = 18;
       newRow.discount_type = "PER";
-      newRow.discount_amount = (18 / 100) * (1 * 0); // 0 initially
     }
-
     setRows((prev) => [...prev, newRow]);
   };
 
@@ -435,6 +425,7 @@ const BillingCreation = () => {
     setRows((prev) => prev.filter((_, i) => i !== index));
   };
 
+  /* ---------- SUBMIT ---------- */
   const submit = async () => {
     if (submitting) return;
     setSubmitting(true);
@@ -455,7 +446,7 @@ const BillingCreation = () => {
 
     try {
       const balance = grand_total - paid;
-      let billingPayload = {
+      const billingPayload = {
         ...form,
         member_id: form.member_id,
         productandservice_details: JSON.stringify(
@@ -468,7 +459,6 @@ const BillingCreation = () => {
             discount: r.discount,
             discount_type: r.discount_type,
             discount_amount: r.discount_amount,
-            // Add staff_name
             staff_id: r.staff_id,
             staff_name: r.staff_name,
             total: r.row_total,
@@ -480,6 +470,11 @@ const BillingCreation = () => {
         total: grand_total,
         paid,
         balance,
+        // ---- NEW: payment split saved as JSON ----
+        payment_details: JSON.stringify({
+          cash: paymentCash,
+          gpay: paymentGpay,
+        }),
       };
 
       if (isEdit) {
@@ -500,19 +495,16 @@ const BillingCreation = () => {
 
   const balance = grand_total - paid;
 
-  // Custom filter for product select
   const productFilterOption = (option, rawInput) => {
     if (!rawInput) return true;
     const inputValue = rawInput.trim().toLowerCase();
     const label = option.label;
-    // If input is numeric, exact match serial
     const isNumeric = /^\d+$/.test(inputValue);
     if (isNumeric) {
       const serialMatch = label.match(/^(\d+)/);
       const serial = serialMatch ? serialMatch[1] : "";
       return serial === inputValue;
     } else {
-      // Search in entire label
       return label.toLowerCase().includes(inputValue);
     }
   };
@@ -520,7 +512,8 @@ const BillingCreation = () => {
   return (
     <div id="main">
       <Container fluid className="p-3">
-        <Row className="mb-4 ">
+        {/* ---------- Header Row ---------- */}
+        <Row className="mb-4">
           <Col md={4} lg={3}>
             <TextInputform
               formLabel="Date *"
@@ -565,9 +558,8 @@ const BillingCreation = () => {
           </Col>
         </Row>
 
-        {/* Main Row: Left 3 Containers, Right Stats */}
+        {/* ---------- Table Row ---------- */}
         <Row className="mb-4">
-          {/* Left: Container 2 - Product/Service Table - Full Width */}
           <Col md={12}>
             <Table className="mb-3">
               <thead>
@@ -589,7 +581,7 @@ const BillingCreation = () => {
                   const filteredProductOptions = filteredProducts.map((p) => ({
                     value: p.productandservice_id,
                     label: p.serial_number
-                      ? `${p.serial_number} - ${p.productandservice_name} `
+                      ? `${p.serial_number} - ${p.productandservice_name}`
                       : p.productandservice_name,
                   }));
                   const productValue = row.product_id
@@ -600,6 +592,7 @@ const BillingCreation = () => {
                         label: row.product_name,
                       }
                     : null;
+
                   return (
                     <tr key={index}>
                       <td>
@@ -639,7 +632,6 @@ const BillingCreation = () => {
                           }}
                         />
                       </td>
-
                       <td>
                         <TextInputform
                           formtype="text"
@@ -652,7 +644,6 @@ const BillingCreation = () => {
                         />
                       </td>
                       <td>
-                        {/* MODIFIED: Added gap-2 for spacing between dropdown and input */}
                         <div className="d-flex gap-2">
                           <DropDown
                             placeholder="Type"
@@ -680,7 +671,6 @@ const BillingCreation = () => {
                         </div>
                       </td>
                       <td>
-                        {/* Single Select */}
                         <Select
                           options={staffOptions}
                           value={
@@ -716,9 +706,8 @@ const BillingCreation = () => {
           </Col>
         </Row>
 
-        {/* Row for Totals and Stats */}
+        {/* ---------- Totals & Payment ---------- */}
         <Row className="mb-4">
-          {/* Container 3: Subtotal, Discount, Total - Vertical */}
           <Col md={8}>
             <Card>
               <Card.Header>Totals</Card.Header>
@@ -727,6 +716,7 @@ const BillingCreation = () => {
                   <strong>Subtotal</strong>
                   <span>₹{subtotal.toFixed(2)}</span>
                 </div>
+
                 <div className="mb-3 d-flex justify-content-between align-items-center">
                   <div>
                     <label>Discount</label>
@@ -750,25 +740,44 @@ const BillingCreation = () => {
                     />
                   </div>
                 </div>
-                <div className="mb-3 d-flex justify-content-between align-items-center  pt-2">
+
+                <div className="mb-3 d-flex justify-content-between align-items-center pt-2">
                   <strong>Total</strong>
                   <span>₹{grand_total.toFixed(2)}</span>
                 </div>
-                <div className="mb-3 d-flex justify-content-between align-items-center">
-                  <div>
-                    <label>Paid</label>
-                  </div>
-                  <div className="input-group" style={{ width: "150px" }}>
-                    <TextInputform
-                      formtype="text"
-                      step="0.01"
-                      PlaceHolder="Amount"
-                      value={paid}
-                      onChange={handlePaidChange}
-                    />
-                  </div>
+
+                {/* ---------- PAYMENT METHOD SECTION ---------- */}
+                <div className="mb-3">
+                  <label className="d-block mb-2">
+                    <strong>Paid</strong> (Total: ₹{paid.toFixed(2)})
+                  </label>
+                  <Row className="g-2">
+                    <Col xs={6}>
+                      <Form.Label>Cash</Form.Label>
+                      <TextInputform
+                        formtype="number"
+                        step="0.01"
+                        PlaceHolder="0.00"
+                        value={paymentCash}
+                        onChange={(e) => setPaymentCash(e.target.value)}
+                        style={{ width: "100%" }}
+                      />
+                    </Col>
+                    <Col xs={6}>
+                      <Form.Label>Gpay</Form.Label>
+                      <TextInputform
+                        formtype="number"
+                        step="0.01"
+                        PlaceHolder="0.00"
+                        value={paymentGpay}
+                        onChange={(e) => setPaymentGpay(e.target.value)}
+                        style={{ width: "100%" }}
+                      />
+                    </Col>
+                  </Row>
                 </div>
-                <div className="d-flex justify-content-between align-items-center  pt-2">
+
+                <div className="d-flex justify-content-between align-items-center pt-2">
                   <strong>{balance >= 0 ? "Balance" : "Change"}</strong>
                   <span>₹{Math.abs(balance).toFixed(2)}</span>
                 </div>
@@ -776,7 +785,7 @@ const BillingCreation = () => {
             </Card>
           </Col>
 
-          {/* Right: Stats Container - Compact for 3 Fields */}
+          {/* ---------- Member Stats (right side) ---------- */}
           {form.member_id && (
             <Col md={4}>
               <Card>
@@ -821,7 +830,7 @@ const BillingCreation = () => {
           )}
         </Row>
 
-        {/* Submit Buttons */}
+        {/* ---------- Submit Buttons ---------- */}
         <Row>
           <Col md={12} className="text-center">
             <Buttons
@@ -848,7 +857,7 @@ const BillingCreation = () => {
         </Row>
       </Container>
 
-      {/* New Member Modal */}
+      {/* ---------- New Member Modal ---------- */}
       <Modal
         show={showNewMemberModal}
         onHide={() => setShowNewMemberModal(false)}
