@@ -21,7 +21,7 @@ export const downloadStaffExcel = (
       if (col.dataIndex === "report_date")
         return formatDate(row[col.dataIndex]);
       if (col.dataIndex === "total")
-        return `₹${(parseFloat(row[col.dataIndex]) || 0).toFixed(2)}`;
+        return `Rs.${(parseFloat(row[col.dataIndex]) || 0).toFixed(2)}`;
       return row[col.dataIndex] || "-";
     }),
   ]);
@@ -31,7 +31,7 @@ export const downloadStaffExcel = (
     "",
     "",
     "Overall Total",
-    `₹${Number(staffTotal.toFixed(2)).toLocaleString("en-IN")}`,
+    `Rs.${Number(staffTotal.toFixed(2)).toLocaleString("en-IN")}`,
   ]);
   const ws = XLSX.utils.aoa_to_sheet([headers, ...data]);
   const wb = XLSX.utils.book_new();
@@ -87,6 +87,14 @@ export const downloadMemberExcel = (
     (acc, row) => acc + (parseFloat(row.total) || 0),
     0
   );
+  const memberCashTotal = member.reduce(
+    (acc, row) => acc + (parseFloat(row.cash) || 0),
+    0
+  );
+  const memberGPayTotal = member.reduce(
+    (acc, row) => acc + (parseFloat(row.gpay) || 0),
+    0
+  );
   const headers = memberColumns.map((col) => col.title);
   const data = member.map((row, index) => [
     index + 1, // S.No
@@ -94,20 +102,27 @@ export const downloadMemberExcel = (
       if (col.dataIndex === "report_date")
         return formatDate(row[col.dataIndex]);
       if (col.dataIndex === "total")
-        return `₹${(parseFloat(row[col.dataIndex]) || 0).toFixed(2)}`;
+        return `Rs. ${(parseFloat(row[col.dataIndex]) || 0).toFixed(2)}`;
       if (col.dataIndex === "membership")
         return row[col.dataIndex] === "Yes" ? "Yes" : "No";
+      if (col.dataIndex === "cash")
+        return `Rs. ${(parseFloat(row[col.dataIndex]) || 0).toFixed(2)}`;
+      if (col.dataIndex === "gpay")
+        return `Rs. ${(parseFloat(row[col.dataIndex]) || 0).toFixed(2)}`;
       return row[col.dataIndex] || "-";
     }),
   ]);
   data.push([
-    "",
-    "",
-    "",
-    "",
-    "",
+    ...Array(6).fill(""),
+    "Overall Cash",
+    "Overall GPay",
     "Overall Total",
-    `₹${Number(memberTotal.toFixed(2)).toLocaleString("en-IN")}`,
+  ]);
+  data.push([
+    ...Array(6).fill(""),
+    `Rs. ${Number(memberCashTotal.toFixed(2)).toLocaleString("en-IN")}`,
+    `Rs. ${Number(memberGPayTotal.toFixed(2)).toLocaleString("en-IN")}`,
+    `Rs. ${Number(memberTotal.toFixed(2)).toLocaleString("en-IN")}`,
   ]);
   const ws = XLSX.utils.aoa_to_sheet([headers, ...data]);
   const wb = XLSX.utils.book_new();
@@ -118,6 +133,14 @@ export const downloadMemberExcel = (
 export const downloadMemberPDF = (member, memberFromDate, memberToDate) => {
   const memberTotal = member.reduce(
     (acc, row) => acc + (parseFloat(row.total) || 0),
+    0
+  );
+  const memberCashTotal = member.reduce(
+    (acc, row) => acc + (parseFloat(row.cash) || 0),
+    0
+  );
+  const memberGPayTotal = member.reduce(
+    (acc, row) => acc + (parseFloat(row.gpay) || 0),
     0
   );
   const doc = new jsPDF();
@@ -134,6 +157,8 @@ export const downloadMemberPDF = (member, memberFromDate, memberToDate) => {
     row.name,
     row.phone,
     row.membership === "Yes" ? "Yes" : "No",
+    `Rs. ${(parseFloat(row.cash) || 0).toFixed(2)}`,
+    `Rs. ${(parseFloat(row.gpay) || 0).toFixed(2)}`,
     `Rs. ${(parseFloat(row.total) || 0).toFixed(2)}`,
   ]);
   tableData.push([
@@ -142,7 +167,20 @@ export const downloadMemberPDF = (member, memberFromDate, memberToDate) => {
     "",
     "",
     "",
+    "",
+    "Overall Cash",
+    "Overall GPay",
     "Overall Total",
+  ]);
+  tableData.push([
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    `Rs. ${Number(memberCashTotal.toFixed(2)).toLocaleString("en-IN")}`,
+    `Rs. ${Number(memberGPayTotal.toFixed(2)).toLocaleString("en-IN")}`,
     `Rs. ${Number(memberTotal.toFixed(2)).toLocaleString("en-IN")}`,
   ]);
   autoTable(doc, {
@@ -154,6 +192,8 @@ export const downloadMemberPDF = (member, memberFromDate, memberToDate) => {
         "Name",
         "Phone",
         "Gold Membership",
+        "Cash",
+        "GPay",
         "Total Spending",
       ],
     ],

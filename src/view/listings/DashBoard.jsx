@@ -52,6 +52,14 @@ const DashboardReports = () => {
     (sum, item) => sum + (parseFloat(item.total) || 0),
     0
   );
+  const memberCashTotal = member.reduce(
+    (sum, item) => sum + (parseFloat(item.cash) || 0),
+    0
+  );
+  const memberGPayTotal = member.reduce(
+    (sum, item) => sum + (parseFloat(item.gpay) || 0),
+    0
+  );
 
   // Fetch reports
   useEffect(() => {
@@ -217,6 +225,22 @@ const DashboardReports = () => {
       render: (m) => (m === "Yes" ? "Yes ✅" : "No ❌"),
     },
     {
+      title: "Cash",
+      dataIndex: "cash",
+      key: "cash",
+      align: "right",
+      sorter: (a, b) => (parseFloat(a.cash) || 0) - (parseFloat(b.cash) || 0),
+      render: (c) => `₹${(parseFloat(c) || 0).toFixed(2)}`,
+    },
+    {
+      title: "GPay",
+      dataIndex: "gpay",
+      key: "gpay",
+      align: "right",
+      sorter: (a, b) => (parseFloat(a.gpay) || 0) - (parseFloat(b.gpay) || 0),
+      render: (g) => `₹${(parseFloat(g) || 0).toFixed(2)}`,
+    },
+    {
       title: "Total Spending",
       dataIndex: "total",
       key: "total",
@@ -237,6 +261,31 @@ const DashboardReports = () => {
       }}
     >
       {label}: ₹{total.toFixed(2).toLocaleString("en-IN")}
+    </div>
+  );
+
+  const memberTableFooter = () => (
+    <div
+      style={{
+        textAlign: "right",
+        padding: "8px",
+        borderTop: "1px solid #d9d9d9",
+        backgroundColor: "#f9f9f9",
+        display: "flex",
+        justifyContent: "flex-end",
+        alignItems: "center",
+        gap: "20px",
+      }}
+    >
+      <div style={{ fontWeight: "bold" }}>
+        Overall Cash: ₹{memberCashTotal.toFixed(2).toLocaleString("en-IN")}
+      </div>
+      <div style={{ fontWeight: "bold" }}>
+        Overall GPay: ₹{memberGPayTotal.toFixed(2).toLocaleString("en-IN")}
+      </div>
+      <div style={{ fontWeight: "bold" }}>
+        Overall Total: ₹{memberTotal.toFixed(2).toLocaleString("en-IN")}
+      </div>
     </div>
   );
 
@@ -410,10 +459,10 @@ const DashboardReports = () => {
               rowKey={(r) => `${r.report_date}_${r.member_no}`}
               pagination={false}
               bordered
-              scroll={{ x: 1000 }}
+              scroll={{ x: 1200 }}
               size="middle"
               className="professional-table"
-              footer={() => tableFooter(memberTotal, "Overall Total")}
+              footer={memberTableFooter}
             />
           </Card>
         </TabPane>
