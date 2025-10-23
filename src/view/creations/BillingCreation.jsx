@@ -9,6 +9,7 @@ import {
   Button,
   Card,
   Modal,
+  Alert,
 } from "react-bootstrap";
 import Select from "react-select";
 import { useDispatch, useSelector } from "react-redux";
@@ -73,6 +74,17 @@ const BillingCreation = () => {
     membership: "No",
   });
   const [newMemberSubmitting, setNewMemberSubmitting] = useState(false);
+
+  // Dynamic Wow Content State
+  const [wowContent, setWowContent] = useState(
+    "Wow! This client has a membership with Discount on Service 0%"
+  );
+
+  // Local notification state for other messages inside the warning container
+  const [localNotification, setLocalNotification] = useState({
+    message: "",
+    type: "",
+  });
 
   // Payment method options
   const paymentOptions = [
@@ -224,6 +236,15 @@ const BillingCreation = () => {
             })
           );
         }
+
+        // Set wow content for edit mode
+        if (rec.membership) {
+          const totalDiscount = rec.membership === "Yes" ? 18 : 0;
+          const discText = `${totalDiscount}%`;
+          setWowContent(
+            `Wow! This client has a membership with Discount on Service ${discText}`
+          );
+        }
       }
     }
   }, [id, billing, isEdit, products, staff, categories]);
@@ -297,30 +318,36 @@ const BillingCreation = () => {
         dispatch(clearMilestoneDiscount());
 
         // Fetch milestone extra discount
+        let extraRate = 0;
         if (selectedMember.member_id) {
-          const extraRate = await dispatch(
+          extraRate = await dispatch(
             getMilestoneDiscount(selectedMember.member_id)
           ).unwrap();
           console.log("Extra discount rate:", extraRate);
-
-          // Apply discounts to all existing rows
-          setRows((prevRows) =>
-            applyDiscountsToRows(prevRows, selectedMember.membership, extraRate)
-          );
-
-          if (extraRate > 0) {
-            NotifyData(
-              `Milestone discount applied: ${extraRate}% extra (Total: ${
-                selectedMember.membership === "Yes" ? 28 : 10
-              }%)`,
-              "info"
-            );
-          } else {
-            NotifyData("Member found and details loaded!", "success");
-          }
-        } else {
-          NotifyData("Member found and details loaded!", "success");
         }
+
+        // Calculate total discount
+        const totalDiscount =
+          selectedMember.membership === "Yes" ? 18 + extraRate : extraRate;
+
+        // Update wow content dynamically
+        if (totalDiscount > 0) {
+          const discText = `${totalDiscount}%`;
+          let extraText =
+            extraRate > 0 ? ` (Extra Milestone: ${extraRate}%)` : "";
+          setWowContent(
+            `Wow! This client has a membership with Discount on Service ${discText}${extraText}`
+          );
+        } else {
+          setWowContent("This client has no discount available.");
+        }
+
+        // Apply discounts to all existing rows
+        setRows((prevRows) =>
+          applyDiscountsToRows(prevRows, selectedMember.membership, extraRate)
+        );
+
+        NotifyData("Member found and details loaded!", "success");
       }
     } else {
       // cleared
@@ -333,8 +360,22 @@ const BillingCreation = () => {
         membership: "",
       }));
       dispatch(clearMilestoneDiscount());
+      // Reset to default wow content
+      setWowContent(
+        "Wow! This client has a membership with Discount on Service 0%"
+      );
     }
   };
+
+  // Clear local notification after 5 seconds
+  useEffect(() => {
+    if (localNotification.message) {
+      const timer = setTimeout(() => {
+        setLocalNotification({ message: "", type: "" });
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [localNotification]);
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
@@ -424,6 +465,13 @@ const BillingCreation = () => {
           phone: newMemberForm.phone,
           membership: newMemberForm.membership,
         }));
+
+        // Update wow content for new member
+        const totalDiscount = newMember.membership === "Yes" ? 18 : 0;
+        const discText = `${totalDiscount}%`;
+        setWowContent(
+          `Wow! This client has a membership with Discount on Service ${discText}`
+        );
       }
 
       // Close modal
@@ -613,6 +661,45 @@ const BillingCreation = () => {
   return (
     <div id="main">
       <Container fluid className="p-3">
+        <Row className="mb-4">
+          <Col md={12}>
+            <Card className="warning-container">
+              <Card.Body className="p-3">
+                <div className="d-flex flex-column gap-3">
+                  {/* Dynamic Wow Content */}
+                  <Alert variant="success" className="flex-grow-1">
+                    {wowContent}
+                  </Alert>
+
+                  {/* Static Note Content */}
+                  <Alert variant="warning" className="flex-grow-1">
+                    Note: Minimum reward point should be 0 or minimum bill
+                    amount should be INR 0.00 to apply membership discount.
+                  </Alert>
+
+                  {/* Local Notification Display (Inside the Box for other messages) */}
+                  {localNotification.message && (
+                    <Alert
+                      variant={
+                        localNotification.type === "success"
+                          ? "success"
+                          : localNotification.type === "info"
+                          ? "info"
+                          : localNotification.type === "error"
+                          ? "danger"
+                          : "secondary"
+                      }
+                      className="local-toast mt-2"
+                    >
+                      {localNotification.message}
+                    </Alert>
+                  )}
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+
         <Row className="mb-4 ">
           <Col md={4} lg={3}>
             <TextInputform
