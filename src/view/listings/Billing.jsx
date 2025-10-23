@@ -210,7 +210,7 @@ const Billing = () => {
       item.member_no,
       item.name,
       item.phone,
-      getStaffNames(item),
+      getStaffNames(item) || "-",
       `₹ ${parseFloat(item.total).toFixed(2)}`,
       <ActionButton
         options={[
