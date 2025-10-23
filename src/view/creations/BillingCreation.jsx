@@ -56,11 +56,7 @@ const BillingCreation = () => {
   const [grand_total, setGrandTotal] = useState(0);
 
   /* ---------- PAYMENT METHOD STATE ---------- */
-  const paymentMethods = [
-    { value: "Cash", label: "Cash" },
-    { value: "Gpay", label: "Gpay" },
-  ];
-
+ 
   const [paymentCash, setPaymentCash] = useState(0);
   const [paymentGpay, setPaymentGpay] = useState(0);
 
