@@ -661,44 +661,46 @@ const BillingCreation = () => {
   return (
     <div id="main">
       <Container fluid className="p-3">
-        <Row className="mb-4">
-          <Col md={12}>
-            <Card className="warning-container">
-              <Card.Body className="p-3">
-                <div className="d-flex flex-column gap-3">
-                  {/* Dynamic Wow Content */}
-                  <Alert variant="success" className="flex-grow-1">
-                    {wowContent}
-                  </Alert>
-
-                  {/* Static Note Content */}
-                  <Alert variant="warning" className="flex-grow-1">
-                    Note: Minimum reward point should be 0 or minimum bill
-                    amount should be INR 0.00 to apply membership discount.
-                  </Alert>
-
-                  {/* Local Notification Display (Inside the Box for other messages) */}
-                  {localNotification.message && (
-                    <Alert
-                      variant={
-                        localNotification.type === "success"
-                          ? "success"
-                          : localNotification.type === "info"
-                          ? "info"
-                          : localNotification.type === "error"
-                          ? "danger"
-                          : "secondary"
-                      }
-                      className="local-toast mt-2"
-                    >
-                      {localNotification.message}
+        {form.phone && (
+          <Row className="mb-4">
+            <Col md={12}>
+              <Card className="warning-container">
+                <Card.Body className="p-3">
+                  <div className="d-flex flex-column gap-3">
+                    {/* Dynamic Wow Content */}
+                    <Alert variant="success" className="flex-grow-1">
+                      {wowContent}
                     </Alert>
-                  )}
-                </div>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
+
+                    {/* Static Note Content */}
+                    <Alert variant="warning" className="flex-grow-1">
+                      Note: Minimum reward point should be 0 or minimum bill
+                      amount should be INR 0.00 to apply membership discount.
+                    </Alert>
+
+                    {/* Local Notification Display (Inside the Box for other messages) */}
+                    {localNotification.message && (
+                      <Alert
+                        variant={
+                          localNotification.type === "success"
+                            ? "success"
+                            : localNotification.type === "info"
+                            ? "info"
+                            : localNotification.type === "error"
+                            ? "danger"
+                            : "secondary"
+                        }
+                        className="local-toast mt-2"
+                      >
+                        {localNotification.message}
+                      </Alert>
+                    )}
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+        )}
 
         <Row className="mb-4 ">
           <Col md={4} lg={3}>
