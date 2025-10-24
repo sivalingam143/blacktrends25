@@ -43,6 +43,9 @@ const DashboardReports = () => {
     error,
   } = useSelector((state) => state.billing);
 
+
+  console.log("Member Report:", member);
+
   // Calculate totals
   const staffTotal = staff.reduce(
     (sum, item) => sum + (parseFloat(item.total) || 0),
@@ -248,6 +251,25 @@ const DashboardReports = () => {
       sorter: (a, b) => a.daily_total - b.daily_total,
       render: (t) => `₹${(parseFloat(t) || 0).toFixed(2)}`,
     },
+    {
+      title: "Service Provider",
+      dataIndex: "staff_summary",
+      key: "staff_summary",
+      align: "left",
+      render: (staff_summary) => {
+        if (!staff_summary || !Array.isArray(staff_summary) || staff_summary.length === 0) {
+          return <span style={{ color: "#999" }}>No Staff</span>;
+        }
+
+        // Combine staff names + total
+        return staff_summary.map((s) => (
+          <div key={s.staff_id}>
+            {s.staff_name} — <b>₹{parseFloat(s.total).toFixed(2)}</b>
+          </div>
+        ));
+      },
+    },
+
   ];
 
   const tableFooter = (total, label = "Overall Total") => (
@@ -330,7 +352,43 @@ const DashboardReports = () => {
                         initialDate={staffTo}
                       />
                     </Col>
+
+                    <Col span={24} style={{ marginTop: 8 }}>
+                      <Row gutter={8}>
+                        {/* ✅ Set Today Button */}
+                        <Col xs={12}>
+                          <Button
+                            type="default"
+                            onClick={() => {
+                              const today = moment().format("YYYY-MM-DD");
+                              setStaffFrom(today);
+                              setStaffTo(today);
+                            }}
+                            block
+                          >
+                            Set Today
+                          </Button>
+                        </Col>
+
+                        {/* ✅ Reset Button */}
+                        <Col xs={12}>
+                          <Button
+                            type="dashed"
+                            onClick={() => {
+                              const startOfYear = moment().startOf("year").format("YYYY-MM-DD");
+                              const today = moment().format("YYYY-MM-DD");
+                              setStaffFrom(startOfYear);
+                              setStaffTo(today);
+                            }}
+                            block
+                          >
+                            Reset
+                          </Button>
+                        </Col>
+                      </Row>
+                    </Col>
                   </Row>
+
                 </Col>
                 <Col xs={24} lg={16}>
                   <Row gutter={12} justify="end" align="middle">
@@ -416,6 +474,41 @@ const DashboardReports = () => {
                         calenderlabel="To Date"
                         initialDate={memberTo}
                       />
+                    </Col>
+                    <Col span={24} style={{ marginTop: 8 }}>
+                      <Row gutter={8}>
+                        {/* ✅ Set Today Button */}
+                        <Col xs={12}>
+                          <Button
+                            type="default"
+                            onClick={() => {
+                              const today = moment().format("YYYY-MM-DD");
+                              setMemberFrom(today);
+                              setMemberTo(today);
+                            }}
+                            block
+                          >
+                            Set Today
+                          </Button>
+                        </Col>
+
+                        {/* ✅ Reset Button */}
+                        <Col xs={12}>
+                          <Button
+                            type="dashed"
+                            onClick={() => {
+                              const startOfYear = moment().startOf("year").format("YYYY-MM-DD");
+                              const today = moment().format("YYYY-MM-DD");
+
+                              setMemberFrom(startOfYear);
+                              setMemberTo(today);
+                            }}
+                            block
+                          >
+                            Reset
+                          </Button>
+                        </Col>
+                      </Row>
                     </Col>
                   </Row>
                 </Col>
