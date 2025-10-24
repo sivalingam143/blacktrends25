@@ -49,7 +49,7 @@ const DashboardReports = () => {
     0
   );
   const memberTotal = member.reduce(
-    (sum, item) => sum + (parseFloat(item.total) || 0),
+    (sum, item) => sum + (parseFloat(item.daily_total) || 0),
     0
   );
   const memberCashTotal = member.reduce(
@@ -242,10 +242,10 @@ const DashboardReports = () => {
     },
     {
       title: "Total Spending",
-      dataIndex: "total",
-      key: "total",
+      dataIndex: "daily_total",
+      key: "todaily_totaltal",
       align: "right",
-      sorter: (a, b) => a.total - b.total,
+      sorter: (a, b) => a.daily_total - b.daily_total,
       render: (t) => `₹${(parseFloat(t) || 0).toFixed(2)}`,
     },
   ];

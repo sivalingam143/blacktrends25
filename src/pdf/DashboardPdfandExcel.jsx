@@ -84,7 +84,7 @@ export const downloadMemberExcel = (
   memberColumns
 ) => {
   const memberTotal = member.reduce(
-    (acc, row) => acc + (parseFloat(row.total) || 0),
+    (acc, row) => acc + (parseFloat(row.daily_total) || 0),
     0
   );
   const memberCashTotal = member.reduce(
@@ -101,7 +101,7 @@ export const downloadMemberExcel = (
     ...memberColumns.slice(1).map((col) => {
       if (col.dataIndex === "report_date")
         return formatDate(row[col.dataIndex]);
-      if (col.dataIndex === "total")
+      if (col.dataIndex === "daily_total")
         return `Rs. ${(parseFloat(row[col.dataIndex]) || 0).toFixed(2)}`;
       if (col.dataIndex === "membership")
         return row[col.dataIndex] === "Yes" ? "Yes" : "No";
@@ -132,7 +132,7 @@ export const downloadMemberExcel = (
 
 export const downloadMemberPDF = (member, memberFromDate, memberToDate) => {
   const memberTotal = member.reduce(
-    (acc, row) => acc + (parseFloat(row.total) || 0),
+    (acc, row) => acc + (parseFloat(row.daily_total) || 0),
     0
   );
   const memberCashTotal = member.reduce(
@@ -159,7 +159,7 @@ export const downloadMemberPDF = (member, memberFromDate, memberToDate) => {
     row.membership === "Yes" ? "Yes" : "No",
     `Rs. ${(parseFloat(row.cash) || 0).toFixed(2)}`,
     `Rs. ${(parseFloat(row.gpay) || 0).toFixed(2)}`,
-    `Rs. ${(parseFloat(row.total) || 0).toFixed(2)}`,
+    `Rs. ${(parseFloat(row.daily_total) || 0).toFixed(2)}`,
   ]);
   tableData.push([
     "",
