@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import moment from "moment";
 import { useSelector, useDispatch } from "react-redux";
 import { Tabs, Card, Input, Table, Typography, Row, Col, Button } from "antd";
@@ -19,6 +19,8 @@ import {
   downloadMemberExcel,
   downloadMemberPDF,
 } from "../../pdf/DashboardPdfandExcel";
+import { fetchStaff } from "../../slice/StaffSlice";
+import { Select } from "antd";
 
 const { TabPane } = Tabs;
 const { Text } = Typography;
@@ -35,34 +37,78 @@ const DashboardReports = () => {
     moment().startOf("year").format("YYYY-MM-DD")
   );
   const [memberTo, setMemberTo] = useState(moment().format("YYYY-MM-DD"));
+  const [selectedStaff, setSelectedStaff] = useState("all");
+
+
 
   const {
-    staffReport: staff,
+    staffReport: staff1,
     memberReport: member,
     status,
     error,
   } = useSelector((state) => state.billing);
+  const { staff } = useSelector((state) => state.staff);
+  console.log("Staff Data:", staff);
 
 
-  console.log("Member Report:", member);
+  const filteredMembers = useMemo(() => {
+  if (!member) return [];
+
+  // ✅ Apply staff filter
+  let filtered = member;
+  if (selectedStaff && selectedStaff !== "all") {
+    filtered = filtered.filter((m) =>
+      m.staff_summary?.some((s) => s.staff_id === selectedStaff)
+    );
+  }
+
+  // ✅ Apply search text filter (if applicable)
+  if (memberSearchText) {
+    filtered = filtered.filter(
+      (m) =>
+        m.name.toLowerCase().includes(memberSearchText.toLowerCase()) ||
+        m.member_no.toLowerCase().includes(memberSearchText.toLowerCase()) ||
+        (m.phone + "").includes(memberSearchText)
+    );
+  }
+
+  return filtered;
+}, [member, selectedStaff, memberSearchText]);
+
 
   // Calculate totals
-  const staffTotal = staff.reduce(
+  const staffTotal = staff1.reduce(
     (sum, item) => sum + (parseFloat(item.total) || 0),
     0
   );
-  const memberTotal = member.reduce(
-    (sum, item) => sum + (parseFloat(item.daily_total) || 0),
+  // const memberTotal = member.reduce(
+  //   (sum, item) => sum + (parseFloat(item.daily_total) || 0),
+  //   0
+  // );
+  // const memberCashTotal = member.reduce(
+  //   (sum, item) => sum + (parseFloat(item.cash) || 0),
+  //   0
+  // );
+  // const memberGPayTotal = member.reduce(
+  //   (sum, item) => sum + (parseFloat(item.gpay) || 0),
+  //   0
+  // );
+  const memberCashTotal = useMemo(() => {
+  return filteredMembers.reduce((sum, m) => sum + (parseFloat(m.cash) || 0), 0);
+}, [filteredMembers]);
+
+const memberGPayTotal = useMemo(() => {
+  return filteredMembers.reduce((sum, m) => sum + (parseFloat(m.gpay) || 0), 0);
+}, [filteredMembers]);
+
+const memberTotal = useMemo(() => {
+  return filteredMembers.reduce(
+    (sum, m) => sum + (parseFloat(m.daily_total) || 0),
     0
   );
-  const memberCashTotal = member.reduce(
-    (sum, item) => sum + (parseFloat(item.cash) || 0),
-    0
-  );
-  const memberGPayTotal = member.reduce(
-    (sum, item) => sum + (parseFloat(item.gpay) || 0),
-    0
-  );
+}, [filteredMembers]);
+
+  
 
   // Fetch reports
   useEffect(() => {
@@ -74,6 +120,7 @@ const DashboardReports = () => {
           searchText: staffSearchText,
         })
       );
+      dispatch(fetchStaff(""));
     }
   }, [dispatch, staffFrom, staffTo, staffSearchText]);
 
@@ -117,11 +164,11 @@ const DashboardReports = () => {
 
   // Download handlers
   const handleStaffExcelDownload = () => {
-    downloadStaffExcel(staff, staffFrom, staffTo, staffColumns);
+    downloadStaffExcel(staff1, staffFrom, staffTo, staffColumns);
   };
 
   const handleStaffPDFDownload = () => {
-    downloadStaffPDF(staff, staffFrom, staffTo);
+    downloadStaffPDF(staff1, staffFrom, staffTo);
   };
 
   const handleMemberExcelDownload = () => {
@@ -287,29 +334,30 @@ const DashboardReports = () => {
   );
 
   const memberTableFooter = () => (
-    <div
-      style={{
-        textAlign: "right",
-        padding: "8px",
-        borderTop: "1px solid #d9d9d9",
-        backgroundColor: "#f9f9f9",
-        display: "flex",
-        justifyContent: "flex-end",
-        alignItems: "center",
-        gap: "20px",
-      }}
-    >
-      <div style={{ fontWeight: "bold" }}>
-        Overall Cash: ₹{memberCashTotal.toFixed(2).toLocaleString("en-IN")}
-      </div>
-      <div style={{ fontWeight: "bold" }}>
-        Overall GPay: ₹{memberGPayTotal.toFixed(2).toLocaleString("en-IN")}
-      </div>
-      <div style={{ fontWeight: "bold" }}>
-        Overall Total: ₹{memberTotal.toFixed(2).toLocaleString("en-IN")}
-      </div>
+  <div
+    style={{
+      textAlign: "right",
+      padding: "8px",
+      borderTop: "1px solid #d9d9d9",
+      backgroundColor: "#f9f9f9",
+      display: "flex",
+      justifyContent: "flex-end",
+      alignItems: "center",
+      gap: "20px",
+    }}
+  >
+    <div style={{ fontWeight: "bold" }}>
+      Overall Cash: ₹{memberCashTotal.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
     </div>
-  );
+    <div style={{ fontWeight: "bold" }}>
+      Overall GPay: ₹{memberGPayTotal.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+    </div>
+    <div style={{ fontWeight: "bold" }}>
+      Overall Total: ₹{memberTotal.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+    </div>
+  </div>
+);
+
 
   return (
     <div className="dashboard-container" id="main">
@@ -331,7 +379,7 @@ const DashboardReports = () => {
                   {formatDate(staffTo)})
                 </h3>
                 <Text type="secondary">
-                  Total Records: {staff?.length || 0}
+                  Total Records: {staff1?.length || 0}
                 </Text>
               </div>
 
@@ -426,7 +474,7 @@ const DashboardReports = () => {
             </div>
             <Table
               columns={staffColumns}
-              dataSource={staff}
+              dataSource={staff1}
               rowKey={(r) => `${r.report_date}_${r.name}`}
               pagination={false}
               bordered
@@ -508,12 +556,33 @@ const DashboardReports = () => {
                             Reset
                           </Button>
                         </Col>
+
                       </Row>
                     </Col>
+
                   </Row>
                 </Col>
+
                 <Col xs={24} lg={16}>
                   <Row gutter={12} justify="end" align="middle">
+                    <Col flex="160px" xs={24} sm={12} md={6}>
+                      <Select
+                        allowClear
+                        placeholder="Filter by Staff"
+                        value={selectedStaff}
+                        onChange={(value) => setSelectedStaff(value)}
+                        style={{ width: "100%" }}
+                        options={[
+                          { label: "All Staff", value: "all" },
+                          ...staff.map((s) => ({
+                            label: s.name,
+                            value: s.staff_id,
+                          })),
+                        ]}
+                        showSearch
+                        optionFilterProp="label"
+                      />
+                    </Col>
                     <Col flex="200px" xs={24} sm={12} md={8}>
                       <Input
                         placeholder="Search members..."
@@ -548,7 +617,7 @@ const DashboardReports = () => {
             </div>
             <Table
               columns={memberColumns}
-              dataSource={member}
+              dataSource={filteredMembers}
               rowKey={(r) => `${r.report_date}_${r.member_no}`}
               pagination={false}
               bordered
