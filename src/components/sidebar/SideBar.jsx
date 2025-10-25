@@ -10,6 +10,7 @@ import "./MobileDevice.css";
 const Sidebar = () => {
   const [open, setOpen] = useState(null);
    const [Role, setRole] = useState("");
+   console.log("Sidebar Role:", Role);
 
 
   const toggleSubMenu = (index) => {
@@ -24,15 +25,16 @@ const Sidebar = () => {
       setRole(storedRole);
     }
   }, []);
-  const filteredMenuItems = MenuItems.filter(item =>
+ const filteredMenuItems = MenuItems.filter(item =>
   item.roles.includes(Role)
 ).map(item => {
-  if (item.submenu) {
-    // Filter submenu based on role
-    item.submenu = item.submenu.filter(sub => sub.roles.includes(Role));
+  const newItem = { ...item }; // clone
+  if (newItem.submenu) {
+    newItem.submenu = newItem.submenu.filter(sub => sub.roles.includes(Role));
   }
-  return item;
+  return newItem;
 });
+
 
   return (
     <aside id="side-bar" className="side-bar">
