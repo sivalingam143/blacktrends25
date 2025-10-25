@@ -50,6 +50,10 @@ const DashboardReports = () => {
   const { staff } = useSelector((state) => state.staff);
   console.log("Staff Data:", staff);
 
+   const { milestoneDiscount: extraDiscountRate } = useSelector(
+      (s) => s.billing
+    );
+
 
   const filteredMembers = useMemo(() => {
     if (!member) return [];
