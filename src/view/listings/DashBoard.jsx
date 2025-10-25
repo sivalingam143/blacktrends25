@@ -52,28 +52,28 @@ const DashboardReports = () => {
 
 
   const filteredMembers = useMemo(() => {
-  if (!member) return [];
+    if (!member) return [];
 
-  // ✅ Apply staff filter
-  let filtered = member;
-  if (selectedStaff && selectedStaff !== "all") {
-    filtered = filtered.filter((m) =>
-      m.staff_summary?.some((s) => s.staff_id === selectedStaff)
-    );
-  }
+    // ✅ Apply staff filter
+    let filtered = member;
+    if (selectedStaff && selectedStaff !== "all") {
+      filtered = filtered.filter((m) =>
+        m.staff_summary?.some((s) => s.staff_id === selectedStaff)
+      );
+    }
 
-  // ✅ Apply search text filter (if applicable)
-  if (memberSearchText) {
-    filtered = filtered.filter(
-      (m) =>
-        m.name.toLowerCase().includes(memberSearchText.toLowerCase()) ||
-        m.member_no.toLowerCase().includes(memberSearchText.toLowerCase()) ||
-        (m.phone + "").includes(memberSearchText)
-    );
-  }
+    // ✅ Apply search text filter (if applicable)
+    if (memberSearchText) {
+      filtered = filtered.filter(
+        (m) =>
+          m.name.toLowerCase().includes(memberSearchText.toLowerCase()) ||
+          m.member_no.toLowerCase().includes(memberSearchText.toLowerCase()) ||
+          (m.phone + "").includes(memberSearchText)
+      );
+    }
 
-  return filtered;
-}, [member, selectedStaff, memberSearchText]);
+    return filtered;
+  }, [member, selectedStaff, memberSearchText]);
 
 
   // Calculate totals
@@ -94,21 +94,35 @@ const DashboardReports = () => {
   //   0
   // );
   const memberCashTotal = useMemo(() => {
-  return filteredMembers.reduce((sum, m) => sum + (parseFloat(m.cash) || 0), 0);
-}, [filteredMembers]);
+    return filteredMembers.reduce((sum, m) => sum + (parseFloat(m.cash) || 0), 0);
+  }, [filteredMembers]);
 
-const memberGPayTotal = useMemo(() => {
-  return filteredMembers.reduce((sum, m) => sum + (parseFloat(m.gpay) || 0), 0);
-}, [filteredMembers]);
+  const memberGPayTotal = useMemo(() => {
+    return filteredMembers.reduce((sum, m) => sum + (parseFloat(m.gpay) || 0), 0);
+  }, [filteredMembers]);
 
-const memberTotal = useMemo(() => {
-  return filteredMembers.reduce(
-    (sum, m) => sum + (parseFloat(m.daily_total) || 0),
-    0
-  );
-}, [filteredMembers]);
+  const memberTotal = useMemo(() => {
+    if (selectedStaff && selectedStaff !== "all") {
+      // 🔹 Staff-specific total
+      return filteredMembers.reduce((sum, m) => {
+        const staffData = m.staff_summary?.find(
+          (s) => s.staff_id === selectedStaff
+        );
+        return sum + (staffData ? parseFloat(staffData.total) : 0);
+      }, 0);
+    } else {
+      // 🔹 All-staff total (as before)
+      return filteredMembers.reduce(
+        (sum, m) => sum + (parseFloat(m.daily_total) || 0),
+        0
+      );
+    }
+  }, [filteredMembers, selectedStaff]);
 
-  
+
+  console.log("Filtered Members:", filteredMembers);
+
+
 
   // Fetch reports
   useEffect(() => {
@@ -299,22 +313,31 @@ const memberTotal = useMemo(() => {
       render: (t) => `₹${(parseFloat(t) || 0).toFixed(2)}`,
     },
     {
-      title: "Service Provider",
-      dataIndex: "staff_summary",
-      key: "staff_summary",
-      align: "left",
-      render: (staff_summary) => {
-        if (!staff_summary || !Array.isArray(staff_summary) || staff_summary.length === 0) {
-          return <span style={{ color: "#999" }}>No Staff</span>;
-        }
+    title: "Service Provider",
+    dataIndex: "staff_summary",
+    key: "staff_summary",
+    align: "left",
+    render: (staff_summary) => {
+      if (!staff_summary || !Array.isArray(staff_summary) || staff_summary.length === 0) {
+        return <span style={{ color: "#999" }}>No Staff</span>;
+      }
 
-        // Combine staff names + total
-        return staff_summary.map((s) => (
-          <div key={s.staff_id}>
-            {s.staff_name} — <b>₹{parseFloat(s.total).toFixed(2)}</b>
-          </div>
-        ));
-      },
+      // ✅ Apply staff filter to this cell
+      const filteredStaff =
+        selectedStaff && selectedStaff !== "all"
+          ? staff_summary.filter((s) => s.staff_id === selectedStaff)
+          : staff_summary;
+
+      if (filteredStaff.length === 0) {
+        return <span style={{ color: "#999" }}>No matching staff</span>;
+      }
+
+      return filteredStaff.map((s) => (
+        <div key={s.staff_id}>
+          {s.staff_name} — <b>₹{parseFloat(s.total).toFixed(2)}</b>
+        </div>
+      ));
+    },
     },
 
   ];
@@ -334,29 +357,29 @@ const memberTotal = useMemo(() => {
   );
 
   const memberTableFooter = () => (
-  <div
-    style={{
-      textAlign: "right",
-      padding: "8px",
-      borderTop: "1px solid #d9d9d9",
-      backgroundColor: "#f9f9f9",
-      display: "flex",
-      justifyContent: "flex-end",
-      alignItems: "center",
-      gap: "20px",
-    }}
-  >
-    <div style={{ fontWeight: "bold" }}>
-      Overall Cash: ₹{memberCashTotal.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+    <div
+      style={{
+        textAlign: "right",
+        padding: "8px",
+        borderTop: "1px solid #d9d9d9",
+        backgroundColor: "#f9f9f9",
+        display: "flex",
+        justifyContent: "flex-end",
+        alignItems: "center",
+        gap: "20px",
+      }}
+    >
+      <div style={{ fontWeight: "bold" }}>
+        Overall Cash: ₹{memberCashTotal.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+      </div>
+      <div style={{ fontWeight: "bold" }}>
+        Overall GPay: ₹{memberGPayTotal.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+      </div>
+      <div style={{ fontWeight: "bold" }}>
+        Overall Total: ₹{memberTotal.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+      </div>
     </div>
-    <div style={{ fontWeight: "bold" }}>
-      Overall GPay: ₹{memberGPayTotal.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
-    </div>
-    <div style={{ fontWeight: "bold" }}>
-      Overall Total: ₹{memberTotal.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
-    </div>
-  </div>
-);
+  );
 
 
   return (
