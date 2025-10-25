@@ -44,6 +44,11 @@ const BillingCreation = () => {
     (s) => s.billing
   );
   const isEdit = !!id;
+   const [Role, setRole] = useState("");
+  useEffect(() => {
+    const storedRole = sessionStorage.getItem("Role"); // or from Redux
+    if (storedRole) setRole(storedRole);
+  }, []);
 
   const [form, setForm] = useState({
     billing_date: new Date().toISOString().split("T")[0],
@@ -1116,6 +1121,7 @@ const BillingCreation = () => {
         {/* Submit Buttons */}
         <Row>
           <Col md={12} className="text-center">
+           {Role === "Admin" && (
             <Buttons
               btnlabel={
                 submitting
@@ -1130,6 +1136,8 @@ const BillingCreation = () => {
               onClick={submit}
               disabled={submitting}
             />
+           )}
+           
             <Buttons
               btnlabel="Cancel"
               className="border-0 add-btn"

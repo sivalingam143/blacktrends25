@@ -14,6 +14,11 @@ const MemberCreation = () => {
   const { id } = useParams();
   const { member } = useSelector((s) => s.member);
   const isEdit = !!id;
+  const [Role, setRole] = useState("");
+useEffect(() => {
+  const storedRole = sessionStorage.getItem("Role"); // or from Redux
+  if (storedRole) setRole(storedRole);
+}, []);
 
   const [form, setForm] = useState({
     name: "",
@@ -191,19 +196,22 @@ const MemberCreation = () => {
         </Row>
 
         <div className="d-flex justify-content-center mt-4">
-          <Buttons
-            btnlabel={
-              submitting
-                ? isEdit
-                  ? "Updating…"
-                  : "Adding…"
-                : isEdit
-                ? "Update"
-                : "Create"
-            }
-            className="border-0 submit-btn me-3"
-            onClick={submit}
-          />
+         {Role === "Admin" && (
+  <Buttons
+    btnlabel={
+      submitting
+        ? isEdit
+          ? "Updating…"
+          : "Adding…"
+        : isEdit
+        ? "Update"
+        : "Create"
+    }
+    className="border-0 submit-btn me-3"
+    onClick={submit}
+  />
+)}
+
           <Buttons
             btnlabel="Cancel"
             className="border-0 add-btn"

@@ -24,7 +24,7 @@ const Member = () => {
   const { member, status } = useSelector((s) => s.member);
   const [searchTerm, setSearchTerm] = useState("");
   const [membershipFilter, setMembershipFilter] = useState("");
-     const [Role, setRole] = useState("");
+  const [Role, setRole] = useState("");
 
   // modal state
   const [showGoldModal, setShowGoldModal] = React.useState(false);
@@ -32,13 +32,13 @@ const Member = () => {
 
   useEffect(() => {
     dispatch(fetchMembers(""));
-      const storedRole = sessionStorage.getItem("Role");
-      if (storedRole) {
-        setRole(storedRole);
-      }
+    const storedRole = sessionStorage.getItem("Role");
+    if (storedRole) {
+      setRole(storedRole);
+    }
   }, [dispatch]);
 
-   
+
 
   const handleCreate = () => navigate("/member/create");
 
@@ -195,9 +195,8 @@ const Member = () => {
     const membershipDisplay = (
       <div
         key={m.member_id}
-        className={`form-check form-switch ${
-          isActiveGold ? "disabled-toggle" : ""
-        }`}
+        className={`form-check form-switch ${isActiveGold ? "disabled-toggle" : ""
+          }`}
         onClick={() => openGoldModal(m)}
         style={{ cursor: isActiveGold ? "not-allowed" : "pointer" }}
       >
@@ -227,16 +226,19 @@ const Member = () => {
           options={[
 
             {
-              label: "Edit",
+              label: Role === "Admin" ? "Edit" : "View",
               icon: <LiaEditSolid />,
               onClick: () => handleEdit(m),
             },
-            
-            {
-              label: "Delete",
-              icon: <MdOutlineDelete />,
-              onClick: () => handleDelete(m.id),
-            },
+            ...(Role === "Admin" // Only include Delete if role is Admin
+              ? [
+                {
+                  label: "Delete",
+                  icon: <MdOutlineDelete />,
+                  onClick: () => handleDelete(m.id),
+                },
+              ]
+              : []),
           ]}
           label={<HiOutlineDotsVertical />}
         />,
@@ -277,11 +279,11 @@ const Member = () => {
             />
             {Role === "Admin" && (
               <>
-              <Buttons
-              btnlabel="Download Excel"
-              className="add-btn ms-2"
-              onClick={handleExport}
-            />
+                <Buttons
+                  btnlabel="Download Excel"
+                  className="add-btn ms-2"
+                  onClick={handleExport}
+                />
               </>
             )}
           </Col>

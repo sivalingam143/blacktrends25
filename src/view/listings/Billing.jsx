@@ -22,10 +22,15 @@ const Billing = () => {
   const { billing } = useSelector((s) => s.billing);
   const companies = useSelector((s) => s.company.company);
   const [searchTerm, setSearchTerm] = useState("");
+  const [Role, setRole] = useState("");
 
   useEffect(() => {
     dispatch(fetchBillings(""));
     dispatch(fetchCompanies(""));
+      const storedRole = sessionStorage.getItem("Role");
+    if (storedRole) {
+      setRole(storedRole);
+    }
   }, [dispatch]);
 
   const handleCreate = () => navigate("/billing/create");
@@ -230,15 +235,19 @@ const Billing = () => {
             onClick: () => handleSMSShare(item),
           },
           {
-            label: "Edit",
-            icon: <LiaEditSolid />,
-            onClick: () => handleEdit(item),
-          },
-          {
-            label: "Delete",
-            icon: <MdOutlineDelete />,
-            onClick: () => handleDelete(item.id),
-          },
+                       label: Role === "Admin" ? "Edit" : "View",
+                       icon: <LiaEditSolid />,
+                       onClick: () => handleEdit(item),
+                     },
+                     ...(Role === "Admin" // Only include Delete if role is Admin
+                       ? [
+                         {
+                           label: "Delete",
+                           icon: <MdOutlineDelete />,
+                           onClick: () => handleDelete(item.id),
+                         },
+                       ]
+                       : []),
         ]}
         label={<HiOutlineDotsVertical />}
       />,
