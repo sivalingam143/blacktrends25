@@ -29,9 +29,17 @@ const Login = () => {
     }
     try {
       const response = await dispatch(loginUser(formData));
+      console.log("Login Response:", response.payload);
       if (response?.meta?.requestStatus === "fulfilled") {
         NotifyData("Login Success", "success");
-        navigate("/dashboard");
+        if(response.payload === "Admin"){
+          navigate("/dashboard");
+          sessionStorage.setItem("Admin", response.payload);
+        } else{
+         navigate("/billing/create");
+          
+        }
+       
       } else {
         NotifyData(response?.payload || "Invalid email or password", "error");
       }

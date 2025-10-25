@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import { MdKeyboardArrowRight, MdKeyboardArrowDown } from "react-icons/md";
 import { RxDash } from "react-icons/rx";
@@ -9,6 +9,8 @@ import "./MobileDevice.css";
 
 const Sidebar = () => {
   const [open, setOpen] = useState(null);
+   const [Role, setRole] = useState("");
+
 
   const toggleSubMenu = (index) => {
     setOpen(open === index ? null : index);
@@ -16,6 +18,22 @@ const Sidebar = () => {
   const handleSideBar = () => {
     document.body.classList.remove("toggle-sidebar");
   };
+   useEffect(() => {
+    const storedRole = sessionStorage.getItem("Role");
+    if (storedRole) {
+      setRole(storedRole);
+    }
+  }, []);
+  const filteredMenuItems = MenuItems.filter(item =>
+  item.roles.includes(Role)
+).map(item => {
+  if (item.submenu) {
+    // Filter submenu based on role
+    item.submenu = item.submenu.filter(sub => sub.roles.includes(Role));
+  }
+  return item;
+});
+
   return (
     <aside id="side-bar" className="side-bar">
       <div>
@@ -30,7 +48,7 @@ const Sidebar = () => {
 
       <div className="list-group">
         <ul>
-          {MenuItems.map((item, index) => (
+          {filteredMenuItems.map((item, index) => (
             <li key={index} onClick={handleSideBar}>
               <NavLink
                 to={item.path}

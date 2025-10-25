@@ -24,6 +24,7 @@ const Member = () => {
   const { member, status } = useSelector((s) => s.member);
   const [searchTerm, setSearchTerm] = useState("");
   const [membershipFilter, setMembershipFilter] = useState("");
+     const [Role, setRole] = useState("");
 
   // modal state
   const [showGoldModal, setShowGoldModal] = React.useState(false);
@@ -31,7 +32,13 @@ const Member = () => {
 
   useEffect(() => {
     dispatch(fetchMembers(""));
+      const storedRole = sessionStorage.getItem("Role");
+      if (storedRole) {
+        setRole(storedRole);
+      }
   }, [dispatch]);
+
+   
 
   const handleCreate = () => navigate("/member/create");
 
@@ -218,11 +225,13 @@ const Member = () => {
         statusDisplay, // Dynamic status
         <ActionButton
           options={[
+
             {
               label: "Edit",
               icon: <LiaEditSolid />,
               onClick: () => handleEdit(m),
             },
+            
             {
               label: "Delete",
               icon: <MdOutlineDelete />,
@@ -266,11 +275,15 @@ const Member = () => {
               className="add-btn"
               onClick={handleCreate}
             />
-            <Buttons
+            {Role === "Admin" && (
+              <>
+              <Buttons
               btnlabel="Download Excel"
               className="add-btn ms-2"
               onClick={handleExport}
             />
+              </>
+            )}
           </Col>
           <Col xs="12" lg="3" className="py-2">
             <div className="d-flex gap-2">

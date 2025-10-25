@@ -15,11 +15,12 @@ const loginUser = createAsyncThunk(
       });
 
       if (response?.data?.head?.code === 200) {
-        console.log(response.data.body.name);
+        console.log(response.data.body);
         // Successful login
+        sessionStorage.setItem("Role", response.data.body.Role);
         sessionStorage.setItem("username", response.data.body.name);
         sessionStorage.setItem("userid", response.data.body.user_id);
-        return response?.data?.body?.user || {};
+        return response?.data?.body?.Role || {};
       } else {
         return thunkAPI.rejectWithValue(
           response?.data?.head?.msg || "Invalid login details"
