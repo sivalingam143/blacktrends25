@@ -25,6 +25,7 @@ const Member = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [membershipFilter, setMembershipFilter] = useState("");
   const [Role, setRole] = useState("");
+  const [extraDiscountFilter, setExtraDiscountFilter] = useState("All");
 
   // modal state
   const [showGoldModal, setShowGoldModal] = React.useState(false);
@@ -104,7 +105,11 @@ const Member = () => {
       `Members_${new Date().toISOString().split("T")[0]}.xlsx`
     );
   };
-
+const extraDiscountOptions = [
+  { value: "All", label: "All" },
+  { value: "Yes", label: "Yes" },
+  { value: "No", label: "No" },
+];
   const handleEdit = (m) => navigate(`/member/edit/${m.member_id}`);
 
   const handleDelete = async (id) => {
@@ -157,19 +162,38 @@ const Member = () => {
     { value: "No", label: "No" },
   ];
 
+  // const filteredMember = member.filter((m) => {
+  //   const nameMatch = (m.name || "")
+  //     .toLowerCase()
+  //     .includes(searchTerm.toLowerCase());
+  //   const phoneMatch = String(m.phone || "")
+  //     .toLowerCase()
+  //     .includes(searchTerm.toLowerCase());
+  //   const membershipMatch =
+  //     !membershipFilter ||
+  //     membershipFilter === "All" ||
+  //     m.membership === membershipFilter;
+  //   return (nameMatch || phoneMatch) && membershipMatch;
+  // });
   const filteredMember = member.filter((m) => {
-    const nameMatch = (m.name || "")
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const phoneMatch = String(m.phone || "")
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const membershipMatch =
-      !membershipFilter ||
-      membershipFilter === "All" ||
-      m.membership === membershipFilter;
-    return (nameMatch || phoneMatch) && membershipMatch;
-  });
+  const nameMatch = (m.name || "")
+    .toLowerCase()
+    .includes(searchTerm.toLowerCase());
+  const phoneMatch = String(m.phone || "")
+    .toLowerCase()
+    .includes(searchTerm.toLowerCase());
+
+  const membershipMatch =
+    !membershipFilter || membershipFilter === "All" || m.membership === membershipFilter;
+
+  const extraDiscountMatch =
+    !extraDiscountFilter || extraDiscountFilter === "All" ||
+    (extraDiscountFilter === "Yes" && m.extra_milestone_customer === 1) ||
+    (extraDiscountFilter === "No" && m.extra_milestone_customer === 0);
+
+  return (nameMatch || phoneMatch) && membershipMatch && extraDiscountMatch;
+});
+
 
   // ---------- table ----------
   const headers = ["No", "Name", "Phone", "Membership", "Status"]; // Status column
@@ -304,10 +328,18 @@ const Member = () => {
               value={membershipFilter}
               onChange={(e) => setMembershipFilter(e.target.value)}
               options={membershipOptions}
+             
+            />
+          </Col>
+          <Col xs="12" lg="3" className="py-2">
+            <DropDown
+              placeholder="Extra Discount"
+              value={extraDiscountFilter}
+              onChange={(e) => setExtraDiscountFilter(e.target.value)}
+              options={extraDiscountOptions}
               width="150px"
             />
           </Col>
-
           <Col xs="12" className="py-3">
             <TableUI
               headers={headers}
