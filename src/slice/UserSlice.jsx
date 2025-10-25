@@ -34,14 +34,15 @@ export const addUser = createAsyncThunk("users/addUser", async (userData) => {
 // Update user by ID
 export const updateUser = createAsyncThunk(
   "users/updateUser",
-  async ({ id, Name,Mobile_Number,Password }) => {
-    console.log("siva",{ id, Name,Mobile_Number,Password });
-    const response = await updateUserApi({ id : id , Name : Name,Mobile_Number : Mobile_Number,Password :Password});
+  async ({ id, Name,Mobile_Number,Password,Role}) => {
+    console.log("siva",{ id, Name,Mobile_Number,Password,Role });
+    const response = await updateUserApi({ id : id , Name : Name,Mobile_Number : Mobile_Number,Password :Password,Role:Role });
     return {
       id,
       Name,
       Mobile_Number,
-      Password
+      Password,
+      Role
     };
   }
 );

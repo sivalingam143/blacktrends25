@@ -39,6 +39,7 @@ export const updateUserApi = async (userdata) => {
     Name: userdata.Name,
     Mobile_Number: userdata.Mobile_Number,
     Password: userdata.Password,
+    Role: userdata.Role,
   };
   const response = await axiosInstance.post(`${API_ENDPOINT}`, payload);
   console.log("update response", response.data.head);

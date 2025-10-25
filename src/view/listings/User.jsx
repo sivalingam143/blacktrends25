@@ -38,13 +38,26 @@ const User = () => {
       required: true,
       classname: "form-control-padright",
     },
+    {
+    name: "Role",
+    label: "Role",
+    type: "select",
+    options: [
+      { label: "Admin", value: "Admin" },
+      { label: "Staff", value: "Staff" },
+    ],
+    required: true,
+  },
   ];
 
   const [formData, setFormData] = useState({
     Name: "",
     Mobile_Number: "",
     Password: "",
+    Role: "",
   });
+
+  console.log("Form Data:", formData);
 
   const [show, setShow] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -67,6 +80,7 @@ const User = () => {
       Name: user?.Name || "", // Use optional chaining with a default value
       Mobile_Number: user?.Mobile_Number || "",
       Password: user?.Password || "",
+      Role: user?.Role || "",
     });
     handleOpen();
   };
@@ -102,6 +116,7 @@ const User = () => {
             Name: formData.Name,
             Mobile_Number: formData.Mobile_Number,
             Password: formData.Password,
+            Role: formData.Role,
           })
         ).unwrap();
 
@@ -142,7 +157,7 @@ const User = () => {
       user?.Name?.toLowerCase()?.includes(searchTerm.toLowerCase())
     ) || [];
 
-  const RoleHead = ["No", "Name", "Mobile Number"];
+  const RoleHead = ["No", "Name", "Mobile Number","Role"];
   const RoleData =
     filteredUsers?.length > 0
       ? filteredUsers.map((user, index) => ({
@@ -150,6 +165,7 @@ const User = () => {
             index + 1,
             user.Name,
             user.Mobile_Number,
+              user.Role,
             <ActionButton
               options={[
                 {

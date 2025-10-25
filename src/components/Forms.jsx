@@ -141,4 +141,25 @@ const formatDate = (dateString) => {
   return moment(dateString, "YYYY-MM-DD").format("DD-MM-YYYY");
 };
 
+export const SelectInputForm = ({ textlabel, name, value, options, onChange }) => {
+  return (
+    <div className="form-group">
+      <label>{textlabel}</label>
+      <select
+        className="form-control"
+        name={name}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      >
+        <option value="">Select {textlabel}</option>
+        {options.map((opt, idx) => (
+          <option key={idx} value={opt.value}>
+            {opt.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+};
+
 export { TextInputform, TextArea, DropDown, CheckBox, formatDate, Calender };
