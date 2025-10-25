@@ -16,7 +16,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { TextInputform, DropDown } from "../../components/Forms";
 import { Buttons } from "../../components/Buttons";
 import NotifyData from "../../components/NotifyData";
-import { fetchMembers, addMember } from "../../slice/MemberSlice";
+import { fetchMembers, addMember, updateWallet } from "../../slice/MemberSlice";
 import { fetchProductAndServices } from "../../slice/ProductAndServiceSlice";
 import { fetchStaff } from "../../slice/StaffSlice";
 import {
@@ -33,6 +33,7 @@ const BillingCreation = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const { member } = useSelector((s) => s.member);
+  console.log("Members from store:", member);
   const { billing } = useSelector((s) => s.billing);
   const { productandservice: products } = useSelector(
     (s) => s.productandservice
@@ -629,15 +630,27 @@ const BillingCreation = () => {
         balance,
         payment_details: JSON.stringify(payments),
       };
-
+      let billMsg;
       if (isEdit) {
         billingPayload.billing_id = id;
-        const msg = await dispatch(updateBilling(billingPayload)).unwrap();
-        NotifyData(msg, "success");
+        billMsg = await dispatch(updateBilling(billingPayload)).unwrap();
+       
       } else {
-        const msg = await dispatch(addBilling(billingPayload)).unwrap();
-        NotifyData(msg, "success");
+        billMsg = await dispatch(addBilling(billingPayload)).unwrap();
+        
       }
+      // ✅ Wallet Update
+    const walletPayload = {
+      member_id: form.member_id,
+      bill_id: isEdit ? id : undefined,
+      bill_amount: grand_total,
+      paid_amount: paid,
+    };
+
+    const walletMsg = await dispatch(updateWallet(walletPayload)).unwrap();
+
+    NotifyData(walletMsg, "success");
+    NotifyData(billMsg, "success");
       navigate("/billing");
     } catch (e) {
       NotifyData(e.message, "error");
@@ -1059,10 +1072,29 @@ const BillingCreation = () => {
             <strong>Total Spending</strong>
             <span>₹{selectedMember.total_spending || 0}</span>
           </div>
-          <div className="d-flex justify-content-between align-items-center">
+          <div className="mb-2 d-flex justify-content-between align-items-center">
             <strong>Membership</strong>
             <span>{selectedMember.membership || "-"}</span>
           </div>
+         <div className="mb-2 d-flex justify-content-between align-items-center">
+  <strong>Wallet Balance</strong>
+  <span
+    style={{
+      color:
+        selectedMember.wallet_balance < 0
+          ? "red"
+          : selectedMember.wallet_balance > 0
+          ? "green"
+          : "inherit",
+      fontWeight: "600",
+    }}
+  >
+    {selectedMember.wallet_balance > 0
+      ? `+${selectedMember.wallet_balance}`
+      : selectedMember.wallet_balance || "0"}
+  </span>
+</div>
+
           {extraDiscountRate > 0 && (
             <div className="d-flex justify-content-between align-items-center text-success fw-bold">
               <strong>Extra Discount</strong>

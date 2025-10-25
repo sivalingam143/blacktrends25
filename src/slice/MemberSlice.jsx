@@ -5,7 +5,9 @@ import {
   updateMemberApi,
   deleteMemberApi,
   toggleGoldApi,
+  updateWalletApi,
 } from "../services/MemberService";
+
 
 /* ---- thunks ---- */
 export const fetchMembers = createAsyncThunk(
@@ -46,6 +48,14 @@ export const toggleGold = createAsyncThunk(
     const res = await toggleGoldApi(member_id, makeGold);
     if (res.head.code !== 200) throw new Error(res.head.msg);
     return { member_id, makeGold };
+  }
+);
+export const updateWallet = createAsyncThunk(
+  "member/updateWallet",
+  async (walletData) => {
+    const res = await updateWalletApi(walletData);
+    if (res.head.code !== 200) throw new Error(res.head.msg);
+    return res.head.msg;
   }
 );
 
@@ -118,6 +128,18 @@ const memberSlice = createSlice({
         state.member[idx].membership = goldVal;
       }
     });
+    builder
+  .addCase(updateWallet.pending, (s) => {
+    s.status = "loading";
+  })
+  .addCase(updateWallet.fulfilled, (s) => {
+    s.status = "succeeded";
+  })
+  .addCase(updateWallet.rejected, (s, a) => {
+    s.status = "failed";
+    s.error = a.error.message;
+  });
+
   },
 });
 

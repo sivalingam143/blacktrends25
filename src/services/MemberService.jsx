@@ -53,3 +53,14 @@ export const toggleGoldApi = async (member_id, makeGold) => {
   const { data } = await axiosInstance.post(API_ENDPOINT, payload);
   return data;
 };
+export const updateWalletApi = async (walletData) => {
+  const payload = {
+    action: "updateWallet",
+    member_id: walletData.member_id,
+    bill_id: walletData.bill_id,
+    bill_amount: walletData.bill_amount,
+    paid_amount: walletData.paid_amount,
+  };
+  const { data } = await axiosInstance.post(API_ENDPOINT, payload);
+  return data;
+};
