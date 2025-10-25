@@ -16,7 +16,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { TextInputform, DropDown } from "../../components/Forms";
 import { Buttons } from "../../components/Buttons";
 import NotifyData from "../../components/NotifyData";
-import { fetchMembers, addMember, updateWallet } from "../../slice/MemberSlice";
+import { fetchMembers, addMember, updateWallet, fetchWalletHistory } from "../../slice/MemberSlice";
 import { fetchProductAndServices } from "../../slice/ProductAndServiceSlice";
 import { fetchStaff } from "../../slice/StaffSlice";
 import {
@@ -44,7 +44,7 @@ const BillingCreation = () => {
     (s) => s.billing
   );
   const isEdit = !!id;
-   const [Role, setRole] = useState("");
+  const [Role, setRole] = useState("");
   useEffect(() => {
     const storedRole = sessionStorage.getItem("Role"); // or from Redux
     if (storedRole) setRole(storedRole);
@@ -91,6 +91,9 @@ const BillingCreation = () => {
     message: "",
     type: "",
   });
+  const { walletHistory, walletStatus } = useSelector((state) => state.member);
+
+  console.log("Wallet History:", walletHistory);
 
   // Payment method options
   const paymentOptions = [
@@ -145,7 +148,10 @@ const BillingCreation = () => {
     dispatch(fetchStaff(""));
     dispatch(fetchCategories(""));
     dispatch(fetchBillings(""));
-  }, [dispatch]);
+    if (form.member_id) {
+      dispatch(fetchWalletHistory(form.member_id));
+    }
+  }, [form.member_id, dispatch]);
 
   // Edit mode: Parse payment_details if exists
   useEffect(() => {
@@ -277,9 +283,9 @@ const BillingCreation = () => {
 
   const phoneValue = form.phone
     ? phoneOptions.find((opt) => opt.value === form.phone) || {
-        value: form.phone,
-        label: form.phone,
-      }
+      value: form.phone,
+      label: form.phone,
+    }
     : null;
 
   // Helper function to apply discounts to rows
@@ -639,23 +645,23 @@ const BillingCreation = () => {
       if (isEdit) {
         billingPayload.billing_id = id;
         billMsg = await dispatch(updateBilling(billingPayload)).unwrap();
-       
+
       } else {
         billMsg = await dispatch(addBilling(billingPayload)).unwrap();
-        
+
       }
       // ✅ Wallet Update
-    const walletPayload = {
-      member_id: form.member_id,
-      bill_id: isEdit ? id : undefined,
-      bill_amount: grand_total,
-      paid_amount: paid,
-    };
+      const walletPayload = {
+        member_id: form.member_id,
+        bill_id: isEdit ? id : undefined,
+        bill_amount: grand_total,
+        paid_amount: paid,
+      };
 
-    const walletMsg = await dispatch(updateWallet(walletPayload)).unwrap();
+      const walletMsg = await dispatch(updateWallet(walletPayload)).unwrap();
 
-    NotifyData(walletMsg, "success");
-    NotifyData(billMsg, "success");
+      NotifyData(walletMsg, "success");
+      NotifyData(billMsg, "success");
       navigate("/billing");
     } catch (e) {
       NotifyData(e.message, "error");
@@ -682,6 +688,7 @@ const BillingCreation = () => {
       return label.toLowerCase().includes(inputValue);
     }
   };
+  const walletLoading = walletStatus === "loading";
 
   return (
     <div id="main">
@@ -710,10 +717,10 @@ const BillingCreation = () => {
                           localNotification.type === "success"
                             ? "success"
                             : localNotification.type === "info"
-                            ? "info"
-                            : localNotification.type === "error"
-                            ? "danger"
-                            : "secondary"
+                              ? "info"
+                              : localNotification.type === "error"
+                                ? "danger"
+                                : "secondary"
                         }
                         className="local-toast mt-2"
                       >
@@ -801,11 +808,11 @@ const BillingCreation = () => {
                   }));
                   const productValue = row.product_id
                     ? filteredProductOptions.find(
-                        (opt) => opt.value === row.product_id
-                      ) || {
-                        value: row.product_id,
-                        label: row.product_name,
-                      }
+                      (opt) => opt.value === row.product_id
+                    ) || {
+                      value: row.product_id,
+                      label: row.product_name,
+                    }
                     : null;
                   return (
                     <tr key={index}>
@@ -1036,83 +1043,157 @@ const BillingCreation = () => {
           {/* Right: Stats Container - Compact for 3 Fields */}
           {form.member_id && (
             <Col md={4}>
-            <Card
-  className={`position-relative ${
-    extraDiscountRate > 0 ? "highlight-card" : ""
-  }`}
-  style={{
-    borderRadius: "12px",
-    overflow: "hidden",
-    transition: "all 0.4s ease-in-out",
-    transform: extraDiscountRate > 0 ? "scale(1.01)" : "scale(1)",
-  }}
->
-  <Card.Header
-    className={`fw-bold ${
-      extraDiscountRate > 0 ? "bg-success text-white" : ""
-    }`}
-  >
-    Member Status
+              <Card
+                className={`position-relative ${extraDiscountRate > 0 ? "highlight-card" : ""
+                  }`}
+                style={{
+                  borderRadius: "12px",
+                  overflow: "hidden",
+                  transition: "all 0.4s ease-in-out",
+                  transform: extraDiscountRate > 0 ? "scale(1.01)" : "scale(1)",
+                }}
+              >
+                <Card.Header
+                  className={`fw-bold ${extraDiscountRate > 0 ? "bg-success text-white" : ""
+                    }`}
+                >
+                  Member Status
+                </Card.Header>
+                <Card.Body className="p-2">
+                  {(() => {
+                    const selectedMember = member.find(
+                      (m) => m.member_id === form.member_id
+                    );
+                    return selectedMember ? (
+                      <>
+                        <div className="mb-2 d-flex justify-content-between align-items-center">
+                          <strong>Last Visit Date</strong>
+                          <span>
+                            {selectedMember.last_visit_date
+                              ? formatDate(selectedMember.last_visit_date)
+                              : "-"}
+                          </span>
+                        </div>
+                        <div className="mb-2 d-flex justify-content-between align-items-center">
+                          <strong>Total Visit Count</strong>
+                          <span>{selectedMember.total_visit_count || 0}</span>
+                        </div>
+                        <div className="mb-2 d-flex justify-content-between align-items-center">
+                          <strong>Total Spending</strong>
+                          <span>₹{selectedMember.total_spending || 0}</span>
+                        </div>
+                        <div className="mb-2 d-flex justify-content-between align-items-center">
+                          <strong>Membership</strong>
+                          <span>{selectedMember.membership || "-"}</span>
+                        </div>
+                        <div className="mb-2 d-flex justify-content-between align-items-center">
+                          <strong>Wallet Balance</strong>
+                          <span
+                            style={{
+                              color:
+                                selectedMember.wallet_balance < 0
+                                  ? "red"
+                                  : selectedMember.wallet_balance > 0
+                                    ? "green"
+                                    : "inherit",
+                              fontWeight: "600",
+                            }}
+                          >
+                            {selectedMember.wallet_balance > 0
+                              ? `+${selectedMember.wallet_balance}`
+                              : selectedMember.wallet_balance || "0"}
+                          </span>
+                        </div>
+
+                        {extraDiscountRate > 0 && (
+                          <div className="d-flex justify-content-between align-items-center text-success fw-bold">
+                            <strong>Extra Discount</strong>
+                            <span>{extraDiscountRate}%</span>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="text-center text-muted">No Member Data</div>
+                    );
+                  })()}
+                </Card.Body>
+              </Card>
+             <Card className="mt-3 shadow-sm">
+  <Card.Header className="fw-bold bg-primary text-white">
+    Wallet Transactions
   </Card.Header>
   <Card.Body className="p-2">
-    {(() => {
-      const selectedMember = member.find(
-        (m) => m.member_id === form.member_id
-      );
-      return selectedMember ? (
-        <>
-          <div className="mb-2 d-flex justify-content-between align-items-center">
-            <strong>Last Visit Date</strong>
-            <span>
-              {selectedMember.last_visit_date
-                ? formatDate(selectedMember.last_visit_date)
-                : "-"}
-            </span>
-          </div>
-          <div className="mb-2 d-flex justify-content-between align-items-center">
-            <strong>Total Visit Count</strong>
-            <span>{selectedMember.total_visit_count || 0}</span>
-          </div>
-          <div className="mb-2 d-flex justify-content-between align-items-center">
-            <strong>Total Spending</strong>
-            <span>₹{selectedMember.total_spending || 0}</span>
-          </div>
-          <div className="mb-2 d-flex justify-content-between align-items-center">
-            <strong>Membership</strong>
-            <span>{selectedMember.membership || "-"}</span>
-          </div>
-         <div className="mb-2 d-flex justify-content-between align-items-center">
-  <strong>Wallet Balance</strong>
-  <span
-    style={{
-      color:
-        selectedMember.wallet_balance < 0
-          ? "red"
-          : selectedMember.wallet_balance > 0
-          ? "green"
-          : "inherit",
-      fontWeight: "600",
-    }}
-  >
-    {selectedMember.wallet_balance > 0
-      ? `+${selectedMember.wallet_balance}`
-      : selectedMember.wallet_balance || "0"}
-  </span>
-</div>
+    {walletLoading ? (
+      <div className="text-center py-3 fs-6 text-secondary">Loading...</div>
+    ) : !Array.isArray(walletHistory) || walletHistory.length === 0 ? (
+      <div className="text-center py-3 fs-6 text-muted">No Wallet History</div>
+    ) : (
+      <div className="table-responsive">
+        <table className="table table-sm table-hover table-bordered align-middle mb-0">
+          <thead className="table-light">
+            <tr className="text-center text-uppercase fs-12">
+              <th>Date</th>
+              <th>Bill Amount</th>
+              <th>Paid Amount</th>
+              <th>Difference</th>
+              <th>Type</th>
+              <th>Wallet Before</th>
+              <th>Wallet After</th>
+              <th>Remarks</th>
+            </tr>
+          </thead>
+          <tbody>
+            {walletHistory.map((w) => {
+              const typeColor =
+                w.difference_type === "CREDIT"
+                  ? "text-success fw-bold"
+                  : w.difference_type === "DEBIT"
+                  ? "text-danger fw-bold"
+                  : "text-muted";
 
-          {extraDiscountRate > 0 && (
-            <div className="d-flex justify-content-between align-items-center text-success fw-bold">
-              <strong>Extra Discount</strong>
-              <span>{extraDiscountRate}%</span>
-            </div>
-          )}
-        </>
-      ) : (
-        <div className="text-center text-muted">No Member Data</div>
-      );
-    })()}
+              return (
+                <tr
+                  key={w.id}
+                  className={w.difference_type === "DEBIT" ? "bg-light" : ""}
+                  style={{ fontSize: "0.875rem" }}
+                >
+                  <td className="text-center">
+                    {w.transaction_date
+                      ? (() => {
+                          const [datePart] = w.transaction_date.split(" ");
+                          const [dd, mm, yyyy] = datePart.split("-");
+                          const monthNames = [
+                            "JAN", "FEB", "MAR", "APR", "MAY", "JUN",
+                            "JUL", "AUG", "SEP", "OCT", "NOV", "DEC",
+                          ];
+                          const month = monthNames[parseInt(mm, 10) - 1];
+                          const year = yyyy.slice(-2);
+                          return `${dd}-${month}${year}`;
+                        })()
+                      : "-"}
+                  </td>
+                  <td className="text-end">₹{w.bill_amount || 0}</td>
+                  <td className="text-end">₹{w.paid_amount || 0}</td>
+                  <td className={`text-end ${typeColor}`}>
+                    {w.difference > 0 ? `+${w.difference}` : w.difference}
+                  </td>
+                  <td className={`text-center ${typeColor}`}>{w.difference_type}</td>
+                  <td className="text-end">₹{w.wallet_before}</td>
+                  <td className="text-end">₹{w.wallet_after}</td>
+                  <td className="text-start">{w.remarks || "-"}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    )}
   </Card.Body>
 </Card>
+
+
+
+
 
             </Col>
           )}
@@ -1121,23 +1202,23 @@ const BillingCreation = () => {
         {/* Submit Buttons */}
         <Row>
           <Col md={12} className="text-center">
-           {Role === "Admin" && (
-            <Buttons
-              btnlabel={
-                submitting
-                  ? isEdit
-                    ? "Updating…"
-                    : "Adding…"
-                  : isEdit
-                  ? "Update"
-                  : "Create"
-              }
-              className="border-0 submit-btn me-3"
-              onClick={submit}
-              disabled={submitting}
-            />
-           )}
-           
+            {Role === "Admin" && (
+              <Buttons
+                btnlabel={
+                  submitting
+                    ? isEdit
+                      ? "Updating…"
+                      : "Adding…"
+                    : isEdit
+                      ? "Update"
+                      : "Create"
+                }
+                className="border-0 submit-btn me-3"
+                onClick={submit}
+                disabled={submitting}
+              />
+            )}
+
             <Buttons
               btnlabel="Cancel"
               className="border-0 add-btn"

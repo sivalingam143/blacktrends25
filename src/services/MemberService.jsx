@@ -64,3 +64,10 @@ export const updateWalletApi = async (walletData) => {
   const { data } = await axiosInstance.post(API_ENDPOINT, payload);
   return data;
 };
+
+/* ---------- WALLET HISTORY ---------- */
+export const fetchWalletHistoryApi = async (member_id) => {
+  const payload = { action: "getWalletHistory", member_id };
+  const { data } = await axiosInstance.post(API_ENDPOINT, payload);
+  return data;
+};

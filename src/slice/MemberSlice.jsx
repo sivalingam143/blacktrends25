@@ -6,6 +6,7 @@ import {
   deleteMemberApi,
   toggleGoldApi,
   updateWalletApi,
+  fetchWalletHistoryApi,
 } from "../services/MemberService";
 
 
@@ -56,6 +57,14 @@ export const updateWallet = createAsyncThunk(
     const res = await updateWalletApi(walletData);
     if (res.head.code !== 200) throw new Error(res.head.msg);
     return res.head.msg;
+  }
+);
+export const fetchWalletHistory = createAsyncThunk(
+  "member/fetchWalletHistory",
+  async (member_id) => {
+    const res = await fetchWalletHistoryApi(member_id);
+    if (res.head.code !== 200) throw new Error(res.head.msg);
+    return res.body || [];
   }
 );
 
@@ -139,7 +148,18 @@ const memberSlice = createSlice({
     s.status = "failed";
     s.error = a.error.message;
   });
-
+ builder
+      .addCase(fetchWalletHistory.pending, (state) => {
+        state.walletStatus = "loading";
+      })
+      .addCase(fetchWalletHistory.fulfilled, (state, action) => {
+        state.walletStatus = "succeeded";
+        state.walletHistory = action.payload;
+      })
+      .addCase(fetchWalletHistory.rejected, (state, action) => {
+        state.walletStatus = "failed";
+        state.error = action.error.message;
+      });
   },
 });
 
