@@ -45,6 +45,8 @@ const BillingCreation = () => {
   );
   const isEdit = !!id;
   const [Role, setRole] = useState("");
+  const [phoneValue, setPhoneValue] = useState(null);
+  const [nameValue, setNameValue] = useState(null);
   useEffect(() => {
     const storedRole = sessionStorage.getItem("Role"); // or from Redux
     if (storedRole) setRole(storedRole);
@@ -59,6 +61,8 @@ const BillingCreation = () => {
     membership: "",
     billing_id: "",
   });
+
+
   console.log(form);
   const [rows, setRows] = useState([]);
   const [subtotal, setSubtotal] = useState(0);
@@ -67,10 +71,15 @@ const BillingCreation = () => {
   const [grand_total, setGrandTotal] = useState(0);
   const [paid, setPaid] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+  const [tips, setTips] = useState("");
+  console.log(tips);
 
-  const [paymentMethod, setPaymentMethod] = useState("Cash");
-  const [paymentAmount, setPaymentAmount] = useState(0);
-  const [payments, setPayments] = useState([]);
+  // const [paymentMethod, setPaymentMethod] = useState("Cash");
+  // const [paymentAmount, setPaymentAmount] = useState(0);
+  const [payments, setPayments] = useState({
+    gpay: { amount: "", reference: "" },
+    cash: { amount: "", reference: "" },
+  });
 
   // New Member Modal States
   const [showNewMemberModal, setShowNewMemberModal] = useState(false);
@@ -95,16 +104,20 @@ const BillingCreation = () => {
 
   console.log("Wallet History:", walletHistory);
 
-  // Payment method options
-  const paymentOptions = [
-    { value: "GPay", label: "GPay" },
-    { value: "Cash", label: "Cash" },
-  ];
+  // // Payment method options
+  // const paymentOptions = [
+  //   { value: "GPay", label: "GPay" },
+  //   { value: "Cash", label: "Cash" },
+  // ];
 
   // Phone options for searchable dropdown
   const phoneOptions = member.map((m) => ({
     value: m.phone,
     label: m.phone,
+  }));
+  const nameOptions = member.map((m) => ({
+    value: m.name,
+    label: `${m.name} (${m.phone})`,
   }));
 
   // Category options
@@ -138,9 +151,13 @@ const BillingCreation = () => {
 
   // Update paid based on payments sum
   useEffect(() => {
-    const totalPaid = payments.reduce((sum, p) => sum + p.amount, 0);
+    const totalPaid = Object.values(payments).reduce((sum, p) => {
+      const amt = parseFloat(p.amount) || 0;
+      return sum + amt;
+    }, 0);
     setPaid(totalPaid);
   }, [payments]);
+
 
   useEffect(() => {
     dispatch(fetchMembers(""));
@@ -281,12 +298,7 @@ const BillingCreation = () => {
     setGrandTotal(newSubtotal - discountAmount);
   }, [rows, overall_discount, discount_type]);
 
-  const phoneValue = form.phone
-    ? phoneOptions.find((opt) => opt.value === form.phone) || {
-      value: form.phone,
-      label: form.phone,
-    }
-    : null;
+
 
   // Helper function to apply discounts to rows
   const applyDiscountsToRows = (rowsToUpdate, membership, extraRate) => {
@@ -317,74 +329,139 @@ const BillingCreation = () => {
   };
 
   // Handle member change
-  const handleMemberChange = async (selectedOption) => {
-    if (selectedOption) {
-      const selectedMember = member.find(
-        (m) => m.phone === selectedOption.value
-      );
-      if (selectedMember) {
-        // existing member
-        setForm((prev) => ({
-          ...prev,
-          member_id: selectedMember.member_id,
-          member_no: selectedMember.member_no,
-          name: selectedMember.name,
-          phone: selectedMember.phone,
-          membership: selectedMember.membership || "",
-        }));
+  // const handleMemberChange = async (selectedOption) => {
+  //   if (selectedOption) {
+  //     const selectedMember = member.find(
+  //       (m) => m.phone === selectedOption.value
+  //     );
+  //     if (selectedMember) {
+  //       // existing member
+  //       setForm((prev) => ({
+  //         ...prev,
+  //         member_id: selectedMember.member_id,
+  //         member_no: selectedMember.member_no,
+  //         name: selectedMember.name,
+  //         phone: selectedMember.phone,
+  //         membership: selectedMember.membership || "",
+  //       }));
 
-        // Clear previous milestone discount
-        dispatch(clearMilestoneDiscount());
+  //       // Clear previous milestone discount
+  //       dispatch(clearMilestoneDiscount());
 
-        // Fetch milestone extra discount
-        let extraRate = 0;
-        if (selectedMember.member_id) {
-          extraRate = await dispatch(
-            getMilestoneDiscount(selectedMember.member_id)
-          ).unwrap();
-          console.log("Extra discount rate:", extraRate);
-        }
+  //       // Fetch milestone extra discount
+  //       let extraRate = 0;
+  //       if (selectedMember.member_id) {
+  //         extraRate = await dispatch(
+  //           getMilestoneDiscount(selectedMember.member_id)
+  //         ).unwrap();
+  //         console.log("Extra discount rate:", extraRate);
+  //       }
 
-        // Calculate total discount
-        const totalDiscount =
-          selectedMember.membership === "Yes" ? 18 + extraRate : extraRate;
+  //       // Calculate total discount
+  //       const totalDiscount =
+  //         selectedMember.membership === "Yes" ? 18 + extraRate : extraRate;
 
-        // Update wow content dynamically
-        if (totalDiscount > 0) {
-          const discText = `${totalDiscount}%`;
-          let extraText =
-            extraRate > 0 ? ` (Extra Milestone: ${extraRate}%)` : "";
-          setWowContent(
-            `Wow! This client has a membership with Discount on Service ${discText}${extraText}`
-          );
-        } else {
-          setWowContent("This client has no discount available.");
-        }
+  //       // Update wow content dynamically
+  //       if (totalDiscount > 0) {
+  //         const discText = `${totalDiscount}%`;
+  //         let extraText =
+  //           extraRate > 0 ? ` (Extra Milestone: ${extraRate}%)` : "";
+  //         setWowContent(
+  //           `Wow! This client has a membership with Discount on Service ${discText}${extraText}`
+  //         );
+  //       } else {
+  //         setWowContent("This client has no discount available.");
+  //       }
 
-        // Apply discounts to all existing rows
-        setRows((prevRows) =>
-          applyDiscountsToRows(prevRows, selectedMember.membership, extraRate)
-        );
+  //       // Apply discounts to all existing rows
+  //       setRows((prevRows) =>
+  //         applyDiscountsToRows(prevRows, selectedMember.membership, extraRate)
+  //       );
 
-        NotifyData("Member found and details loaded!", "success");
-      }
-    } else {
-      // cleared
-      setForm((prev) => ({
-        ...prev,
+  //       NotifyData("Member found and details loaded!", "success");
+  //     }
+  //   } else {
+  //     // cleared
+  //     setForm((prev) => ({
+  //       ...prev,
+  //       member_id: "",
+  //       member_no: "",
+  //       name: "",
+  //       phone: "",
+  //       membership: "",
+  //     }));
+  //     dispatch(clearMilestoneDiscount());
+  //     // Reset to default wow content
+  //     setWowContent(
+  //       "Wow! This client has a membership with Discount on Service 0%"
+  //     );
+  //   }
+  // };
+  const handleMemberChangeCommon = async (selectedOption, mode = "phone") => {
+    if (!selectedOption) {
+      setForm({
         member_id: "",
         member_no: "",
         name: "",
         phone: "",
         membership: "",
-      }));
+      });
       dispatch(clearMilestoneDiscount());
-      // Reset to default wow content
-      setWowContent(
-        "Wow! This client has a membership with Discount on Service 0%"
-      );
+      setWowContent("Wow! This client has a membership with Discount on Service 0%");
+      return;
     }
+
+    const selectedMember = member.find((m) =>
+      mode === "phone" ? m.phone === selectedOption.value : m.name === selectedOption.value
+    );
+
+    if (!selectedMember) return;
+
+    // Fill form
+    setForm({
+      member_id: selectedMember.member_id,
+      member_no: selectedMember.member_no,
+      name: selectedMember.name,
+      phone: selectedMember.phone,
+      membership: selectedMember.membership || "",
+    });
+
+    // Sync both dropdowns visually
+    setPhoneValue({ value: selectedMember.phone, label: `${selectedMember.phone} (${selectedMember.name})` });
+    setNameValue({ value: selectedMember.name, label: `${selectedMember.name} (${selectedMember.phone})` });
+
+    // Apply discounts (same as your original)
+    dispatch(clearMilestoneDiscount());
+    let extraRate = 0;
+    if (selectedMember.member_id) {
+      extraRate = await dispatch(getMilestoneDiscount(selectedMember.member_id)).unwrap();
+    }
+    const totalDiscount =
+      selectedMember.membership === "Yes" ? 18 + extraRate : extraRate;
+
+    setWowContent(
+      totalDiscount > 0
+        ? `Wow! This client has a membership with Discount on Service ${totalDiscount}%${extraRate > 0 ? ` (Extra Milestone: ${extraRate}%)` : ""
+        }`
+        : "This client has no discount available."
+    );
+
+    setRows((prevRows) =>
+      applyDiscountsToRows(prevRows, selectedMember.membership, extraRate)
+    );
+
+    NotifyData("Member found and details loaded!", "success");
   };
+  const handleMemberChange = (selectedOption) => {
+    setPhoneValue(selectedOption);
+    handleMemberChangeCommon(selectedOption, "phone");
+  };
+
+  const handleNameChange = (selectedOption) => {
+    setNameValue(selectedOption);
+    handleMemberChangeCommon(selectedOption, "name");
+  };
+
 
   // Clear local notification after 5 seconds
   useEffect(() => {
@@ -412,31 +489,52 @@ const BillingCreation = () => {
     setOverallDiscount(parseFloat(e.target.value) || 0);
   };
 
-  // New: Handle Payment Method Change
-  const handlePaymentMethodChange = (selected) => {
-    setPaymentMethod(selected ? selected.value : "Cash");
+  // // New: Handle Payment Method Change
+  // const handlePaymentMethodChange = (selected) => {
+  //   setPaymentMethod(selected ? selected.value : "Cash");
+  // };
+
+  // // New: Handle Payment Amount Change
+  // const handlePaymentAmountChange = (e) => {
+  //   setPaymentAmount(parseFloat(e.target.value) || 0);
+  // };
+
+  // // New: Add Payment
+  // const addPayment = () => {
+  //   if (paymentAmount <= 0) {
+  //     NotifyData("Enter a valid amount!", "error");
+  //     return;
+  //   }
+  //   const newPayment = { method: paymentMethod, amount: paymentAmount };
+  //   setPayments((prev) => [...prev, newPayment]);
+  //   setPaymentAmount(0); // Reset input
+  //   NotifyData(`${paymentMethod}: ₹${paymentAmount} added!`, "success");
+  // };
+
+  // // New: Remove Payment
+  // const removePayment = (index) => {
+  //   setPayments((prev) => prev.filter((_, i) => i !== index));
+  // };
+  const handleAutoPaymentChange = (method, value, field) => {
+    setPayments((prev) => {
+      const updated = { ...prev };
+      if (!updated[method]) updated[method] = { amount: "", reference: "" };
+
+      if (field === "amount") {
+        updated[method].amount = value;
+      } else {
+        updated[method].reference = value;
+      }
+
+      return updated;
+    });
   };
 
-  // New: Handle Payment Amount Change
-  const handlePaymentAmountChange = (e) => {
-    setPaymentAmount(parseFloat(e.target.value) || 0);
-  };
-
-  // New: Add Payment
-  const addPayment = () => {
-    if (paymentAmount <= 0) {
-      NotifyData("Enter a valid amount!", "error");
-      return;
-    }
-    const newPayment = { method: paymentMethod, amount: paymentAmount };
-    setPayments((prev) => [...prev, newPayment]);
-    setPaymentAmount(0); // Reset input
-    NotifyData(`${paymentMethod}: ₹${paymentAmount} added!`, "success");
-  };
-
-  // New: Remove Payment
-  const removePayment = (index) => {
-    setPayments((prev) => prev.filter((_, i) => i !== index));
+  const handleRemovePayment = (method) => {
+    setPayments((prev) => ({
+      ...prev,
+      [method]: { amount: "", reference: "" },
+    }));
   };
 
   // New Member Form Handlers
@@ -640,7 +738,9 @@ const BillingCreation = () => {
         paid,
         balance,
         payment_details: JSON.stringify(payments),
+        tips: tips
       };
+      
       let billMsg;
       if (isEdit) {
         billingPayload.billing_id = id;
@@ -767,7 +867,7 @@ const BillingCreation = () => {
               )}
             </div>
           </Col>
-          <Col md={4} lg={3}>
+          {/* <Col md={4} lg={3}>
             <TextInputform
               formLabel="Name *"
               PlaceHolder="Name"
@@ -776,7 +876,21 @@ const BillingCreation = () => {
               onChange={handleFormChange}
               disabled={!!form.member_no}
             />
+          </Col> */}
+          <Col md={4} lg={3} className="py-2">
+            <label>Name *</label>
+            <div className="d-flex gap-2">
+              <Select
+                options={nameOptions}
+                isSearchable={true}
+                placeholder="Search by Name"
+                value={nameValue}
+                onChange={handleNameChange}
+                className="flex-grow-1"
+              />
+            </div>
           </Col>
+
         </Row>
 
         {/* Main Row: Left 3 Containers, Right Stats */}
@@ -965,76 +1079,100 @@ const BillingCreation = () => {
                   <strong>Total</strong>
                   <span>₹{grand_total.toFixed(2)}</span>
                 </div>
-                {/* New: Payment Methods Section */}
-                <div className="mb-3">
-                  <div className="d-flex justify-content-between align-items-center mb-2">
-                    <strong>Payment Method</strong>
-                    <div className="d-flex gap-2 align-items-center">
-                      <Select
-                        options={paymentOptions}
-                        value={paymentOptions.find(
-                          (opt) => opt.value === paymentMethod
-                        )}
-                        onChange={handlePaymentMethodChange}
-                        placeholder="Select Method"
-                        className="flex-grow-1"
-                        styles={{
-                          control: (provided) => ({
-                            ...provided,
-                            minWidth: "150px",
-                          }),
-                        }}
-                      />
-                      <TextInputform
-                        formtype="text"
-                        step="0.01"
-                        PlaceHolder="Amount"
-                        value={paymentAmount}
-                        onChange={handlePaymentAmountChange}
-                        style={{ width: "150px" }}
-                      />
-                    </div>
-                  </div>
-                  <div className="py-2">
-                    <Button variant="success" size="sm" onClick={addPayment}>
-                      Add
-                    </Button>
-                  </div>
+                <div className="p-3 border rounded bg-white">
+                  <strong className="d-block mb-3">Payment Method</strong>
 
-                  {/* Payment List */}
-                  {payments.length > 0 && (
-                    <div className="border p-2 bg-light">
-                      <strong>Payments:</strong>
-                      <ul className="list-unstyled mb-0">
-                        {payments.map((p, index) => (
+                  {/* Payment Inputs */}
+                 <div className="container-fluid">
+  <div className="row g-2 align-items-center col-6">
+    {/* Cash Row */}
+    <div className="col-4 text-start">
+      <label className="fw-semibold mb-0">Cash</label>
+    </div>
+    <div className="col-8 text-end">
+      <TextInputform
+        formtype="number"
+        step="0.01"
+        PlaceHolder="Amount"
+        value={payments.cash?.amount || ""}
+        onChange={(e) =>
+          handleAutoPaymentChange("cash", e.target.value, "amount")
+        }
+        style={{ width: "150px" }}
+      />
+    </div>
+
+    {/* GPay Row */}
+    <div className="col-4 text-start">
+      <label className="fw-semibold mb-0">GPay</label>
+    </div>
+    <div className="col-8 text-end">
+      <TextInputform
+        formtype="number"
+        step="0.01"
+        PlaceHolder="Amount"
+        value={payments.gpay?.amount || ""}
+        onChange={(e) =>
+          handleAutoPaymentChange("gpay", e.target.value, "amount")
+        }
+        style={{ width: "150px" }}
+      />
+    </div>
+  </div>
+</div>
+
+
+                  {/* Payment Summary */}
+                  <div className="border p-2 mt-4 bg-light rounded">
+                    <strong>Payments Summary:</strong>
+                    <ul className="list-unstyled mb-0 small">
+                      {Object.entries(payments)
+                        .filter(([_, p]) => parseFloat(p.amount) > 0)
+                        .map(([method, p]) => (
                           <li
-                            key={index}
-                            className="d-flex justify-content-between align-items-center small"
+                            key={method}
+                            className="d-flex justify-content-between align-items-center py-1 border-bottom"
                           >
                             <span>
-                              {p.method}: ₹{p.amount.toFixed(2)}
+                              {method.toUpperCase()}: ₹{parseFloat(p.amount).toFixed(2)}{" "}
+                              {p.reference && (
+                                <span className="text-muted">({p.reference})</span>
+                              )}
                             </span>
                             <Button
                               variant="link"
                               size="sm"
                               className="p-0 text-danger"
-                              onClick={() => removePayment(index)}
+                              onClick={() => handleRemovePayment(method)}
                             >
                               Remove
                             </Button>
                           </li>
                         ))}
-                      </ul>
+                    </ul>
+
+                    <div className="mt-2 text-end fw-bold">
+                      Total Paid: ₹{paid.toFixed(2)}
                     </div>
-                  )}
+                  </div>
                 </div>
-                <div className="mb-3 d-flex justify-content-between align-items-center">
-                  <strong>Paid</strong>
-                  <span>₹{paid.toFixed(2)}</span>
-                </div>
+
                 <div className="d-flex justify-content-between align-items-center  pt-2">
                   <strong>{balance >= 0 ? "Balance" : "Change"}</strong>
                   <span>₹{Math.abs(balance).toFixed(2)}</span>
+                </div>
+                <div className="d-flex align-items-center justify-content-between mt-4 col-6">
+                  <label className="fw-semibold mb-0" style={{ minWidth: "80px" }}>
+                    Tips
+                  </label>
+                  <TextInputform
+                    formtype="number"
+                    step="0.01"
+                    PlaceHolder="Enter Tips"
+                    value={tips}
+                    onChange={(e) => setTips(e.target.value)}
+                    style={{ width: "150px" }}
+                  />
                 </div>
               </Card.Body>
             </Card>
@@ -1118,78 +1256,78 @@ const BillingCreation = () => {
                   })()}
                 </Card.Body>
               </Card>
-             <Card className="mt-3 shadow-sm">
-  <Card.Header className="fw-bold bg-primary text-white">
-    Wallet Transactions
-  </Card.Header>
-  <Card.Body className="p-2">
-    {walletLoading ? (
-      <div className="text-center py-3 fs-6 text-secondary">Loading...</div>
-    ) : !Array.isArray(walletHistory) || walletHistory.length === 0 ? (
-      <div className="text-center py-3 fs-6 text-muted">No Wallet History</div>
-    ) : (
-      <div className="table-responsive">
-        <table className="table table-sm table-hover table-bordered align-middle mb-0">
-          <thead className="table-light">
-            <tr className="text-center text-uppercase fs-12">
-              <th>Date</th>
-              <th>Bill Amount</th>
-              <th>Paid Amount</th>
-              <th>Difference</th>
-              <th>Type</th>
-              <th>Wallet Before</th>
-              <th>Wallet After</th>
-              <th>Remarks</th>
-            </tr>
-          </thead>
-          <tbody>
-            {walletHistory.map((w) => {
-              const typeColor =
-                w.difference_type === "CREDIT"
-                  ? "text-success fw-bold"
-                  : w.difference_type === "DEBIT"
-                  ? "text-danger fw-bold"
-                  : "text-muted";
+              <Card className="mt-3 shadow-sm">
+                <Card.Header className="fw-bold bg-primary text-white">
+                  Wallet Transactions
+                </Card.Header>
+                <Card.Body className="p-2">
+                  {walletLoading ? (
+                    <div className="text-center py-3 fs-6 text-secondary">Loading...</div>
+                  ) : !Array.isArray(walletHistory) || walletHistory.length === 0 ? (
+                    <div className="text-center py-3 fs-6 text-muted">No Wallet History</div>
+                  ) : (
+                    <div className="table-responsive">
+                      <table className="table table-sm table-hover table-bordered align-middle mb-0">
+                        <thead className="table-light">
+                          <tr className="text-center text-uppercase fs-12">
+                            <th>Date</th>
+                            <th>Bill Amount</th>
+                            <th>Paid Amount</th>
+                            <th>Difference</th>
+                            <th>Type</th>
+                            <th>Wallet Before</th>
+                            <th>Wallet After</th>
+                            <th>Remarks</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {walletHistory.map((w) => {
+                            const typeColor =
+                              w.difference_type === "CREDIT"
+                                ? "text-success fw-bold"
+                                : w.difference_type === "DEBIT"
+                                  ? "text-danger fw-bold"
+                                  : "text-muted";
 
-              return (
-                <tr
-                  key={w.id}
-                  className={w.difference_type === "DEBIT" ? "bg-light" : ""}
-                  style={{ fontSize: "0.875rem" }}
-                >
-                  <td className="text-center">
-                    {w.transaction_date
-                      ? (() => {
-                          const [datePart] = w.transaction_date.split(" ");
-                          const [dd, mm, yyyy] = datePart.split("-");
-                          const monthNames = [
-                            "JAN", "FEB", "MAR", "APR", "MAY", "JUN",
-                            "JUL", "AUG", "SEP", "OCT", "NOV", "DEC",
-                          ];
-                          const month = monthNames[parseInt(mm, 10) - 1];
-                          const year = yyyy.slice(-2);
-                          return `${dd}-${month}${year}`;
-                        })()
-                      : "-"}
-                  </td>
-                  <td className="text-end">₹{w.bill_amount || 0}</td>
-                  <td className="text-end">₹{w.paid_amount || 0}</td>
-                  <td className={`text-end ${typeColor}`}>
-                    {w.difference > 0 ? `+${w.difference}` : w.difference}
-                  </td>
-                  <td className={`text-center ${typeColor}`}>{w.difference_type}</td>
-                  <td className="text-end">₹{w.wallet_before}</td>
-                  <td className="text-end">₹{w.wallet_after}</td>
-                  <td className="text-start">{w.remarks || "-"}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    )}
-  </Card.Body>
-</Card>
+                            return (
+                              <tr
+                                key={w.id}
+                                className={w.difference_type === "DEBIT" ? "bg-light" : ""}
+                                style={{ fontSize: "0.875rem" }}
+                              >
+                                <td className="text-center">
+                                  {w.transaction_date
+                                    ? (() => {
+                                      const [datePart] = w.transaction_date.split(" ");
+                                      const [dd, mm, yyyy] = datePart.split("-");
+                                      const monthNames = [
+                                        "JAN", "FEB", "MAR", "APR", "MAY", "JUN",
+                                        "JUL", "AUG", "SEP", "OCT", "NOV", "DEC",
+                                      ];
+                                      const month = monthNames[parseInt(mm, 10) - 1];
+                                      const year = yyyy.slice(-2);
+                                      return `${dd}-${month}${year}`;
+                                    })()
+                                    : "-"}
+                                </td>
+                                <td className="text-end">₹{w.bill_amount || 0}</td>
+                                <td className="text-end">₹{w.paid_amount || 0}</td>
+                                <td className={`text-end ${typeColor}`}>
+                                  {w.difference > 0 ? `+${w.difference}` : w.difference}
+                                </td>
+                                <td className={`text-center ${typeColor}`}>{w.difference_type}</td>
+                                <td className="text-end">₹{w.wallet_before}</td>
+                                <td className="text-end">₹{w.wallet_after}</td>
+                                <td className="text-start">{w.remarks || "-"}</td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </Card.Body>
+              </Card>
 
 
 

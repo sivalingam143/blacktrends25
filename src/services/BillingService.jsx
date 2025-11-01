@@ -29,6 +29,7 @@ export const addBillingApi = async (billingData) => {
     payment_details: billingData.payment_details,
     membership: billingData.membership,
     created_by_id: userId,
+    tips: billingData.tips
   };
   const { data } = await axiosInstance.post(API_ENDPOINT, payload);
   console.log(data);
@@ -55,9 +56,10 @@ export const updateBillingApi = async (billingData) => {
     payment_details: billingData.payment_details,
     membership: billingData.membership,
     updated_by_id: userId,
+    tips: billingData.tips
   };
   const { data } = await axiosInstance.post(API_ENDPOINT, payload);
-  console.log(data);
+  console.log(data,"sivas");
   return data;
 };
 
