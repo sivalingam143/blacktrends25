@@ -50,9 +50,9 @@ const DashboardReports = () => {
   const { staff } = useSelector((state) => state.staff);
   console.log("Staff Data:", staff);
 
-   const { milestoneDiscount: extraDiscountRate } = useSelector(
-      (s) => s.billing
-    );
+  const { milestoneDiscount: extraDiscountRate } = useSelector(
+    (s) => s.billing
+  );
 
 
   const filteredMembers = useMemo(() => {
@@ -309,6 +309,15 @@ const DashboardReports = () => {
       render: (g) => `₹${(parseFloat(g) || 0).toFixed(2)}`,
     },
     {
+      title: "Tips",
+      dataIndex: "tips",
+      key: "tips",
+      align: "right",
+      sorter: (a, b) => (parseFloat(a.tips) || 0) - (parseFloat(b.tips) || 0),
+      render: (g) => `₹${(parseFloat(g) || 0).toFixed(2)}`,
+    },
+
+    {
       title: "Total Spending",
       dataIndex: "daily_total",
       key: "todaily_totaltal",
@@ -317,31 +326,31 @@ const DashboardReports = () => {
       render: (t) => `₹${(parseFloat(t) || 0).toFixed(2)}`,
     },
     {
-    title: "Service Provider",
-    dataIndex: "staff_summary",
-    key: "staff_summary",
-    align: "left",
-    render: (staff_summary) => {
-      if (!staff_summary || !Array.isArray(staff_summary) || staff_summary.length === 0) {
-        return <span style={{ color: "#999" }}>No Staff</span>;
-      }
+      title: "Service Provider",
+      dataIndex: "staff_summary",
+      key: "staff_summary",
+      align: "left",
+      render: (staff_summary) => {
+        if (!staff_summary || !Array.isArray(staff_summary) || staff_summary.length === 0) {
+          return <span style={{ color: "#999" }}>No Staff</span>;
+        }
 
-      // ✅ Apply staff filter to this cell
-      const filteredStaff =
-        selectedStaff && selectedStaff !== "all"
-          ? staff_summary.filter((s) => s.staff_id === selectedStaff)
-          : staff_summary;
+        // ✅ Apply staff filter to this cell
+        const filteredStaff =
+          selectedStaff && selectedStaff !== "all"
+            ? staff_summary.filter((s) => s.staff_id === selectedStaff)
+            : staff_summary;
 
-      if (filteredStaff.length === 0) {
-        return <span style={{ color: "#999" }}>No matching staff</span>;
-      }
+        if (filteredStaff.length === 0) {
+          return <span style={{ color: "#999" }}>No matching staff</span>;
+        }
 
-      return filteredStaff.map((s) => (
-        <div key={s.staff_id}>
-          {s.staff_name} — <b>₹{parseFloat(s.total).toFixed(2)}</b>
-        </div>
-      ));
-    },
+        return filteredStaff.map((s) => (
+          <div key={s.staff_id}>
+            {s.staff_name} — <b>₹{parseFloat(s.total).toFixed(2)}</b>
+          </div>
+        ));
+      },
     },
 
   ];

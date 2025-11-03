@@ -175,6 +175,7 @@ const BillingCreation = () => {
     if (isEdit && billing.length) {
       const rec = billing.find((b) => b.billing_id === id);
       if (rec) {
+        console.log(rec,'rec');
         // Set basic form
         setForm({
           ...rec,
@@ -183,6 +184,17 @@ const BillingCreation = () => {
         });
         setOverallDiscount(parseFloat(rec.discount));
         setDiscountType(rec.discount_type || "INR");
+
+        setPhoneValue({
+  value: rec.phone,
+  label: `${rec.phone} (${rec.name})`,
+});
+setNameValue({
+  value: rec.name,
+  label: `${rec.name} (${rec.phone})`,
+});
+
+setTips(rec.tips);
 
         // Parse payments if exists
         if (rec.payment_details) {
@@ -243,6 +255,7 @@ const BillingCreation = () => {
                 staff_id: staffId || null,
                 staff_name: staffName,
                 row_total: rowTotal,
+
               };
             });
           } catch (e) {
