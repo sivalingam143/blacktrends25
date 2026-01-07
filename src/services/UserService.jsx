@@ -25,6 +25,7 @@ export const addUserApi = async (userData) => {
     Name: userData.Name,
     Mobile_Number: userData.Mobile_Number,
     Password: userData.Password,
+    role: userData.Role,
   };
   const response = await axiosInstance.post(API_ENDPOINT, payload);
   console.log("add user :", response.data);
