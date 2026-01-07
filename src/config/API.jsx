@@ -1,6 +1,6 @@
 import axios from "axios";
-// const API_URL = "https://blacktrends.zentexus.in/api";
-const API_URL = "http://localhost/blacktrends_api/api";
+const API_URL = "https://blacktrends.zentexus.in/api";
+// const API_URL = "http://localhost/blacktrends_api/api";
 
 const axiosInstance = axios.create({
   baseURL: API_URL,
